@@ -24,7 +24,7 @@ You can also submit bug reports and suggestions via e-mail or <https://github.co
 
 
 ```R
-devtools::install_github(lorenzbr/portfoliotracker)
+devtools::install_github("lorenzbr/portfoliotracker")
 ```
 
 
@@ -49,4 +49,4 @@ Definitions can be found here:
 
 This R package is licensed under the GNU General Public License v3.0.
 
-See [here](https://github.com/lorenzbr/extractBankStatements/blob/main/LICENSE) for further information.
+See [here](https://github.com/lorenzbr/portfoliotracker/blob/main/LICENSE) for further information.
