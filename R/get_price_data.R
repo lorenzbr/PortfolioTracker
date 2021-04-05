@@ -1,52 +1,36 @@
-#### Get financial data from Yahoo Finance via API
-####
+#' Get prices based on new financial transactions
+#'
+#'
+#' @export
+get_prices <- function(df.transaction){
 
+  #### function which retrieves prices for tickers. Starts with transaction date
 
-## several functions to get and update financial data
-##
-##
-##
-
-## to do:
-## consider PDFs with more than one page
-## access website to get conversion of ISIN to ticker automatically (prefer Xetra prices)
-## when transaction data is retrieved. check whether this is an older transaction than before
-
-
-
-
-get.financials.based.on.transaction <- function(filename.processed.transaction.data){
-
-  #### function which accesses financial data from yahoo and starts with transaction date
-
-  ## path names
-  source(paste0("global.R"))
+  ## unique ISINs
+  isin <- unique(df.transaction$isin)
 
   ## get table with conversion of all relevant ISINs to ticker
-  df.isin.ticker.converter <- get.ticker.from.isin()
-
-  ## load transaction data
-  df.transaction.data <- data.table::fread(paste0(path.data.processed.transactions.new,filename.processed.transaction.data))
+  df.isin.ticker <- portfoliotracker::get_ticker_from_isin(isin)
 
   ## add ticker to transaction data
-  df.transaction.data <- merge(df.transaction.data,df.isin.ticker.converter,by="isin",all.x = T)
+  df.transaction <- merge(df.transaction, df.isin.ticker, by = "isin", all.x = T)
 
 
   ## transaction date to date format
-  df.transaction.data$transaction_date <- as.Date(df.transaction.data$transaction_date,"%d-%m-%Y")
+  df.transaction$transaction_date <- as.Date(df.transaction$transaction_date, "%d-%m-%Y")
 
   ## get current date
   today <- Sys.Date()
 
 
   ## for loop over all transactions in file
-  for(i in 1:nrow(df.transaction.data)){
+  for(i in 1:nrow(df.transaction)){
 
     tryCatch({
 
     ## select transaction date and ticker
-    transaction.date <- df.transaction.data$transaction_date[i]
-    ticker <- df.transaction.data$ticker[i]
+    transaction.date <- df.transaction$transaction_date[i]
+    ticker <- df.transaction$ticker[i]
 
 
     ## check whether a financial data for this ticker based on transaction date already exists
@@ -54,15 +38,15 @@ get.financials.based.on.transaction <- function(filename.processed.transaction.d
     # if yes: 1) if the focal one is younger, don't do anything 2) if the focal one is older, continue
 
     ## get all financials with same ticker
-    df.financials.same.ticker <- data.frame(filename = list.files(path.data.raw.financials,pattern=ticker))
+    df.financials.same.ticker <- data.frame(filename = list.files(path.data.raw.financials, pattern = ticker))
 
     ## initialize earliest.date (does not make sense, only needed to have an existent date)
-    earliest.date <- as.Date("1900-01-01","%Y-%m-%d")
+    earliest.date <- as.Date("1900-01-01", "%Y-%m-%d")
 
     ## identify earliest date for each of those files and compare to transaction.date
     if(nrow(df.financials.same.ticker) > 0){
       df.financials.same.ticker$first_date <- stringr::str_match(df.financials.same.ticker$filename, "from_(.*?)_to")[,2]
-      df.financials.same.ticker$first_date <- as.Date(df.financials.same.ticker$first_date,"%Y-%m-%d")
+      df.financials.same.ticker$first_date <- as.Date(df.financials.same.ticker$first_date, "%Y-%m-%d")
       df.financials.same.ticker <- df.financials.same.ticker[df.financials.same.ticker$first_date == min(df.financials.same.ticker$first_date),]
       earliest.date <- unique(df.financials.same.ticker$first_date)
 
@@ -73,47 +57,46 @@ get.financials.based.on.transaction <- function(filename.processed.transaction.d
 
 
     ## file name for the data
-    filename.data.raw.financials <- paste0("prices_ticker_",ticker,"_from_",transaction.date,"_to_",today,".csv")
+    filename.data.raw.financials <- paste0("prices_ticker_", ticker, "_from_", transaction.date, "_to_", today, ".csv")
 
 
     ## if transaction.date is older than earliest.date of existing transactions or no financials with same ticker exist, do this
-    if(transaction.date < earliest.date | nrow(df.financials.same.ticker)==0){
+    if(transaction.date < earliest.date | nrow(df.financials.same.ticker) == 0){
 
       ## check whether such a file exists already, then no need to download again
-      if(!(file.exists(paste0(path.data.raw.financials,filename.data.raw.financials)))){
+      if(!(file.exists(paste0(path.data.raw.financials, filename.data.raw.financials)))){
 
         ## get financial data from yahoo
-        df.ticker.prices <- get.financials.from.yahoo(ticker,transaction.date,today)
+        df.ticker.prices <- portfoliotracker::get_prices_from_yahoo(ticker, transaction.date, today)
 
         ## start and end date
         from <- min(df.ticker.prices$date)
         to <- max(df.ticker.prices$date)
 
         ## file name for the data
-        filename.data.raw.financials <- paste0("prices_ticker_",ticker,"_from_",from,"_to_",to,".csv")
+        filename.data.raw.financials <- paste0("prices_ticker_", ticker, "_from_", from, "_to_", to, ".csv")
 
         ## store as csv in raw financial data
-        data.table::fwrite(df.ticker.prices,paste0(path.data.raw.financials,filename.data.raw.financials))
+        data.table::fwrite(df.ticker.prices, paste0(path.data.raw.financials, filename.data.raw.financials))
 
         if(today != Sys.Date()){
-          print(paste("Older transaction: Financial data update for",ticker,"from",transaction.date,"to",today,"successfully downloaded."))
-        } else {print(paste("Financial data for",ticker,"from",transaction.date,"to",today,"successfully downloaded."))}
+
+          print(paste("Older transaction: Price data update for", ticker, "from", transaction.date, "to", today, "successfully downloaded."))
+
+        } else {print(paste("Price data for", ticker, "from", transaction.date, "to", today, "successfully downloaded."))}
 
       } else {
 
-        print(paste("Financial data for",ticker,"from",transaction.date,"to",today,"already downloaded."," File",
+        print(paste("Price data for",ticker,"from",transaction.date,"to",today,"already downloaded."," File",
                     filename.data.raw.financials,"exists already."))
 
+      } ## end of else if condition which checks whether file already exists
+
+    } else {print("Prices based on older transaction already exist.")} ## end of if else statement: transaction.date older than any other or no transactions exist
 
 
-      }  ## end of else if condition which checks whether file already exists
-
-
-    } else {print("Financials based on older transaction already exist.")} ## end of if else statement: transaction.date older than any other or no transactions exist
-
-
-    }, error=function(cond){
-      message(paste0("No financials for ticker '",ticker,"'"))
+    }, error = function(cond){
+      message(paste0("No prices for ticker '",ticker,"' available."))
       message("Original message:")
       message(cond)
 
@@ -124,20 +107,19 @@ get.financials.based.on.transaction <- function(filename.processed.transaction.d
   } ## end of for loop over all transactions in file
 
   ## move files to folders once all transaction files are used for financial data requests
-  file.rename(from = paste0(path.data.processed.transactions.new,filename.processed.transaction.data),
-              to = paste0(path.data.processed.transactions.used,filename.processed.transaction.data))
+  file.rename(from = paste0(path.data.processed.transactions.new, filename.processed.transaction.data),
+              to = paste0(path.data.processed.transactions.used, filename.processed.transaction.data))
+
+} ## end of function get_prices
 
 
-} ## end of function get transaction data
-
-
-
-update.financial.data <- function(){
+#' Update stock prices
+#'
+#' @export
+update_prices <- function(){
 
   #### update all financial data based on all tickers in folder and last date for each ticker
 
-  ## path names
-  source(paste0("global.R"))
 
   ## load file names for financial data
   filename.data.raw.financials.with.ticker <- list.files(path.data.raw.financials)
@@ -178,19 +160,19 @@ update.financial.data <- function(){
       if(today > from){
 
         ## get financial data for them
-        df.updated.financials <- get.financials.from.yahoo(ticker,from,today)
+        df.updated.financials <- portfoliotracker::get_prices_from_yahoo(ticker, from, today)
 
         ## start and end date
         from <- min(df.updated.financials$date)
         to <- max(df.updated.financials$date)
 
         ## file name for the data
-        filename.data.raw.financials <- paste0("prices_ticker_",ticker,"_from_",from,"_to_",to,".csv")
+        filename.data.raw.financials <- paste0("prices_ticker_", ticker, "_from_", from, "_to_", to, ".csv")
 
         ## store as csv in raw financial data
-        data.table::fwrite(df.updated.financials,paste0(path.data.raw.financials,filename.data.raw.financials))
+        data.table::fwrite(df.updated.financials, paste0(path.data.raw.financials, filename.data.raw.financials))
 
-        print(paste("Financial data for",ticker,"from",from,"to",to,"successfully downloaded."))
+        print(paste("Financial data for", ticker, "from", from, "to", to, "successfully downloaded."))
 
       } else {print("Start date needs to be earlier than end date.")}
 
@@ -209,11 +191,12 @@ update.financial.data <- function(){
 
   } else {print("No financials available for update.")} ## end of if else statement whether file names are non empty
 
-} ## end of function update financial data
+} ## end of function update_prices
 
-
-
-get.financials.from.yahoo <- function(ticker,from,to){
+#' Get price data from Yahoo Finance
+#'
+#' @export
+get_prices_from_yahoo <- function(ticker, from, to){
 
   #### get financial data from yahoo finance API and clean output data a bit
 
@@ -224,7 +207,7 @@ get.financials.from.yahoo <- function(ticker,from,to){
   df.ticker.prices <- data.frame(ticker.prices)
 
   ## change column names
-  names(df.ticker.prices) <- gsub(paste0(ticker,"\\."),"",names(df.ticker.prices))
+  names(df.ticker.prices) <- gsub(paste0(ticker, "\\."), "", names(df.ticker.prices))
 
 
   ## column names to lower case
@@ -244,6 +227,6 @@ get.financials.from.yahoo <- function(ticker,from,to){
 
   return(df.ticker.prices)
 
-}
+} ## end of function get_prices_from_yahoo
 
 
