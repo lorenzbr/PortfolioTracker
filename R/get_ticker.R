@@ -50,6 +50,7 @@ update_ticker_isin_pairs <- function(path, file){
 
 #' Get ticker from ISIN
 #'
+#'
 #' @export
 get_ticker_from_isin <- function(){
 
@@ -63,32 +64,33 @@ get_ticker_from_isin <- function(){
 } ## end of function get ticker from ISIN
 
 #'
-#' Get ticker from ISIN by crawling investing.com
+#' Get ticker based on ISIN by crawling investing.com
 #'
 #'
 #' @export
-get_ticker_from_investing <- function(isin, preferred.stock.exchange = "Xetra"){
+get_ticker_from_investing <- function(isin, preferred.stock.exchange = ""){
 
   #### function get ticker from ISIN
 
   url <- "https://www.investing.com/search/?q="
-  url.isin <- paste0(url,isin)
+  url.isin <- paste0(url, isin)
 
   html.output <- rvest::read_html(url.isin)
-  html.output.div <- rvest::html_nodes(html.output,'div.js-inner-all-results-quotes-wrapper')
-  html.output.div <- rvest::html_nodes(html.output.div,'a')
+  html.output.div <- rvest::html_nodes(html.output, 'div.js-inner-all-results-quotes-wrapper')
+  html.output.div <- rvest::html_nodes(html.output.div, 'a')
   html.output.text <- rvest::html_text(html.output.div)
-  html.output.text.selected <- html.output.text[grepl(preferred.stock.exchange,html.output.text)]
+  html.output.text.selected <- html.output.text[grepl(preferred.stock.exchange, html.output.text)]
   if(rlang::is_empty(html.output.text.selected)){
     ## if preferred stock exchange does not exist, select random one
     html.output.text.selected <- html.output.text[sample(length(html.output.text),1)]
   }
-  html.output.text.selected <- gsub("\t","",html.output.text.selected)
-  html.output.text.selected <- gsub("^(\n)+|(\n)+$","",html.output.text.selected)
+  html.output.text.selected <- gsub("\t","", html.output.text.selected)
+  html.output.text.selected <- gsub("^(\n)+|(\n)+$","", html.output.text.selected)
 
   if(!(rlang::is_empty(html.output.text.selected))){
     ticker <- strsplit(html.output.text.selected,"\n")[[1]][1]
-    if(preferred.stock.exchange == "Xetra" & grepl(preferred.stock.exchange,html.output.text.selected)){ticker <- paste0(ticker,".DE")}
+    if(preferred.stock.exchange == "Xetra" & grepl(preferred.stock.exchange, html.output.text.selected)){
+      ticker <- paste0(ticker,".DE")}
   }
 
   return(ticker)
@@ -96,7 +98,7 @@ get_ticker_from_investing <- function(isin, preferred.stock.exchange = "Xetra"){
 } ## end of function get_ticker_from_investing
 
 
-#' Get ticker from ISIN by crawling the Xetra website
+#' Get ticker based on ISIN by crawling the Xetra website
 #'
 #'
 #' @export

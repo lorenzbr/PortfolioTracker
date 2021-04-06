@@ -2,10 +2,10 @@
 % Please edit documentation in R/get_ticker.R
 \name{get_ticker_from_investing}
 \alias{get_ticker_from_investing}
-\title{Get ticker from ISIN by crawling investing.com}
+\title{Get ticker based on ISIN by crawling investing.com}
 \usage{
-get_ticker_from_investing(isin, preferred.stock.exchange = "Xetra")
+get_ticker_from_investing(isin, preferred.stock.exchange = "")
 }
 \description{
-Get ticker from ISIN by crawling investing.com
+Get ticker based on ISIN by crawling investing.com
 }

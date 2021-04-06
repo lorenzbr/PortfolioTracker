@@ -2,10 +2,10 @@
 % Please edit documentation in R/get_ticker.R
 \name{get_ticker_from_xetra}
 \alias{get_ticker_from_xetra}
-\title{Get ticker from ISIN by crawling the Xetra website}
+\title{Get ticker based on ISIN by crawling the Xetra website}
 \usage{
 get_ticker_from_xetra(isin, preferred.stock.exchange = "Xetra")
 }
 \description{
-Get ticker from ISIN by crawling the Xetra website
+Get ticker based on ISIN by crawling the Xetra website
 }

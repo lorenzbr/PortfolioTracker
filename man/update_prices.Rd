@@ -2,10 +2,10 @@
 % Please edit documentation in R/get_price_data.R
 \name{update_prices}
 \alias{update_prices}
-\title{Update stock prices}
+\title{Update and store prices as csv}
 \usage{
 update_prices()
 }
 \description{
-Update stock prices
+Update and store prices as csv
 }

@@ -1,43 +1,46 @@
-#' Get prices based on new financial transactions
+#' Update and store prices as csv based on new financial transactions
 #'
 #'
 #' @export
-get_prices <- function(df.transaction){
+update_prices_based_on_transactions <- function(path.prices, path.input.transactions, path.output.transactions){
 
   #### function which retrieves prices for tickers. Starts with transaction date
 
+  ## load input transactions
+
+
   ## unique ISINs
-  isin <- unique(df.transaction$isin)
+  isin <- unique(df.transactions$isin)
 
   ## get table with conversion of all relevant ISINs to ticker
   df.isin.ticker <- portfoliotracker::get_ticker_from_isin(isin)
 
   ## add ticker to transaction data
-  df.transaction <- merge(df.transaction, df.isin.ticker, by = "isin", all.x = T)
+  df.transactions <- merge(df.transactions, df.isin.ticker, by = "isin", all.x = T)
 
 
   ## transaction date to date format
-  df.transaction$transaction_date <- as.Date(df.transaction$transaction_date, "%d-%m-%Y")
+  df.transactions$transaction_date <- as.Date(df.transactions$transaction_date, "%d-%m-%Y")
 
   ## get current date
   today <- Sys.Date()
 
 
   ## for loop over all transactions in file
-  for(i in 1:nrow(df.transaction)){
+  for(i in 1:nrow(df.transactions)){
 
     tryCatch({
 
     ## select transaction date and ticker
-    transaction.date <- df.transaction$transaction_date[i]
-    ticker <- df.transaction$ticker[i]
+    transaction.date <- df.transactions$transaction_date[i]
+    ticker <- df.transactions$ticker[i]
 
 
-    ## check whether a financial data for this ticker based on transaction date already exists
+    ## check whether price data for this ticker based on transaction date already exists
     # if no: continue
     # if yes: 1) if the focal one is younger, don't do anything 2) if the focal one is older, continue
 
-    ## get all financials with same ticker
+    ## get all price data with same ticker
     df.financials.same.ticker <- data.frame(filename = list.files(path.data.raw.financials, pattern = ticker))
 
     ## initialize earliest.date (does not make sense, only needed to have an existent date)
@@ -87,8 +90,8 @@ get_prices <- function(df.transaction){
 
       } else {
 
-        print(paste("Price data for",ticker,"from",transaction.date,"to",today,"already downloaded."," File",
-                    filename.data.raw.financials,"exists already."))
+        print(paste("Price data for", ticker, "from", transaction.date, "to", today, "already downloaded.", " File",
+                    filename.data.raw.financials, "exists already."))
 
       } ## end of else if condition which checks whether file already exists
 
@@ -96,7 +99,7 @@ get_prices <- function(df.transaction){
 
 
     }, error = function(cond){
-      message(paste0("No prices for ticker '",ticker,"' available."))
+      message(paste0("No prices for ticker '", ticker, "' available."))
       message("Original message:")
       message(cond)
 
@@ -110,16 +113,16 @@ get_prices <- function(df.transaction){
   file.rename(from = paste0(path.data.processed.transactions.new, filename.processed.transaction.data),
               to = paste0(path.data.processed.transactions.used, filename.processed.transaction.data))
 
-} ## end of function get_prices
+} ## end of function update_prices_based_on_transactions
 
 
-#' Update stock prices
+#' Update and store prices as csv
+#'
 #'
 #' @export
 update_prices <- function(){
 
-  #### update all financial data based on all tickers in folder and last date for each ticker
-
+  #### update all price data based on all tickers in folder and last date for each ticker
 
   ## load file names for financial data
   filename.data.raw.financials.with.ticker <- list.files(path.data.raw.financials)
@@ -189,7 +192,7 @@ update_prices <- function(){
 
   } ## end of else statement that checks whether updates are needed
 
-  } else {print("No financials available for update.")} ## end of if else statement whether file names are non empty
+  } else {print("No prices available for update.")} ## end of if else statement whether file names are non empty
 
 } ## end of function update_prices
 
@@ -213,16 +216,16 @@ get_prices_from_yahoo <- function(ticker, from, to){
   ## column names to lower case
   names(df.ticker.prices) <- tolower(names(df.ticker.prices))
 
-  ## create data variable
+  ## create date variable based on row names
   df.ticker.prices$date <- rownames(df.ticker.prices)
 
   ## new index for row names
   rownames(df.ticker.prices) <- 1:nrow(df.ticker.prices)
 
-  ##  convert to date format
+  ##  convert dates to date format
   df.ticker.prices$date <- as.Date(df.ticker.prices$date)
 
-  ## remove NAs
+  ## remove entries with prices equal to NA
   df.ticker.prices <- df.ticker.prices[!(is.na(df.ticker.prices$adjusted)),]
 
   return(df.ticker.prices)
