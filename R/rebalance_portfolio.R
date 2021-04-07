@@ -1,8 +1,15 @@
 #' Produces a suggestion to rebalance your portfolio
 #'
+#' @usage rebalance_portfolio(df, df.target.shares, money.to.invest, step.size = 500,
+#'                            exclude.from.rebalancing = NA)
+#' @param df A data frame containing at least a column for isin and value
+#' @param df.target.shares A data frame containing a column for isin and target shares
+#' @param money.to.invest A single numeric. Amount to invest for rebalancing.
+#' @param step.size A single numeric. Step size (default is 500).
+#' @param exclude.from.rebalancing A single character or vector of strings. Should contain ISINs (default is NA).
 #'
 #' @export
-rebalance_portfolio <- function(df, df.target.shares, exclude.from.rebalancing, money.to.invest, step.size = 500){
+rebalance_portfolio <- function(df, df.target.shares, money.to.invest, step.size = 500, exclude.from.rebalancing = NA){
 
   ## function should be iterative or nested function, resp., with step size of investing money and adapting actual shares, stop when
   ## target shares are reached more or less or when money to invest is too small
@@ -12,9 +19,8 @@ rebalance_portfolio <- function(df, df.target.shares, exclude.from.rebalancing, 
   nb.iter <- floor(money.to.invest / step.size)
 
   ## choose most recent date
-  df <- df %>% group_by(isin) %>% filter(date == max(date))
-  df <- df %>% group_by(isin) %>% sample_n(size = 1)
-
+  df <- df %>% dplyr::group_by(isin) %>% dplyr::filter(date == max(date))
+  df <- df %>% dplyr::group_by(isin) %>% dplyr::sample_n(size = 1)
 
   ## keep only relevant columns
   df <- df[,c("isin", "value")]

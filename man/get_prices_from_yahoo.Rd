@@ -6,6 +6,13 @@
 \usage{
 get_prices_from_yahoo(ticker, from, to)
 }
+\arguments{
+\item{ticker}{A single character string. Ticker symbol.}
+
+\item{from}{A single character string. Start date.}
+
+\item{to}{A single character string. End date.}
+}
 \description{
 Get price data from Yahoo Finance
 }

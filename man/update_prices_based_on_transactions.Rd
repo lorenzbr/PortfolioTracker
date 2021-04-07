@@ -4,11 +4,15 @@
 \alias{update_prices_based_on_transactions}
 \title{Update and store prices as csv based on new financial transactions}
 \usage{
-update_prices_based_on_transactions(
-  path.prices,
-  path.input.transactions,
-  path.output.transactions
-)
+update_prices_based_on_transactions(df.transactions, path,
+                                           file.ticker = "isin_ticker.csv")
+}
+\arguments{
+\item{df.transactions}{A data frame. Results from [extractBankStatements::get_transactions()]}
+
+\item{path}{A single character string. Folder where all data are stored.}
+
+\item{file.ticker}{A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)}
 }
 \description{
 Update and store prices as csv based on new financial transactions

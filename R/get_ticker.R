@@ -1,71 +1,63 @@
-#' Create ticker list if no such file exists
+#' Create ISIN-ticker table as csv if no such file exists
 #'
+#' @usage init_isin_ticker(path, file = "isin_ticker.csv")
+#' @param path A single character string. Folder where all data are stored.
+#' @param file A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)
 #'
 #' @export
-init_ticker_list <- function(path, file){
+init_isin_ticker <- function(path, file = "isin_ticker.csv"){
 
-  #### create ticker list if no such file exists
+  #### create ISIN-ticker table as csv if no such file exists
 
   if(!(file.exists(paste0(path, file)))){
-    df.isin.ticker.init <- data.frame(matrix(NA, nrow=0, ncol=2, dimnames = list(NULL, c("isin", "ticker"))))
-    data.table::fwrite(df.isin.ticker.init,paste0(path, file))
+    df.isin.ticker.init <- data.frame(matrix(NA, nrow = 0, ncol = 2, dimnames = list(NULL, c("isin", "ticker"))))
+    data.table::fwrite(df.isin.ticker.init, paste0(path, file))
   }
 
-} ## end of function init_ticker_list
+} ## end of function init_isin_ticker
 
-#' Update ticker-ISIN list
+#' Update ISIN-ticker table
+#'
+#' @usage update_ticker_isin(isins, path.tickers, file.ticker = "isin_ticker.csv")
+#' @param isins A single character or vector of strings. ISINs.
+#' @param path.tickers A single character string. Folder where ISIN-ticker table is stored.
+#' @param file.ticker A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)
 #'
 #' @export
-update_ticker_isin_pairs <- function(path, file){
+update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.csv"){
 
-  #### update ticker-ISIN list
+  #### update ISIN-ticker table
 
-  ## get table with conversion of all relevant ISINs to ticker
-  df.isin.ticker.converter <- portfoliotracker::get_ticker_from_isin()
+  isins <- unique(isins)
 
-  ## get all new processed transactions (csv's)
-  filenames.processed.transaction.data <- list.files(path.data.processed.transactions.new)
+  ## create csv if not exists
+  portfoliotracker::init_isin_ticker(path.tickers, file.ticker)
 
-  ## load new transactions if file names are not empty
-  if(!(rlang::is_empty(filenames.processed.transaction.data))){
+  ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
+  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
 
-    ## load transaction data
-    list.transactions <- lapply(paste0(path.data.processed.transactions.new, filenames.processed.transaction.data), data.table::fread)
-    df.transactions.new <- do.call("rbind", list.transactions)
+  ## identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
+  new.isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
+  if(!(rlang::is_empty(new.isins))){
 
-    ## identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
-    isins.not.in.table <- unique(df.transactions.new$isin)[!(unique(df.transactions.new$isin) %in% unique(df.isin.ticker.converter$isin))]
-    if(!(rlang::is_empty(isins.not.in.table))){
-      for(i in 1:length(isins.not.in.table)){
-        isin <- isins.not.in.table[i]
-        try({ticker <- get.isin.to.ticker.crawler.xetra(isin)
-        df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
-        data.table::fwrite(df.isin.ticker.new,paste0(path.data.raw, filename.data.isin.ticker.converter), append = TRUE)
-        print(paste(ticker, "added."))})
-      } ## end of for loop
-    } else(print("New transactions, but ticker already available.")) ## end of if statement ISIN not in table is empty
-  } else (return("No new transactions. Current ticker-ISIN list complete!")) ## end of if else statement vector is empty
+    for(i in 1:length(new.isins)){
 
-} ## end of function update_ticker_isin_pairs
+      isin <- new.isins[i]
+      try({ticker <- portfoliotracker::get_ticker_from_xetra(isin)
+      df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
+      data.table::fwrite(df.isin.ticker.new, paste0(path.tickers, file.ticker), append = TRUE)
+      print(paste(ticker, "added."))})
 
-#' Get ticker from ISIN
-#'
-#'
-#' @export
-get_ticker_from_isin <- function(){
+    } ## end of for loop
+  } else (print("New transactions, but ticker already available.")) ## end of if statement ISIN not in table is empty
 
-  #### get conversion of ISIN to ticker
+} ## end of function update_ticker_isin
 
-  ## table that converts ISIN to ticker (which is needed by yahoo finance)
-  df.isin.ticker.converter <- data.table::fread(paste0(path.data.raw,filename.data.isin.ticker.converter))
-
-  return(df.isin.ticker.converter)
-
-} ## end of function get ticker from ISIN
-
-#'
 #' Get ticker based on ISIN by crawling investing.com
 #'
+#' @usage get_ticker_from_investing(isin, preferred.stock.exchange = "")
+#' @param isin A single character string. ISIN.
+#' @param preferred.stock.exchange A single character string. Stock exchange (e.g., Xetra)
 #'
 #' @export
 get_ticker_from_investing <- function(isin, preferred.stock.exchange = ""){
@@ -100,6 +92,9 @@ get_ticker_from_investing <- function(isin, preferred.stock.exchange = ""){
 
 #' Get ticker based on ISIN by crawling the Xetra website
 #'
+#' @usage get_ticker_from_xetra(isin, preferred.stock.exchange = "Xetra")
+#' @param isin A single character string. ISIN.
+#' @param preferred.stock.exchange A single character string. Stock exchange (default is Xetra)
 #'
 #' @export
 get_ticker_from_xetra <- function(isin, preferred.stock.exchange = "Xetra"){
@@ -139,6 +134,3 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = "Xetra"){
   return(ticker)
 
 } ## end of function get_ticker_from_xetra
-
-
-
