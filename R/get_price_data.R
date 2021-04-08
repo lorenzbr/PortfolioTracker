@@ -13,8 +13,8 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
 
   ## create folders for tickers and prices (if not exists)
   list.paths <- portfoliotracker::create_portfoliotracker_dir(path)
-  path.tickers <- list.paths[[1]][1]
-  path.prices.raw <- list.paths[[2]][1]
+  path.tickers <- list.paths$path.tickers
+  path.prices.raw <- list.paths$path.prices.raw
 
   ## unique ISINs
   isins <- unique(df.transactions$isin)
@@ -50,18 +50,19 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
     ## get all price data with same ticker
     df.prices.same.ticker <- data.frame(filename = list.files(path.prices.raw, pattern = ticker))
 
-    ## initialize earliest.date (only needed to have an existing date)
+    ## initialize earliest.date (required to have an existing date)
     earliest.date <- as.Date("1900-01-01", "%Y-%m-%d")
 
     ## identify earliest date for each of those files and compare to transaction.date
     if(nrow(df.prices.same.ticker) > 0){
+
       df.prices.same.ticker$first_date <- stringr::str_match(df.prices.same.ticker$filename, "from_(.*?)_to")[,2]
       df.prices.same.ticker$first_date <- as.Date(df.prices.same.ticker$first_date, "%Y-%m-%d")
       df.prices.same.ticker <- df.prices.same.ticker[df.prices.same.ticker$first_date == min(df.prices.same.ticker$first_date),]
       earliest.date <- unique(df.prices.same.ticker$first_date)
 
       ## if new transaction is older than earliest date updated "to" date
-      if(transaction.date < earliest.date){today <- earliest.date - 1}
+      if(transaction.date < earliest.date & !(is.na(earliest.date))){today <- earliest.date - 1}
 
     } ## end of if statement
 
@@ -75,7 +76,7 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
       if(!(file.exists(paste0(path.prices.raw, filename.data.raw.prices)))){
 
         ## get price data from Yahoo Finance
-        df.ticker.prices <- portfoliotracker::get_prices_from_yahoo(ticker, transaction.date, today)
+        df.ticker.prices <- portfoliotracker::get_prices_from_yahoo(ticker, from = transaction.date, to = today)
 
         ## start and end date
         from <- min(df.ticker.prices$date)
@@ -206,24 +207,49 @@ update_latest_prices <- function(path){
 
 #' Get price data from Yahoo Finance
 #'
-#' @usage get_prices_from_yahoo(ticker, from, to)
+#' @usage get_prices_from_yahoo(ticker, from, to, preferred.stock.exchange = "Xetra",
+#'                           stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"))
 #' @param ticker A single character string. Ticker symbol.
 #' @param from A single character string. Start date.
 #' @param to A single character string. End date.
+#' @param preferred.stock.exchange A single character string. Stock exchange (default is empty string)
+#' @param stock.exchanges A vector of single character strings. Possible stock exchanges to get price data.
 #'
 #' @export
-get_prices_from_yahoo <- function(ticker, from, to){
+get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "Xetra",
+                                  stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU")){
 
   #### get prices from Yahoo Finance API and clean output data a bit
 
+  ## produce final ticker for Yahoo Finance
+  if (preferred.stock.exchange == "Xetra") {
+    ticker.yahoo <- paste0(ticker, ".DE")
+  } else if (preferred.stock.exchange == "Frankfurt") {
+    ticker.yahoo <- paste0(ticker, ".F")
+  } else if (preferred.stock.exchange == "Stuttgart") {
+    ticker.yahoo <- paste0(ticker, ".SG")
+  } else if (preferred.stock.exchange == "Muenchen") {
+    ticker.yahoo <- paste0(ticker, ".MU")
+  } else if (preferred.stock.exchange == "Duesseldorf") {
+    ticker.yahoo <- paste0(ticker, ".DU")
+  }
+
   ## get prices
-  ticker.prices <- quantmod::getSymbols(ticker, from = from, to = to, auto.assign = FALSE)
+  try(ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to, auto.assign = FALSE))
+
+  iter.stock.exchanges <- 1
+  while (!exists("ticker.prices")) {
+    stock.exchange <- stock.exchanges[iter.stock.exchanges]
+    ticker.yahoo <- paste0(ticker, stock.exchange)
+    iter.stock.exchanges <- iter.stock.exchanges + 1
+    try(ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to, auto.assign = FALSE))
+  }
 
   ## convert to data frame
   df.ticker.prices <- data.frame(ticker.prices)
 
   ## change column names
-  names(df.ticker.prices) <- gsub(paste0(ticker, "\\."), "", names(df.ticker.prices))
+  names(df.ticker.prices) <- gsub(paste0(ticker.yahoo, "\\."), "", names(df.ticker.prices))
 
   ## column names to lower case
   names(df.ticker.prices) <- tolower(names(df.ticker.prices))
@@ -239,6 +265,8 @@ get_prices_from_yahoo <- function(ticker, from, to){
 
   ## remove entries with prices equal to NA
   df.ticker.prices <- df.ticker.prices[!(is.na(df.ticker.prices$adjusted)),]
+
+  print(paste("Prices for ticker", ticker.yahoo, "found."))
 
   return(df.ticker.prices)
 

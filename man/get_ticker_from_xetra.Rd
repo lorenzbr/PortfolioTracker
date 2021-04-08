@@ -4,12 +4,12 @@
 \alias{get_ticker_from_xetra}
 \title{Get ticker based on ISIN by crawling the Xetra website}
 \usage{
-get_ticker_from_xetra(isin, preferred.stock.exchange = "Xetra")
+get_ticker_from_xetra(isin, preferred.stock.exchange = "")
 }
 \arguments{
 \item{isin}{A single character string. ISIN.}
 
-\item{preferred.stock.exchange}{A single character string. Stock exchange (default is Xetra)}
+\item{preferred.stock.exchange}{A single character string. Stock exchange (default is empty string)}
 }
 \description{
 Get ticker based on ISIN by crawling the Xetra website

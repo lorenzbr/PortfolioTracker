@@ -5,7 +5,7 @@
 \alias{transactions}
 \title{Details on four transactions extracted from bank statements}
 \format{
-A data frame with 4 rows and 12 variables:
+A data frame with 4 rows and 12 columns/variables:
 \describe{
 \item{isin}{The identifier ISIN}
 \item{wkn}{The identifier WKN}
@@ -22,7 +22,7 @@ A data frame with 4 rows and 12 variables:
 }
 }
 \source{
-\url{https://github.com/lorenzbr/extractBankStatements}
+Data come from the R package \code{extractBankStatements}. See \url{https://github.com/lorenzbr/extractBankStatements}
 }
 \usage{
 transactions

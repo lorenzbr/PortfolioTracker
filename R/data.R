@@ -3,7 +3,7 @@
 #' A data set containing details on four transactions extracted from PDF bank statements.
 #' The variables are as follows:
 #'
-#' @format A data frame with 4 rows and 12 variables:
+#' @format A data frame with 4 rows and 12 columns/variables:
 #' \describe{
 #' \item{isin}{The identifier ISIN}
 #' \item{wkn}{The identifier WKN}
@@ -18,5 +18,5 @@
 #' \item{document_page}{Page of the transaction in the PDF document.}
 #' \item{document_name}{Name of the PDF document.}
 #' }
-#' @source \url{https://github.com/lorenzbr/extractBankStatements}
+#' @source Data come from the R package \code{extractBankStatements}. See \url{https://github.com/lorenzbr/extractBankStatements}
 "transactions"

@@ -92,12 +92,12 @@ get_ticker_from_investing <- function(isin, preferred.stock.exchange = ""){
 
 #' Get ticker based on ISIN by crawling the Xetra website
 #'
-#' @usage get_ticker_from_xetra(isin, preferred.stock.exchange = "Xetra")
+#' @usage get_ticker_from_xetra(isin, preferred.stock.exchange = "")
 #' @param isin A single character string. ISIN.
-#' @param preferred.stock.exchange A single character string. Stock exchange (default is Xetra)
+#' @param preferred.stock.exchange A single character string. Stock exchange (default is empty string)
 #'
 #' @export
-get_ticker_from_xetra <- function(isin, preferred.stock.exchange = "Xetra"){
+get_ticker_from_xetra <- function(isin, preferred.stock.exchange = ""){
 
   #### web crawler to get ticker from Xetra website based on ISIN code
 

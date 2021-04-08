@@ -4,7 +4,8 @@
 \alias{get_prices_from_yahoo}
 \title{Get price data from Yahoo Finance}
 \usage{
-get_prices_from_yahoo(ticker, from, to)
+get_prices_from_yahoo(ticker, from, to, preferred.stock.exchange = "Xetra",
+                          stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"))
 }
 \arguments{
 \item{ticker}{A single character string. Ticker symbol.}
@@ -12,6 +13,10 @@ get_prices_from_yahoo(ticker, from, to)
 \item{from}{A single character string. Start date.}
 
 \item{to}{A single character string. End date.}
+
+\item{preferred.stock.exchange}{A single character string. Stock exchange (default is empty string)}
+
+\item{stock.exchanges}{A vector of single character strings. Possible stock exchanges to get price data.}
 }
 \description{
 Get price data from Yahoo Finance
