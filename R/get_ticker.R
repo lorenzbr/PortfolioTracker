@@ -40,13 +40,13 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
   new.isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
   if(!(rlang::is_empty(new.isins))){
 
-    for(i in 1:length(new.isins)){
+    for (i in 1:length(new.isins)) {
 
       isin <- new.isins[i]
       try({ticker <- portfoliotracker::get_ticker_from_xetra(isin)
       df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
       data.table::fwrite(df.isin.ticker.new, paste0(path.tickers, file.ticker), append = TRUE)
-      print(paste(ticker, "added."))})
+      print(paste("Ticker was missing.", ticker, "added."))})
 
     } ## end of for loop
   } else (print("New transactions, but ticker already available.")) ## end of if statement ISIN not in table is empty
@@ -79,9 +79,9 @@ get_ticker_from_investing <- function(isin, preferred.stock.exchange = ""){
   html.output.text.selected <- gsub("\t","", html.output.text.selected)
   html.output.text.selected <- gsub("^(\n)+|(\n)+$","", html.output.text.selected)
 
-  if(!(rlang::is_empty(html.output.text.selected))){
+  if (!(rlang::is_empty(html.output.text.selected))) {
     ticker <- strsplit(html.output.text.selected,"\n")[[1]][1]
-    if(preferred.stock.exchange == "Xetra" & grepl(preferred.stock.exchange, html.output.text.selected)){
+    if (preferred.stock.exchange == "Xetra" & grepl(preferred.stock.exchange, html.output.text.selected)) {
       ticker <- paste0(ticker,".DE")}
   }
 
@@ -107,13 +107,13 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = ""){
   html.output <- rvest::read_html(url.isin)
   html.output.ol <- rvest::html_nodes(html.output, 'ol.list')
   url2 <- rvest::html_attr(html.output.ol, 'href')
-  if(!(rlang::is_empty(url2))){
-    if(is.na(url2)){
+  if (!(rlang::is_empty(url2))) {
+    if (is.na(url2)) {
       html.output.ol <- rvest::html_nodes(html.output.ol, "a")
       url2 <- rvest::html_attr(html.output.ol, 'href')
     }
-    if(is.na(url2)) message(paste("Url for", isin, "not found! Please add ticker manually."))
-  } else{stop(paste("Url for", isin, "not found! Please add ticker manually."))}
+    if (is.na(url2)) message(paste("URL for", isin, "not found! Please add ticker manually."))
+  } else {stop(paste("URL for", isin, "not found! Please add ticker manually."))}
   url2 <- paste0("https://www.xetra.com", url2)
 
   html.output <- rvest::read_html(url2)

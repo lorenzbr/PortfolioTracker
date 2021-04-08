@@ -32,18 +32,44 @@ devtools::install_github("lorenzbr/portfoliotracker")
 
 ```R
 install.packages("data.table")
+install.packages("dplyr")
+install.packages("magrittr")
+install.packages("quantmod")
+install.packages("rlang")
+install.packages("rvest")
+install.packages("stringr")
 ```
 
 ## Usage
 
 ```R
-#to be defined
+# Example
 
+# directory
+path <- "portfoliotracker/"
+
+## load transactions
+df.transactions <- transactions
+
+# get price data from Yahoo based on transactions
+update_prices_based_on_transactions(df.transactions, path)
 ```
 
 ## Documentation
 
-Definitions can be found here:
+Generally, [www.investopedia.com](https://www.investopedia.com) is a good starting point to understand the different approaches to measures financial returns.
+
+Annualized return
+:   "An annualized total return is the geometric average amount of money earned by an investment each year over a given time period." See [here](https://www.investopedia.com/terms/a/annualized-total-return.asp) for further details.
+
+Annual return
+:   "The annual return is the return that an investment provides over a period of time, expressed as a time-weighted annual percentage." See [here](https://www.investopedia.com/terms/a/annual-return.asp) for further details.
+
+Geometric mean
+:   ...
+
+Investment return
+:   ...
 
 ## License
 
