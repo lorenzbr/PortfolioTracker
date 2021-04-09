@@ -130,8 +130,8 @@ update_latest_prices <- function(path){
 
   ## create folders for tickers and prices (if not exists)
   list.paths <- portfoliotracker::create_portfoliotracker_dir(path)
-  path.tickers <- list.paths[[1]][1]
-  path.prices.raw <- list.paths[[2]][1]
+  path.tickers <- list.paths$path.tickers
+  path.prices.raw <- list.paths$path.prices.raw
 
   ## load file names for price data
   filename.prices.raw.with.ticker <- list.files(path.prices.raw)
@@ -184,9 +184,9 @@ update_latest_prices <- function(path){
           ## store as csv in raw financial data
           data.table::fwrite(df.updated.prices, paste0(path.prices.raw, filename.prices.raw))
 
-          print(paste("Price data for", ticker, "from", from, "to", to, "successfully downloaded."))
+          print(paste("Prices for", ticker, "from", from, "to", to, "successfully downloaded."))
 
-        } else {print("Start date needs to be earlier than end date.")}
+        } else {print(paste("Prices for ticker", ticker, "up to date."))}
 
         }, error = function(e) { skip_to_next <- TRUE})
 
@@ -238,7 +238,7 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
   try(ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to, auto.assign = FALSE))
 
   iter.stock.exchanges <- 1
-  while (!exists("ticker.prices")) {
+  while (!exists("ticker.prices" && iter.stock.exchanges <= length(stock.exchanges))) {
     stock.exchange <- stock.exchanges[iter.stock.exchanges]
     ticker.yahoo <- paste0(ticker, stock.exchange)
     iter.stock.exchanges <- iter.stock.exchanges + 1

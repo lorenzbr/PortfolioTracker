@@ -9,6 +9,9 @@ create_portfoliotracker_dir(path)
 \arguments{
 \item{path}{A single character string. Folder where all data are stored.}
 }
+\value{
+create_portfoliotracker_dir returns a list with path names for data storage
+}
 \description{
 Create directory for portfoliotracker
 }

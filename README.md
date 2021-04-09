@@ -49,15 +49,24 @@ install.packages("stringr")
 path <- "portfoliotracker/"
 
 ## load transactions
-df.transactions <- transactions
+df.transactions <- portfoliotracker::transactions
 
 # get price data from Yahoo based on transactions
-update_prices_based_on_transactions(df.transactions, path)
+portfoliotracker::update_prices_based_on_transactions(df.transactions, path)
+
+# update tickers to most recent day
+portfoliotracker::update_latest_prices(path)
 ```
+
+## Typical workflow
+
+```R
+# workflow
+```R
 
 ## Documentation
 
-Generally, [www.investopedia.com](https://www.investopedia.com) is a good starting point to understand the different approaches to measures financial returns.
+Generally, [www.investopedia.com](https://www.investopedia.com) is a good starting point to understand the different approaches to measure portfolio performances.
 
 Annualized return
 :   "An annualized total return is the geometric average amount of money earned by an investment each year over a given time period." See [here](https://www.investopedia.com/terms/a/annualized-total-return.asp) for further details.
