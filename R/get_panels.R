@@ -37,7 +37,8 @@ get_quantity_panel <- function(df.transaction.history, path, file.ticker = "isin
   }
 
   ## create quantity panels for all tickers
-  output <- mapply(portfoliotracker::create_quantity_panel, tickers, MoreArgs = list(df.transaction.history))
+  output <- mapply(portfoliotracker::create_quantity_panel, tickers,
+                   MoreArgs = list(df.transaction.history, path.quantitypanel))
 
   return(output)
 
@@ -49,9 +50,10 @@ get_quantity_panel <- function(df.transaction.history, path, file.ticker = "isin
 #' @param ticker A single character string containing the ticker symbol.
 #' @param df.transaction.history A data.frame containing the full history of transactions.
 #' @param path.quantitypanel A single character string containing the folder of quantity panels.
-#' @return create_quantity_panel returns
+#' @return \emph{create_quantity_panel} returns
 #'
 #' @export
+#' @import data.table
 create_quantity_panel <- function(ticker, df.transaction.history, path.quantitypanel){
 
   #### create quantity panel based on ticker and transaction history
@@ -76,51 +78,53 @@ create_quantity_panel <- function(ticker, df.transaction.history, path.quantityp
     ## if negative cumulative quantity exists, stop function because this must be an error (short selling not included)
     if (min(df.transaction.history.ticker$cum_quantity) >= 0) {
 
-    ## earliest transaction_date
-    earliest.transaction.date <- min(df.transaction.history.ticker$transaction_date)
+      ## earliest transaction_date
+      earliest.transaction.date <- min(df.transaction.history.ticker$transaction_date)
 
-    ## first transaction for each ticker (to get panel of quantity for each ticker)
-    df.transaction.history.ticker.first <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_date == earliest.transaction.date, ]
+      ## first transaction for each ticker (to get panel of quantity for each ticker)
+      df.transaction.history.ticker.first <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_date == earliest.transaction.date, ]
 
-    ## create panel with date and quantity for ticker from transaction date until today (remove Saturday and Sunday)
-    today <- Sys.Date()
-    ## daily sequence from earliest transaction date until today
-    dates <- seq(earliest.transaction.date, today, by = 1)
-    mysysgetlocale <- Sys.getlocale('LC_TIME')
-    Sys.setlocale('LC_TIME', 'ENGLISH')
-    ## remove weekends
-    dates <- dates[!weekdays(dates) %in% c('Saturday', 'Sunday')]
-    Sys.setlocale('LC_TIME', mysysgetlocale)
-    df.quantity.panel <- data.frame(date = dates)
-    df.quantity.panel$ticker <- ticker
+      ## create panel with date and quantity for ticker from transaction date until today (remove Saturday and Sunday)
+      today <- Sys.Date()
+      ## daily sequence from earliest transaction date until today
+      dates <- seq(earliest.transaction.date, today, by = 1)
+      mysysgetlocale <- Sys.getlocale('LC_TIME')
+      Sys.setlocale('LC_TIME', 'ENGLISH')
+      ## remove weekends
+      dates <- dates[!weekdays(dates) %in% c('Saturday', 'Sunday')]
+      Sys.setlocale('LC_TIME', mysysgetlocale)
+      df.quantity.panel <- data.frame(date = dates)
+      df.quantity.panel$ticker <- ticker
 
-    ##
-    data.table::setDT(df.quantity.panel)
-    data.table::setDT(df.transaction.history.ticker)
-    data.table::setkey(df.quantity.panel, "date")
-    data.table::setkey(df.transaction.history.ticker, "transaction_date")
-    DT.quantity.panel <- df.transaction.history.ticker[df.quantity.panel, roll = TRUE]
-    df.quantity.panel <- data.table::setDF(DT.quantity.panel)
-    names(df.quantity.panel)[names(df.quantity.panel) == "transaction_date"] <- "date"
+      ##
+      data.table::setDT(df.quantity.panel)
+      data.table::setDT(df.transaction.history.ticker)
+      data.table::setkey(df.quantity.panel, "date")
+      data.table::setkey(df.transaction.history.ticker, "transaction_date")
+      DT.quantity.panel <- df.transaction.history.ticker[df.quantity.panel, roll = TRUE]
+      df.quantity.panel <- data.table::setDF(DT.quantity.panel)
+      names(df.quantity.panel)[names(df.quantity.panel) == "transaction_date"] <- "date"
 
-    ## remove entries with zero cumulative quantity
-    df.quantity.panel <- df.quantity.panel[df.quantity.panel$cum_quantity != 0,]
+      ## remove entries with zero cumulative quantity
+      df.quantity.panel <- df.quantity.panel[df.quantity.panel$cum_quantity != 0,]
 
-    ## start and end date
-    from <- min(df.quantity.panel$date)
-    to <- max(df.quantity.panel$date)
+      ## start and end date
+      from <- min(df.quantity.panel$date)
+      to <- max(df.quantity.panel$date)
 
-    ## file name
-    filename.quantity.panel <- paste0("quantity_panel_", ticker, "_from_", from, "_to_", to, ".csv")
+      ## file name
+      filename.quantity.panel <- paste0("quantity_panel_", ticker, "_from_", from, "_to_", to, ".csv")
 
-    ## store quantity panel as csv
-    data.table::fwrite(df.quantity.panel, paste0(path.quantitypanel, filename.quantity.panel))
+      ## store quantity panel as csv
+      data.table::fwrite(df.quantity.panel, paste0(path.quantitypanel, filename.quantity.panel))
 
-    print(paste("Quantity panel for", ticker, "successfully created!"))
+      print(paste("Quantity panel for", ticker, "successfully created!"))
 
     } else {print(paste0("Negative quantity for ", ticker, ". Creating quantity panel not possible."))} ## end of if else statement minimum quantity is positive
 
   } else (print("No purchases or sale transactions available.")) ## end of if else statement whether purchases or sales transactions are available
+
+  return(TRUE)
 
 } ## end of function create_quantity_panel
 
@@ -212,7 +216,7 @@ get_price_quantity_panels <- function(df.transactions, path){
   }
 
   ## get price quantity panel
-  output <- lapply(tickers, portfoliotracker::get_price_quantity_panel)
+  output <- mapply(portfoliotracker::get_price_quantity_panel, tickers, MoreArgs = list(path))
 
 } ## end of function get_price_quantity_panels
 

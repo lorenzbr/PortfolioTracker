@@ -14,7 +14,7 @@ create_quantity_panel(ticker, df.transaction.history, path.quantitypanel)
 \item{path.quantitypanel}{A single character string containing the folder of quantity panels.}
 }
 \value{
-create_quantity_panel returns
+\emph{create_quantity_panel} returns
 }
 \description{
 Create quantity panel for ticker

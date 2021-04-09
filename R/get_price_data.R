@@ -172,7 +172,7 @@ update_latest_prices <- function(path){
         if(today > from){
 
           ## get price data for ticker
-          df.updated.prices <- portfoliotracker::get_prices_from_yahoo(ticker, from, today)
+          df.updated.prices <- portfoliotracker::get_prices_from_yahoo(ticker, from = from, to = today)
 
           ## start and end date
           from <- min(df.updated.prices$date)
@@ -238,7 +238,7 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
   try(ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to, auto.assign = FALSE))
 
   iter.stock.exchanges <- 1
-  while (!exists("ticker.prices" && iter.stock.exchanges <= length(stock.exchanges))) {
+  while (!exists("ticker.prices") && iter.stock.exchanges <= length(stock.exchanges)) {
     stock.exchange <- stock.exchanges[iter.stock.exchanges]
     ticker.yahoo <- paste0(ticker, stock.exchange)
     iter.stock.exchanges <- iter.stock.exchanges + 1

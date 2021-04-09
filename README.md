@@ -56,6 +56,16 @@ portfoliotracker::update_prices_based_on_transactions(df.transactions, path)
 
 # update tickers to most recent day
 portfoliotracker::update_latest_prices(path)
+
+# history of transactions
+df.transaction.history <- df.transactions
+
+# get panels
+portfoliotracker::get_quantity_panel(df.transaction.history, path, file.ticker = "isin_ticker.csv")
+portfoliotracker::get_price_panel(df.transaction.history, path)
+portfoliotracker::get_price_quantity_panels(df.transaction.history, path)
+
+
 ```
 
 ## Typical workflow
