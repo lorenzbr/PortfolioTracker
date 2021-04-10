@@ -64,15 +64,13 @@ df.transaction.history <- df.transactions
 portfoliotracker::get_quantity_panel(df.transaction.history, path, file.ticker = "isin_ticker.csv")
 portfoliotracker::get_price_panel(df.transaction.history, path)
 portfoliotracker::get_price_quantity_panels(df.transaction.history, path)
-
-
 ```
 
 ## Typical workflow
 
 ```R
 # workflow
-```R
+```
 
 ## Documentation
 
