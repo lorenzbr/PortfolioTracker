@@ -1,24 +1,25 @@
-#' Get annual returns
+#' Store annual returns for all tickers as csv's
 #'
-#' @usage get_annual_returns_all(path)
+#' @usage store_annual_returns_all(path)
 #' @param path A single character string. Folder where all data are stored.
-#' @return get_annual_returns_all returns
 #'
 #' @export
-get_annual_returns_all <- function(path){
+store_annual_returns_all <- function(path) {
 
   #### get annual returns for all tickers
 
-  ## create folder if not exists and get folder name for quantity panel and tickers
+  ## create folder if not exists and get folder name for quantity panel
   list.paths <- portfoliotracker::create_portfoliotracker_dir(path)
   path.pricequantitypanel <- list.paths$path.pricequantitypanel
+  path.returns <- list.paths$path.returns
+  files.pricequantitypanels <- list.files(path.pricequantitypanel)
 
   ## load price-quantity panel
+  no.pricequantitypanels <- !rlang::is_empty(files.pricequantitypanels)
+  if (no.pricequantitypanels) {
 
-  if (!rlang::is_empty(list.files(paste0(path.pricequantitypanel)))) {
-
-    filenames <- paste0(path.pricequantitypanel, list.files(paste0(path.pricequantitypanel)))
-    list.dfs <- lapply(filenames, data.table::fread)
+    files <- paste0(path.pricequantitypanel, files.pricequantitypanels)
+    list.dfs <- lapply(files, data.table::fread)
 
     last.year <- lubridate::year(Sys.Date()) - 1
     df <- data.frame(year = last.year)
@@ -42,10 +43,10 @@ get_annual_returns_all <- function(path){
 
   } else {message("No price-quanity panel to calculate annual returns.")} ## end of if else statement
 
-} ## end of function get_annual_returns_all
+} ## end of function store_annual_returns_all
 
 
-get_annual_returns <- function(df){
+get_annual_returns <- function(df) {
 
   #### get annual returns
 
@@ -75,16 +76,17 @@ get_annual_returns <- function(df){
 } ## end of function get_annual_returns
 
 
+# PerformanceAnalytics::Return.annualized
+# PerformanceAnalytics::Return.cumulative
+
 
 
 
 ## load tables with annual return
-if (!rlang::is_empty(list.files(paste0(path.returns),
-                               pattern = "^annual_returns_all_from_"))) {
+if (!rlang::is_empty(list.files(paste0(path.returns), pattern = "^annual_returns_all_from_"))) {
 
   ## file name for annual returns
-  filename.annual.returns <- list.files(paste0(path.returns),
-                                        pattern = "^annual_returns_all_from_")
+  filename.annual.returns <- list.files(paste0(path.returns), pattern = "^annual_returns_all_from_")
 
   ## choose annual returns with most recent year and minimum year
   filename.annual.returns <- filename.annual.returns[grepl(max(as.numeric(stringr::str_match(filename.annual.returns,

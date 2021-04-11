@@ -1,5 +1,5 @@
-# Portfolio Tracker
-This R package contains functions to track the financial performance of your investments.
+# PortfolioTracker
+This R package contains functions to track the financial performance of your investment portfolio.
 
 
 ## Introduction
@@ -15,16 +15,16 @@ This R package contains functions to track the financial performance of your inv
 
 Please contact <lorenz.brachtendorf@gmx.de> if you want to:
 * contribute to this project
-* have additional features (e.g., other banks or brokers)
+* have additional features (e.g., returns on investments, cash reserves, other currencies, ...)
 
-You can also submit bug reports and suggestions via e-mail or <https://github.com/lorenzbr/portfoliotracker/issues> 
+You can also submit bug reports and suggestions via e-mail or <https://github.com/lorenzbr/PortfolioTracker/issues> 
 
 
 ## Installation
 
 
 ```R
-devtools::install_github("lorenzbr/portfoliotracker")
+devtools::install_github("lorenzbr/PortfolioTracker")
 ```
 
 
@@ -46,24 +46,24 @@ install.packages("stringr")
 # Example
 
 # directory
-path <- "portfoliotracker/"
+path <- "PortfolioTracker/"
 
 ## load transactions
-df.transactions <- portfoliotracker::transactions
+df.transactions <- PortfolioTracker::transactions
 
 # get price data from Yahoo based on transactions
-portfoliotracker::update_prices_based_on_transactions(df.transactions, path)
+PortfolioTracker::update_prices_based_on_transactions(df.transactions, path)
 
 # update tickers to most recent day
-portfoliotracker::update_latest_prices(path)
+PortfolioTracker::update_latest_prices(path)
 
 # history of transactions
 df.transaction.history <- df.transactions
 
 # get panels
-portfoliotracker::get_quantity_panel(df.transaction.history, path, file.ticker = "isin_ticker.csv")
-portfoliotracker::get_price_panel(df.transaction.history, path)
-portfoliotracker::get_price_quantity_panels(df.transaction.history, path)
+PortfolioTracker::get_quantity_panel(df.transaction.history, path, file.ticker = "isin_ticker.csv")
+PortfolioTracker::get_price_panel(df.transaction.history, path)
+PortfolioTracker::get_price_quantity_panels(df.transaction.history, path)
 ```
 
 ## Typical workflow
@@ -92,4 +92,4 @@ Investment return
 
 This R package is licensed under the GNU General Public License v3.0.
 
-See [here](https://github.com/lorenzbr/portfoliotracker/blob/main/LICENSE) for further information.
+See [here](https://github.com/lorenzbr/PortfolioTracker/blob/main/LICENSE) for further information.

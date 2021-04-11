@@ -1,6 +1,6 @@
-Package: portfoliotracker
+Package: PortfolioTracker
 Type: Package
-Title: Track the performance of your portfolio
+Title: Track the performance of your investment portfolio
 Version: 0.1.0
 Authors@R: 
     person(given = "Lorenz",
@@ -8,7 +8,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "lorenz.brachtendorf@gmx.de",
            comment = c(ORCID = "0000-0001-7066-0838"))
-Description: This R package contains functions to track the financial performance of your investments.
+Description: This R package contains functions to track the financial performance of your investment portfolio.
 Imports: data.table, dplyr, magrittr, quantmod, rlang, rvest, stringr
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
