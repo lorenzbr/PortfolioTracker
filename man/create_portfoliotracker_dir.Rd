@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_portfoliotracker_dir.R
 \name{create_portfoliotracker_dir}
 \alias{create_portfoliotracker_dir}
-\title{Create directory for portfoliotracker}
+\title{Create directory for PortfolioTracker}
 \usage{
 create_portfoliotracker_dir(path)
 }
@@ -13,5 +13,5 @@ create_portfoliotracker_dir(path)
 create_portfoliotracker_dir returns a list with path names for data storage
 }
 \description{
-Create directory for portfoliotracker
+Create directory for PortfolioTracker
 }

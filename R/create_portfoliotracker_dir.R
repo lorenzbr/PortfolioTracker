@@ -1,4 +1,4 @@
-#' Create directory for portfoliotracker
+#' Create directory for PortfolioTracker
 #'
 #' @usage create_portfoliotracker_dir(path)
 #' @param path A single character string. Folder where all data are stored.
@@ -7,7 +7,7 @@
 #' @export
 create_portfoliotracker_dir <- function(path){
 
-  #### create directory for portfoliotracker
+  #### create directory for PortfolioTracker
 
   ## create folders for tickers and prices (if not exists)
   path.tickers <- paste0(path, "data/tickers/")

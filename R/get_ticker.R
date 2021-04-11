@@ -31,7 +31,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
   isins <- unique(isins)
 
   ## create csv if not exists
-  portfoliotracker::init_isin_ticker(path.tickers, file.ticker)
+  PortfolioTracker::init_isin_ticker(path.tickers, file.ticker)
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
   df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
@@ -43,7 +43,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
     for (i in 1:length(new.isins)) {
 
       isin <- new.isins[i]
-      try({ticker <- portfoliotracker::get_ticker_from_xetra(isin)
+      try({ticker <- PortfolioTracker::get_ticker_from_xetra(isin)
       df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
       data.table::fwrite(df.isin.ticker.new, paste0(path.tickers, file.ticker), append = TRUE)
       print(paste("Ticker was missing.", ticker, "added."))})
