@@ -1,6 +1,6 @@
 #' Store annual returns for all tickers as csv's
 #'
-#' @usage store_annual_returns_all(path)
+#' @usage store_annual_returns(path)
 #' @param path A single character string. Folder where all data are stored.
 #'
 #' @export
