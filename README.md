@@ -62,10 +62,10 @@ PortfolioTracker::update_latest_prices(path)
 # history of transactions
 df.transaction.history <- df.transactions
 
-# get panels
-PortfolioTracker::get_quantity_panel(df.transaction.history, path, file.ticker = "isin_ticker.csv")
-PortfolioTracker::get_price_panel(df.transaction.history, path)
-PortfolioTracker::get_price_quantity_panels(df.transaction.history, path)
+# write panels as csv
+PortfolioTracker::write_quantity_panels(df.transaction.history, path, file.ticker = "isin_ticker.csv")
+PortfolioTracker::write_price_panels(df.transaction.history, path)
+PortfolioTracker::write_price_quantity_panels(df.transaction.history, path)
 ```
 
 ## Typical workflow

@@ -1,10 +1,10 @@
-#' Store annual returns for all tickers as csv's
+#' Write annual returns for all tickers as csv's
 #'
-#' @usage store_annual_returns(path)
-#' @param path A single character string. Folder where all data are stored.
+#' @usage write_annual_returns(path)
+#' @param path A single character string. Directory where all data are stored.
 #'
 #' @export
-store_annual_returns <- function(path) {
+write_annual_returns <- function(path) {
 
   #### get annual returns for all tickers
 
@@ -43,7 +43,7 @@ store_annual_returns <- function(path) {
 
   } else {message("No price panel to calculate annual returns.")} ## end of if else statement
 
-} ## end of function store_annual_returns
+} ## end of function write_annual_returns
 
 #' Get annual returns
 #'
@@ -84,8 +84,6 @@ get_annual_returns <- function(df) {
 
 # PerformanceAnalytics::Return.annualized
 # PerformanceAnalytics::Return.cumulative
-
-
 
 
 # ## load tables with annual return

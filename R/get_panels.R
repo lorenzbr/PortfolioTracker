@@ -1,13 +1,12 @@
-#' Get full history of quantities
+#' Write full history of quantities for all tickers as csv
 #'
-#' @usage get_quantity_panel(df.transaction.history, path, file.ticker = "isin_ticker.csv")
+#' @usage write_quantity_panels(df.transaction.history, path, file.ticker = "isin_ticker.csv")
 #' @param df.transaction.history A data.frame containing the full history of transactions.
 #' @param path A single character string. Directory of your data.
 #' @param file.ticker A single character string. Name of csv containing ISIN-ticker pairs.
-#' @return get_quantity_panel returns
 #'
 #' @export
-get_quantity_panel <- function(df.transaction.history, path, file.ticker = "isin_ticker.csv"){
+write_quantity_panels <- function(df.transaction.history, path, file.ticker = "isin_ticker.csv"){
 
   #### get full set of all quantity panels
 
@@ -37,24 +36,23 @@ get_quantity_panel <- function(df.transaction.history, path, file.ticker = "isin
   }
 
   ## create quantity panels for all tickers
-  output <- mapply(PortfolioTracker::create_quantity_panel, tickers,
+  output <- mapply(PortfolioTracker::write_quantity_panel, tickers,
                    MoreArgs = list(df.transaction.history, path.quantitypanel))
 
   return(output)
 
-} ## end of function get_quantity_panel
+} ## end of function write_quantity_panels
 
-#' Create quantity panel for ticker
+#' Write quantity panel for ticker
 #'
-#' @usage create_quantity_panel(ticker, df.transaction.history, path.quantitypanel)
+#' @usage write_quantity_panel(ticker, df.transaction.history, path.quantitypanel)
 #' @param ticker A single character string containing the ticker symbol.
 #' @param df.transaction.history A data.frame containing the full history of transactions.
 #' @param path.quantitypanel A single character string containing the folder of quantity panels.
-#' @return \emph{create_quantity_panel} returns
 #'
 #' @export
 #' @import data.table
-create_quantity_panel <- function(ticker, df.transaction.history, path.quantitypanel){
+write_quantity_panel <- function(ticker, df.transaction.history, path.quantitypanel){
 
   #### create quantity panel based on ticker and transaction history
 
@@ -118,25 +116,22 @@ create_quantity_panel <- function(ticker, df.transaction.history, path.quantityp
       ## store quantity panel as csv
       data.table::fwrite(df.quantity.panel, paste0(path.quantitypanel, filename.quantity.panel))
 
-      print(paste("Quantity panel for", ticker, "successfully created!"))
+      message("Quantity panel for ", ticker, " successfully created!")
 
-    } else {print(paste0("Negative quantity for ", ticker, ". Creating quantity panel not possible."))} ## end of if else statement minimum quantity is positive
+    } else {message("Negative quantity for ", ticker, ". Creating quantity panel not possible.")} ## end of if else statement minimum quantity is positive
 
-  } else (print("No purchases or sale transactions available.")) ## end of if else statement whether purchases or sales transactions are available
+  } else {message("No purchases or sale transactions available.")} ## end of if else statement whether purchases or sales transactions are available
 
-  return(TRUE)
+} ## end of function write_quantity_panel
 
-} ## end of function create_quantity_panel
-
-#' Get full history of prices
+#' Write full history of prices for all tickers as csv
 #'
-#' @usage get_price_panel(df.transactions, path)
+#' @usage write_price_panels(df.transactions, path)
 #' @param df.transactions A data.frame containing transaction history.
 #' @param path A single character string.
-#' @return get_price_panel returns
 #'
 #' @export
-get_price_panel <- function(df.transactions, path){
+write_price_panels <- function(df.transactions, path){
 
   #### get panel of prices for each ticker
 
@@ -154,7 +149,7 @@ get_price_panel <- function(df.transactions, path){
   }
 
   ## list all files with prices
-  if (!(rlang::is_empty(tickers))) {
+  if (!rlang::is_empty(tickers)) {
 
     for(i in 1:length(tickers)){
 
@@ -180,25 +175,24 @@ get_price_panel <- function(df.transactions, path){
         ## store price panel as csv
         data.table::fwrite(df.all.prices.for.ticker, paste0(path.pricepanel, filename.price.panel))
 
-        print("Price panel successfully created!")
+        message("Price panel successfully created.")
 
-      } else {print("No financials available!")}
+      } else {message("No financials available.")}
 
     } ## end of for loop
 
-  } else (return("No tickers for price panel available.")) ## end of if else statement
+  } else (message("No tickers for price panel available.")) ## end of if else statement
 
-} ## end of function get_price_panel
+} ## end of function write_price_panels
 
-#' Get panels for the product of prices and quantity for all tickers
+#' Write panels for the product of prices and quantity for all tickers as csv
 #'
-#' @usage get_price_quantity_panels(df.transactions, path)
+#' @usage write_price_quantity_panels(df.transactions, path)
 #' @param df.transactions A data.frame containing transaction history.
 #' @param path A single character string.
-#' @return get_price_quantity_panels returns
 #'
 #' @export
-get_price_quantity_panels <- function(df.transactions, path){
+write_price_quantity_panels <- function(df.transactions, path){
 
   #### get panels for prices times quantity for all tickers
 
@@ -215,20 +209,19 @@ get_price_quantity_panels <- function(df.transactions, path){
     file.remove(paste0(path.pricequantitypanel, list.files(path.pricequantitypanel)))
   }
 
-  ## get price quantity panel
-  output <- mapply(PortfolioTracker::get_price_quantity_panel, tickers, MoreArgs = list(path))
+  ## write price quantity panels
+  output <- mapply(PortfolioTracker::write_price_quantity_panel, tickers, MoreArgs = list(path))
 
-} ## end of function get_price_quantity_panels
+} ## end of function write_price_quantity_panels
 
-#' Get panel for the product of prices and quantity
+#' Write panel for the product of prices and quantity for input ticker as csv
 #'
-#' @usage get_price_quantity_panel(ticker, path)
+#' @usage write_price_quantity_panel(ticker, path)
 #' @param ticker A single character string containing a ticker symbol.
 #' @param path A single character string.
-#' @return get_price_quantity_panel returns
 #'
 #' @export
-get_price_quantity_panel <- function(ticker, path){
+write_price_quantity_panel <- function(ticker, path){
 
   #### get price quantity panel for a ticker
 
@@ -265,13 +258,13 @@ get_price_quantity_panel <- function(ticker, path){
       ## store price quantity panel as csv
       data.table::fwrite(df.pricequantitypanel, paste0(path.pricequantitypanel, filename.pricequantity.panel))
 
-      print("Price-quantity panel successfully created!")
+      message("Price-quantity panel successfully created!")
 
-    } else (print("No quantity panel available.")) ## end of if else statement to check whether quantity panel is available
+    } else (message("No quantity panel available.")) ## end of if else statement to check whether quantity panel is available
 
-  } else (print("No price panel available."))
+  } else (message("No price panel available."))
 
-} ## end of get_price_quantity_panel
+} ## end of write_price_quantity_panel
 
 
 # Helpers -----------------------------------------------------------------
