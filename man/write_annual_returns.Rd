@@ -4,10 +4,12 @@
 \alias{write_annual_returns}
 \title{Write annual returns for all tickers as csv's}
 \usage{
-write_annual_returns(path)
+write_annual_returns(path, file.name = "annual_returns.csv")
 }
 \arguments{
 \item{path}{A single character string. Directory where all data are stored.}
+
+\item{file.name}{A single character string. Name of csv file containing annual returns.}
 }
 \description{
 Write annual returns for all tickers as csv's

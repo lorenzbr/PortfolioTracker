@@ -10,6 +10,7 @@ create_portfoliotracker_dir <- function(path){
   #### create directory for PortfolioTracker
 
   ## create folders for tickers and prices (if not exists)
+  path.data <- paste0(path, "/data/")
   path.tickers <- paste0(path, "/data/tickers/")
   path.prices.raw <- paste0(path, "/data/prices_raw/")
   path.quantitypanel <- paste0(path, "/data/quantity_panel/")
@@ -19,6 +20,7 @@ create_portfoliotracker_dir <- function(path){
   path.transactions <- paste0(path, "/data/transactions/")
   path.returns <- paste0(path, "/data/returns/")
 
+  if (!dir.exists(path.data)) dir.create(path.data, recursive = TRUE)
   if (!dir.exists(path.tickers)) dir.create(path.tickers, recursive = TRUE)
   if (!dir.exists(path.prices.raw)) dir.create(path.prices.raw, recursive = TRUE)
   if (!dir.exists(path.quantitypanel)) dir.create(path.quantitypanel, recursive = TRUE)
@@ -29,6 +31,7 @@ create_portfoliotracker_dir <- function(path){
   if (!dir.exists(path.returns)) dir.create(path.returns, recursive = TRUE)
 
   output.list <- list(
+    path.data = path.data,
     path.tickers = path.tickers,
     path.prices.raw = path.prices.raw,
     path.quantitypanel = path.quantitypanel,

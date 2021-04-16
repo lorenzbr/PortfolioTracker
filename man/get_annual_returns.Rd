@@ -4,10 +4,12 @@
 \alias{get_annual_returns}
 \title{Get annual returns}
 \usage{
-get_annual_returns(df)
+get_annual_returns(df, ticker)
 }
 \arguments{
-\item{df}{A data frame containing date, adjusted prices and ticker.}
+\item{df}{A data frame containing date and prices.}
+
+\item{ticker}{A single character string containing the ticker.}
 }
 \value{
 df.annualreturns A data frame containing years and annual returns.

@@ -58,33 +58,31 @@
 # df.pricequantity.panel.temp <- df.pricequantity.panel
 # df.pricequantity.panel.temp <- df.pricequantity.panel.temp[order(df.pricequantity.panel.temp$date),]
 
-#' Get current portfolio investments
+#' Write current portfolio investments to a csv file
 #'
-#' @usage get_current_portfolio(path, file.tickers = "isin_ticker.csv",
+#' @usage write_current_portfolio(path, file.name = "current_portfolio.csv", file.tickers = "isin_ticker.csv",
 #'                       file.transactions = "transaction_fullhistory.csv")
 #' @param path A single character string. Directory of your data.
+#' @param file.name A single character string. Name of created csv file containing current portfolio.
 #' @param file.tickers A single character string. Name of csv containing ISIN-ticker pairs.
-#' @param file.transactions A single character string. Name of csv containing all transactions.
+#' @param file.transactions A single character string. Name of csv file containing transactions.
 #'
 #' @export
-get_current_portfolio <- function(path, file.tickers = "isin_ticker.csv", file.transactions = "transaction_fullhistory.csv"){
+write_current_portfolio <- function(path, file.name = "current_portfolio.csv", file.tickers = "isin_ticker.csv",
+                                  file.transactions = "transaction_fullhistory.csv"){
 
   ## create folder if not exists and get folder name for quantity panel and tickers
   list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
   path.pricequantitypanel <- list.paths$path.pricequantitypanel
   path.tickers <- list.paths$path.tickers
   path.transactions <- list.paths$path.transactions
+  path.data <- list.paths$path.data
 
   ## load price quantity panels if exists
   if (!rlang::is_empty(list.files(path.pricequantitypanel))) {
 
     filenames <- paste0(path.pricequantitypanel, list.files(path.pricequantitypanel))
     list.dfs <- lapply(filenames, data.table::fread)
-
-  }
-
-  ## create table with current portfolio
-  if (exists("list.dfs")) {
 
     ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
     df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
@@ -123,16 +121,11 @@ get_current_portfolio <- function(path, file.tickers = "isin_ticker.csv", file.t
     ## compute weight of each investment in total portfolio value
     df.current$weight <- df.current$value / total.portfolio.value
 
-  } else {
+    data.table::fwrite(df.current, paste0(path.data, file.name))
 
-    names.all <- c("name", "isin", "ticker", "adjusted", "cum_quantity", "value", "weight")
-    df.current <- data.frame(matrix(nrow = 0, ncol = length(names.all), dimnames = list(NULL, names.all)))
+  } else { message("No price quantity panels available.") } ## end of if statement
 
-  } ## end of if else statement
-
-  return(df.current)
-
-} # end of function get_current_portfolio
+} # end of function write_current_portfolio
 
 
 
