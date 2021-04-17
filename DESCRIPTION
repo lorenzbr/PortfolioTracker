@@ -9,7 +9,7 @@ Authors@R:
            email = "lorenz.brachtendorf@gmx.de",
            comment = c(ORCID = "0000-0001-7066-0838"))
 Description: This R package contains functions to track the financial performance of your investment portfolio.
-Imports: data.table, dplyr, lubridate, magrittr, quantmod, rlang, rvest, stats, stringr, tidyr, xts
+Imports: data.table, dplyr, lubridate, magrittr, PerformanceAnalytics, quantmod, rlang, rvest, stats, stringr, tidyr, xts
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true

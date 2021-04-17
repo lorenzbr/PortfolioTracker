@@ -4,7 +4,8 @@
 \alias{write_current_portfolio}
 \title{Write current portfolio investments to a csv file}
 \usage{
-write_current_portfolio(path, file.name = "current_portfolio.csv", file.tickers = "isin_ticker.csv",
+write_current_portfolio(path, file.name = "current_portfolio.csv",
+                      file.tickers = "isin_ticker.csv",
                       file.transactions = "transaction_fullhistory.csv")
 }
 \arguments{

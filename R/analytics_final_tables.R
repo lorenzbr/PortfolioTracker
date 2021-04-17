@@ -60,7 +60,8 @@
 
 #' Write current portfolio investments to a csv file
 #'
-#' @usage write_current_portfolio(path, file.name = "current_portfolio.csv", file.tickers = "isin_ticker.csv",
+#' @usage write_current_portfolio(path, file.name = "current_portfolio.csv",
+#'                       file.tickers = "isin_ticker.csv",
 #'                       file.transactions = "transaction_fullhistory.csv")
 #' @param path A single character string. Directory of your data.
 #' @param file.name A single character string. Name of created csv file containing current portfolio.
@@ -68,8 +69,9 @@
 #' @param file.transactions A single character string. Name of csv file containing transactions.
 #'
 #' @export
-write_current_portfolio <- function(path, file.name = "current_portfolio.csv", file.tickers = "isin_ticker.csv",
-                                  file.transactions = "transaction_fullhistory.csv"){
+write_current_portfolio <- function(path, file.name = "current_portfolio.csv",
+                                    file.tickers = "isin_ticker.csv",
+                                    file.transactions = "transaction_fullhistory.csv"){
 
   ## create folder if not exists and get folder name for quantity panel and tickers
   list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)

@@ -1,13 +1,12 @@
-#' Write annual returns for all tickers as csv's
+#' Write returns for all tickers to csv files
 #'
-#' @usage write_annual_returns(path, file.name = "annual_returns.csv")
+#' @usage write_returns(path)
 #' @param path A single character string. Directory where all data are stored.
-#' @param file.name A single character string. Name of csv file containing annual returns.
 #'
 #' @export
-write_annual_returns <- function(path, file.name = "annual_returns.csv") {
+write_returns <- function(path) {
 
-  #### get annual returns for all tickers
+  #### write returns for all tickers
 
   ## create folder if not exists and get folder name for price panel
   list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
@@ -15,83 +14,170 @@ write_annual_returns <- function(path, file.name = "annual_returns.csv") {
   path.returns <- list.paths$path.returns
   files.pricepanels <- list.files(path.pricepanel)
 
-  ## load price-quantity panel
-  no.pricequantitypanels <- !rlang::is_empty(files.pricepanels)
+  ## load price panel
+  no.pricepanels <- !rlang::is_empty(files.pricepanels)
 
-  if (no.pricequantitypanels) {
+  if (no.pricepanels) {
 
     files <- paste0(path.pricepanel, files.pricepanels)
     list.dfs <- lapply(files, data.table::fread)
 
-    last.year <- lubridate::year(Sys.Date()) - 1
-    df <- data.frame(year = last.year)
+    # last.year <- lubridate::year(Sys.Date()) - 1
+    # df.annual <- data.frame(year = last.year)
+    df.daily <- data.frame(matrix(nrow = 0, ncol = 1, dimnames = list(NULL, "date")))
+    df.monthly <- data.frame(matrix(nrow = 0, ncol = 1, dimnames = list(NULL, "date")))
+    df.annual <- data.frame(matrix(nrow = 0, ncol = 1, dimnames = list(NULL, "date")))
 
     ## could also do mapply and do.call (if necessary)
     for (i in 1:length(list.dfs)) {
 
-      ticker <- stringr::str_match(files[i], "price_panel_(.*?)_from")[,2]
+      ticker <- stringr::str_match(files[i], "price_panel_(.*?)_from")[, 2]
       df.pricepanel <- list.dfs[[i]]
 
-      df.temp <- PortfolioTracker::get_annual_returns(df.pricepanel, ticker)
+      df.temp <- PortfolioTracker::get_returns_all(df.pricepanel, ticker)
 
-      df <- merge(df, df.temp, by = "year", all.x = TRUE, all.y = TRUE)
+      ticker.daily <- paste0(ticker, ".daily")
+      ticker.monthly <- paste0(ticker, ".monthly")
+      ticker.yearly <- paste0(ticker, ".yearly")
+
+      df.daily.temp <- df.temp[!is.na(df.temp[, ticker.daily]), c("date", ticker.daily)]
+      df.monthly.temp <- df.temp[!is.na(df.temp[, ticker.monthly]), c("date", ticker.monthly)]
+      df.yearly.temp <- df.temp[!is.na(df.temp[, ticker.yearly]), c("date", ticker.yearly)]
+
+      df.daily <- merge(df.daily, df.daily.temp, by = "date", all.x = TRUE, all.y = TRUE)
+      df.monthly <- merge(df.monthly, df.monthly.temp, by = "date", all.x = TRUE, all.y = TRUE)
+      df.annual <- merge(df.annual, df.yearly.temp, by = "date", all.x = TRUE, all.y = TRUE)
 
     } ## end of for loop
 
-    ## store as csv
-    data.table::fwrite(df, paste0(path.returns, file.name))
+    data.table::fwrite(df.daily, paste0(path.returns, "daily_returns.csv"))
+    data.table::fwrite(df.monthly, paste0(path.returns, "monthly_returns.csv"))
+    data.table::fwrite(df.annual, paste0(path.returns, "annual_returns.csv"))
 
-  } else { message("No price panel to calculate annual returns.") } ## end of if else statement
+  } else { message("No price panels to calculate annual returns.") } ## end of if else statement
 
-} ## end of function write_annual_returns
+} ## end of function write_returns
 
 #' Get annual returns
 #'
-#' @usage get_annual_returns(df, ticker)
+#' @usage get_returns_all(df, ticker)
 #' @param df A data frame containing date and prices.
 #' @param ticker A single character string containing the ticker.
-#' @return df.annualreturns A data frame containing years and annual returns.
+#' @return df.allreturns A data frame containing years and annual returns.
 #'
 #' @export
-get_annual_returns <- function(df, ticker) {
+get_returns_all <- function(df, ticker) {
 
-  #### get annual returns
+  #### get all returns
 
   df$date <- as.Date(df$date, "%Y-%m-%d")
 
-  if(!("date" %in% names(df))) rownames(df) <- df$date
-
   df <- df[, c("date", "adjusted")]
-  df <- xts::as.xts(df)
-  df.annualreturns <- quantmod::annualReturn(df)
-  df.annualreturns <- as.data.frame(df.annualreturns)
-
-  names(df.annualreturns) <- paste0(ticker, ".", names(df.annualreturns))
-
-  df.annualreturns$date <- rownames(df.annualreturns)
-  rownames(df.annualreturns) <- 1:nrow(df.annualreturns)
-
-  df.annualreturns$date <- as.Date(df.annualreturns$date, "%Y-%m-%d")
-  df.annualreturns$year <- as.numeric(format(df.annualreturns$date, "%Y"))
-
-  df.annualreturns <- df.annualreturns[, names(df.annualreturns) != "date"]
-
-  return(df.annualreturns)
-
-} ## end of function get_annual_returns
+  xts.prices <- xts::as.xts(df)
 
 
-# df.annualreturns2 <- df.annualreturns
-# df.annualreturns2$date <- paste0("31-12-", df.annualreturns2$year)
-# df.annualreturns2$date <- as.Date(df.annualreturns2$date, "%d-%m-%Y")
-# df.annualreturns2 <- df.annualreturns2[, names(df.annualreturns2) != "year"]
-# df.annualreturns2$EXS1.yearly.returns <- as.numeric(df.annualreturns2$EXS1.yearly.returns)
-# df.annualreturns2 <- df.annualreturns2[, c("date", "EXS1.yearly.returns")]
-# df.annualreturns2$date <- as.Date(df.annualreturns2$date)
-# df.annualreturns2 <- xts::as.xts(df.annualreturns2)
-# PerformanceAnalytics::Return.annualized()
-# PerformanceAnalytics::Return.annualized
+  xts.monthlyreturns <- quantmod::monthlyReturn(xts.prices)
+  xts.annualreturns <- quantmod::annualReturn(xts.prices)
+
+  xts.allreturns <- quantmod::allReturns(xts.prices)
+
+  # df.annualreturns <- as.data.frame(xts.annualreturns)
+  # df.monthlyreturns <- as.data.frame(xts.monthlyreturns)
+  df.allreturns <- as.data.frame(xts.allreturns)
+
+  # names(df.annualreturns) <- paste0(ticker, ".", names(df.annualreturns))
+  # names(df.monthlyreturns) <- paste0(ticker, ".", names(df.monthlyreturns))
+  names(df.allreturns) <- paste0(ticker, ".", names(df.allreturns))
+
+  # df.annualreturns$date <- rownames(df.annualreturns)
+  # df.monthlyreturns$date <- rownames(df.monthlyreturns)
+  df.allreturns$date <- rownames(df.allreturns)
+
+  # rownames(df.annualreturns) <- 1:nrow(df.annualreturns)
+  rownames(df.allreturns) <- 1:nrow(df.allreturns)
+
+  # df.annualreturns$date <- as.Date(df.annualreturns$date, "%Y-%m-%d")
+  # df.monthlyreturns$date <- as.Date(df.monthlyreturns$date, "%Y-%m-%d")
+  df.allreturns$date <- as.Date(df.allreturns$date, "%Y-%m-%d")
+
+  # df.annualreturns$year <- as.numeric(format(df.annualreturns$date, "%Y"))
+
+  # df.annualreturns <- df.annualreturns[, names(df.annualreturns) != "date"]
+
+  # list.returns <-list(
+  #   df.annualreturns = df.annualreturns,
+  #   df.monthlyreturns = df.monthlyreturns
+  # )
+
+  return(df.allreturns)
+
+} ## end of function get_returns_all
+
+
+#' Write annualized returns to a csv file
+#'
+#' @usage write_annualized_returns(path)
+#' @param path A single character string. Directory where all data are stored.
+#'
+#' @export
+write_annualized_returns <- function(path) {
+
+  #### write annualized returns to csv
+
+  ## create folder if not exists and get folder name for price panel
+  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  path.returns <- list.paths$path.returns
+
+  returns.period <- "daily"
+
+  file.name <- list.files(path.returns, pattern = returns.period)
+
+  df.returns <- data.table::fread(paste0(path.returns, file.name))
+
+  names(df.returns) <- gsub(paste0("\\.", returns.period), "", names(df.returns))
+
+  df.returns$date <- as.Date(df.returns$date, "%Y-%m-%d")
+
+  xts.returns.max <- xts::as.xts(df.returns)
+
+  df.annualized <- data.frame(matrix(nrow = length(names(xts.returns.max)), ncol = 0,
+                                     dimnames = list(names(xts.returns.max), NULL)))
+
+  annualize.return.periods <- c(1, 3, 5, 10)
+
+  for(annualize.return.period in annualize.return.periods){
+
+    xts.returns.Xy <- xts.returns.max[paste0(Sys.Date() - lubridate::years(annualize.return.period), "/")]
+
+    annualized.returns.Xy <- PerformanceAnalytics::Return.annualized(xts.returns.Xy)
+
+    df.temp <- as.data.frame(t(annualized.returns.Xy))
+    names(df.temp) <- paste0(annualize.return.period, "y")
+
+    df.annualized <- cbind(df.annualized, df.temp)
+
+  } # end of for loop
+
+  annualized.returns.max <- PerformanceAnalytics::Return.annualized(xts.returns.max)
+  df.temp <- as.data.frame(t(annualized.returns.max))
+  names(df.temp) <- "max"
+  df.annualized <- cbind(df.annualized, df.temp)
+
+  col.names <- names(df.annualized)
+
+  df.annualized$ticker <- rownames(df.annualized)
+
+  df.annualized <- df.annualized[, c("ticker", col.names)]
+
+  file.name.annualized <- "annualized_returns.csv"
+
+  data.table::fwrite(df.annualized, paste0(path.returns, file.name.annualized))
+
+} ## end of function write_annualized_returns
+
+
 # PerformanceAnalytics::Return.cumulative
+# PerformanceAnalytics::Return.portfolio()
 
 
 # ## load tables with annual return
