@@ -93,6 +93,7 @@ write_dividend_by_yr <- function(path, file.dividend.history = "dividends_fullhi
 #'
 #' @export
 #' @importFrom magrittr %>%
+#' @importFrom rlang .data
 write_dividend_by_month <- function(path, file.dividend.history = "dividends_fullhistory.csv") {
 
   #### get dividend payments by month from first payment until today
@@ -115,8 +116,8 @@ write_dividend_by_month <- function(path, file.dividend.history = "dividends_ful
     ## get dividends by month
     df.dividend.history.sum.month <- stats::aggregate(transaction_value ~ yearmon, data = df.dividend.history, sum)
     df.dividend.history.sum.month <- df.dividend.history.sum.month %>%
-      dplyr::mutate(yearmon = as.Date(yearmon)) %>%
-      tidyr::complete(yearmon = seq.Date(min(yearmon), lubridate::floor_date(Sys.Date(), unit = "month"), by = "month"))
+      dplyr::mutate(yearmon = as.Date(.data$yearmon)) %>%
+      tidyr::complete(yearmon = seq.Date(min(.data$yearmon), lubridate::floor_date(Sys.Date(), unit = "month"), by = "month"))
     df.dividend.history.sum.month <- as.data.frame(df.dividend.history.sum.month)
     df.dividend.history.sum.month$transaction_value[is.na(df.dividend.history.sum.month$transaction_value)] <- 0
 
