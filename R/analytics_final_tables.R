@@ -128,36 +128,3 @@ write_current_portfolio <- function(path, file.name = "current_portfolio.csv",
   } else { message("No price quantity panels available.") } ## end of if statement
 
 } # end of function write_current_portfolio
-
-
-
-# ##
-# if(nrow(df.all) > 0){
-#
-#   df.investments <- df.all
-#   df.investments$weight <- df.investments$weight * 100
-#   df.investments$weight <- as.numeric(formatC(df.investments$weight, digits = 2, format = "f"))
-#   df.investments$adjusted <- as.numeric(formatC(df.investments$adjusted, digits = 2, format = "f"))
-#
-#   # tickers <- unique(df.all$ticker)
-#   # df.all[df.all$ticker == tickers[1]]
-#
-#   # } ## end of function get.current.portfolio.list
-#
-#   ## total price gains and until time t
-#   price.gains.max <- total.portfolio.value - amount.invested.max
-#   # ...
-#
-# } else {
-#
-#   total.portfolio.value <- 0
-#   price.gains.max <- 0
-#   names.investments <- names(df.all)
-#   df.investments <- data.frame(matrix(nrow = 0, ncol = length(names.investments), dimnames = list(NULL, names.investments)))
-#
-# } ## end of if else statement df exists
-#
-#
-# ## changes names of df.investments
-# names(df.investments) <- c("Name", "ISIN", "Ticker", "Price [EUR]", "Quantity", "Value [EUR]", "Weight [%]")
-
