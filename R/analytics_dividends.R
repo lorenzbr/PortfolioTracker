@@ -59,6 +59,8 @@ write_dividend_by_yr <- function(path, file.dividend.history = "dividends_fullhi
     ## storno needs to be a negative amount (i.e. payment)
     df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"] <- -df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"]
 
+    df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date, "%d-%m-%y")
+
     ## get year
     df.dividend.history$year <- lubridate::year(df.dividend.history$transaction_date)
 
@@ -109,6 +111,8 @@ write_dividend_by_month <- function(path, file.dividend.history = "dividends_ful
 
     ## storno needs to be a negative amount (i.e., payment)
     df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"] <- -df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"]
+
+    df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date, "%d-%m-%y")
 
     ## get year-month
     df.dividend.history$yearmon <- lubridate::floor_date(df.dividend.history$transaction_date, unit = "month")

@@ -269,7 +269,7 @@ write_price_quantity_panel <- function(ticker, path){
 
 # Helpers -----------------------------------------------------------------
 
-get_tickers_from_transactions <- function(df.transaction.history, path, file.ticker = "isin_ticker.csv"){
+get_tickers_from_transactions <- function(df.transaction.history, path, file.ticker = "isin_ticker.csv") {
 
   #### get all tickers from the history of all transactions
 
