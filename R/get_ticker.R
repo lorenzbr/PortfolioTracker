@@ -29,6 +29,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
   #### update ISIN-ticker table
 
   isins <- unique(isins)
+  isins <- isins[!grepl("^$", isins)]
 
   ## create csv if not exists
   PortfolioTracker::init_isin_ticker(path.tickers, file.ticker)
@@ -38,17 +39,27 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
 
   ## identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
   new.isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
-  if(!(rlang::is_empty(new.isins))){
+
+  if (!rlang::is_empty(new.isins)) {
 
     for (i in 1:length(new.isins)) {
 
       isin <- new.isins[i]
-      try({ticker <- PortfolioTracker::get_ticker_from_xetra(isin)
-      df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
-      data.table::fwrite(df.isin.ticker.new, paste0(path.tickers, file.ticker), append = TRUE)
-      print(paste("Ticker was missing.", ticker, "added."))})
+
+      try({
+
+        ticker <- PortfolioTracker::get_ticker_from_xetra(isin)
+
+        df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
+
+        data.table::fwrite(df.isin.ticker.new, paste0(path.tickers, file.ticker), append = TRUE)
+
+        print(paste("Ticker was missing.", ticker, "added."))
+
+      })
 
     } ## end of for loop
+
   } else (print("New transactions, but ticker already available.")) ## end of if statement ISIN not in table is empty
 
 } ## end of function update_ticker_isin

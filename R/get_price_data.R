@@ -20,13 +20,13 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
   isins <- unique(df.transactions$isin)
 
   ## update ISIN-ticker table
-  update_ticker_isin(isins, path.tickers)
+  PortfolioTracker::update_ticker_isin(isins, path.tickers)
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
   df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
 
   ## add ticker to transaction data
-  df.transactions <- merge(df.transactions, df.isin.ticker, by = "isin", all.x = T)
+  df.transactions <- merge(df.transactions, df.isin.ticker, by = "isin", all.x = TRUE)
 
   ## transaction date to date format
   df.transactions$transaction_date <- as.Date(df.transactions$transaction_date, "%d-%m-%Y")

@@ -1,10 +1,3 @@
-#### FUNCTIONS TO GET PORTFOLIO STATISTICS
-####
-## functions to get statistics for portfolio
-## gains, losses, amount invested, portfolio value
-##
-##
-
 #' Write portfolio statistics
 #'
 #' @usage write_portfolio_stats(path)

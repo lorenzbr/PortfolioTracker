@@ -14,7 +14,6 @@ write_returns <- function(path) {
   path.returns <- list.paths$path.returns
   files.pricepanels <- list.files(path.pricepanel)
 
-  ## load price panel
   no.pricepanels <- !rlang::is_empty(files.pricepanels)
 
   if (no.pricepanels) {
@@ -300,12 +299,12 @@ write_annualized_returns <- function(path) {
 # df1.returns <- Return.calculate(df1.adj)
 # df1.returns.value <- Return.calculate(df1.value)
 #
-# #Annualized Performance with Risk Free Rate 4.5%
+# # Annualized Performance with Risk Free Rate 4.5%
 # performance_table <- as.data.frame(table.AnnualizedReturns(df1.returns, Rf = 0.05/279.8))
 # performance_table <- rownames_to_column(performance_table)
 # names(performance_table)[1] <- 'Performance'
 #
-# #Tidying Annualized Performance Dataframe
+# # Tidying Annualized Performance Dataframe
 # performance_df <- performance_table %>% gather(key = 'Code', value = 'Values', -Performance) %>% spread(key = Performance, value = Values) %>%
 #   rename('Annualized_Return' = 'Annualized Return', 'Annualized_Sharpe' = 'Annualized Sharpe (Rf=4.5%)','Annualized_StdDev' = 'Annualized Std Dev' ) %>%
 #   select(Code,Annualized_Return, Annualized_StdDev, Annualized_Sharpe)

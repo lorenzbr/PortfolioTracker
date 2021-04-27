@@ -59,19 +59,20 @@ PortfolioTracker::update_prices_based_on_transactions(df.transactions, path)
 # update tickers to most recent day
 PortfolioTracker::update_latest_prices(path)
 
-# history of transactions
-df.transaction.history <- df.transactions
-
 # write panels as csv
-PortfolioTracker::write_quantity_panels(df.transaction.history, path, file.ticker = "isin_ticker.csv")
-PortfolioTracker::write_price_panels(df.transaction.history, path)
-PortfolioTracker::write_price_quantity_panels(df.transaction.history, path)
-```
+PortfolioTracker::write_quantity_panels(df.transactions, path, file.ticker = "isin_ticker.csv")
+PortfolioTracker::write_price_panels(df.transactions, path)
+PortfolioTracker::write_price_quantity_panels(df.transactions, path)
 
-## Typical workflow
+# write returns
+PortfolioTracker::write_returns(path)
+PortfolioTracker::write_annualized_returns(path)
 
-```R
-# workflow
+# write dividends
+PortfolioTracker::write_dividend_history(df.transactions, path,
+                                         file.dividend.history = "dividends_fullhistory.csv")
+PortfolioTracker::write_dividend_by_month(path)
+PortfolioTracker::write_dividend_by_yr(path)
 ```
 
 ## Documentation
