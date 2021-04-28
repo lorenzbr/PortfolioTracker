@@ -39,7 +39,7 @@ write_quantity_panels <- function(df.transaction.history, path, file.ticker = "i
   output <- mapply(PortfolioTracker::write_quantity_panel, tickers,
                    MoreArgs = list(df.transaction.history, path.quantitypanel))
 
-  return(output)
+  return("Done!")
 
 } ## end of function write_quantity_panels
 
@@ -184,13 +184,13 @@ write_price_panels <- function(df.transactions, path){
         ## store price panel as csv
         data.table::fwrite(df.all.prices.for.ticker, paste0(path.pricepanel, filename.price.panel))
 
-        message("Price panel successfully created.")
+        message("Price panel for ", ticker, " successfully created.")
 
-      } else {message("No financials available.")}
+      } else { message("No price data available.") }
 
     } ## end of for loop
 
-  } else (message("No tickers for price panel available.")) ## end of if else statement
+  } else { message("No tickers to create price panels available.") } ## end of if else statement
 
 } ## end of function write_price_panels
 
@@ -218,7 +218,7 @@ write_price_quantity_panels <- function(df.transactions, path){
     file.remove(paste0(path.pricequantitypanel, list.files(path.pricequantitypanel)))
   }
 
-  ## write price quantity panels
+  ## write price-quantity panels
   output <- mapply(PortfolioTracker::write_price_quantity_panel, tickers, MoreArgs = list(path))
 
 } ## end of function write_price_quantity_panels
@@ -243,18 +243,19 @@ write_price_quantity_panel <- function(ticker, path){
 
   ## load price panel
   if (!rlang::is_empty(list.files(paste0(path.pricepanel), pattern = ticker))) {
+
     df.pricepanel <- data.table::fread(paste0(path.pricepanel,
                                               list.files(paste0(path.pricepanel), pattern = ticker)))
 
     ## load quantity panel
     if(!rlang::is_empty(list.files(paste0(path.quantitypanel), pattern = ticker))) {
+
       df.quantitypanel <- data.table::fread(paste0(path.quantitypanel,
                                                    list.files(paste0(path.quantitypanel), pattern = ticker)))
 
-      ## merge tables
       df.pricequantitypanel <- merge(df.pricepanel, df.quantitypanel, by = "date")
 
-      ## get value of investment at time t
+      ## get value of investment in each period
       df.pricequantitypanel$value <- df.pricequantitypanel$adjusted * df.pricequantitypanel$cum_quantity
 
       ## start and end date
@@ -267,11 +268,11 @@ write_price_quantity_panel <- function(ticker, path){
       ## store price quantity panel as csv
       data.table::fwrite(df.pricequantitypanel, paste0(path.pricequantitypanel, filename.pricequantity.panel))
 
-      message("Price-quantity panel successfully created!")
+      message("Price-quantity panel for ", ticker, " successfully created!")
 
-    } else (message("No quantity panel available.")) ## end of if else statement to check whether quantity panel is available
+    } else { message("No quantity panel available.") } ## end of if else statement to check whether quantity panel is available
 
-  } else (message("No price panel available."))
+  } else { message("No price panel available.") }
 
 } ## end of write_price_quantity_panel
 

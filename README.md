@@ -64,6 +64,10 @@ PortfolioTracker::write_quantity_panels(df.transactions, path, file.ticker = "is
 PortfolioTracker::write_price_panels(df.transactions, path)
 PortfolioTracker::write_price_quantity_panels(df.transactions, path)
 
+# write current portfolio and create portfolio statistics
+PortfolioTracker::write_current_portfolio(path)
+PortfolioTracker::write_portfolio_stats(path)
+
 # write returns
 PortfolioTracker::write_returns(path)
 PortfolioTracker::write_annualized_returns(path)
