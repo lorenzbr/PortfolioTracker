@@ -65,13 +65,13 @@ write_quantity_panel <- function(ticker, df.transaction.history, path.quantitypa
   if (nrow(df.transaction.history.ticker) > 0) {
 
     ## if transaction type is a sale, quantity needs to be negative (in order to be substracted at a given point in time)
-    df.transaction.history.ticker$quantity[df.transaction.history.ticker$transaction_type == "Sale"] <- -df.transaction.history.ticker$quantity[df.transaction.history.ticker$transaction_type == "Sale"]
+    df.transaction.history.ticker$quantity[df.transaction.history.ticker$transaction_type == "Sale"] <- (-1) * df.transaction.history.ticker$quantity[df.transaction.history.ticker$transaction_type == "Sale"]
 
     ## take cumulative sum of transactions to get quantity over time
-    df.transaction.history.ticker <- df.transaction.history.ticker[,c("transaction_date", "quantity")]
+    df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "quantity")]
     df.transaction.history.ticker <- df.transaction.history.ticker[order(df.transaction.history.ticker$transaction_date),]
     df.transaction.history.ticker$cum_quantity <- cumsum(df.transaction.history.ticker$quantity)
-    df.transaction.history.ticker <- df.transaction.history.ticker[,c("transaction_date", "cum_quantity")]
+    df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "cum_quantity")]
 
     ## if negative cumulative quantity exists, stop function because this must be an error (short selling not included)
     if (min(df.transaction.history.ticker$cum_quantity) >= 0) {
@@ -94,7 +94,6 @@ write_quantity_panel <- function(ticker, df.transaction.history, path.quantitypa
       df.quantity.panel <- data.frame(date = dates)
       df.quantity.panel$ticker <- ticker
 
-      ##
       data.table::setDT(df.quantity.panel)
       data.table::setDT(df.transaction.history.ticker)
       data.table::setkey(df.quantity.panel, "date")
@@ -103,8 +102,18 @@ write_quantity_panel <- function(ticker, df.transaction.history, path.quantitypa
       df.quantity.panel <- data.table::setDF(DT.quantity.panel)
       names(df.quantity.panel)[names(df.quantity.panel) == "transaction_date"] <- "date"
 
+      ## if cum_quantity of most recent date is zero, investment was sold
+      if (df.quantity.panel$cum_quantity[df.quantity.panel$date == max(df.quantity.panel$date)] == 0) {
+
+        last.date.nonzero.quantity <- max(df.quantity.panel$date[df.quantity.panel$cum_quantity != 0])
+        entry.investment.was.sold <- which(df.quantity.panel$date == last.date.nonzero.quantity) + 1
+
+        df.quantity.panel <- df.quantity.panel[1:entry.investment.was.sold, ]
+
+      }
+
       ## remove entries with zero cumulative quantity
-      df.quantity.panel <- df.quantity.panel[df.quantity.panel$cum_quantity != 0,]
+      # df.quantity.panel <- df.quantity.panel[df.quantity.panel$cum_quantity != 0, ]
 
       ## start and end date
       from <- min(df.quantity.panel$date)

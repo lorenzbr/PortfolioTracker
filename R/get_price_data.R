@@ -35,7 +35,7 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
   today <- Sys.Date()
 
   ## for loop over all transactions in file
-  for(i in 1:nrow(df.transactions)){
+  for (i in 1:nrow(df.transactions)) {
 
     tryCatch({
 
@@ -88,9 +88,10 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
         ## store as csv in raw price data
         data.table::fwrite(df.ticker.prices, paste0(path.prices.raw, filename.data.raw.prices))
 
-        if(today != Sys.Date()){
+        if (today != Sys.Date()) {
 
-          print(paste("Older transaction: Price data update for", ticker, "from", transaction.date, "to", today, "successfully downloaded."))
+          print(paste("Older transaction: Price data update for", ticker, "from", transaction.date, "to",
+                      today, "successfully downloaded."))
 
         } else {print(paste("Price data for", ticker, "from", transaction.date, "to", today, "successfully downloaded."))}
 
@@ -111,7 +112,7 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
 
     }
 
-    ) ## end of try catch
+    ) ## end of tryCatch
 
   } ## end of for loop over all transactions in file
 
