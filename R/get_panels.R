@@ -169,20 +169,20 @@ write_price_panels <- function(df.transactions, path){
         df.prices.files <- data.frame(filenames = list.files(paste0(path.prices.raw), pattern = ticker))
         df.prices.files$filenames <- as.character(df.prices.files$filenames)
 
-        ## load all prices (full time series for each ticker)
-        df.all.prices.for.ticker <- lapply(df.prices.files$filenames,
+        ## load all files containing prices for ticker
+        list.price.data <- lapply(df.prices.files$filenames,
                                                function(x) data.table::fread(paste0(path.prices.raw, x)))
-        df.all.prices.for.ticker <- do.call(rbind, df.all.prices.for.ticker)
+        df.price.panel <- do.call(rbind, list.price.data)
 
         ## start and end date
-        from <- min(df.all.prices.for.ticker$date)
-        to <- max(df.all.prices.for.ticker$date)
+        from <- min(df.price.panel$date)
+        to <- max(df.price.panel$date)
 
         ## file name
         filename.price.panel <- paste0("price_panel_", ticker, "_from_", from, "_to_", to, ".csv")
 
         ## store price panel as csv
-        data.table::fwrite(df.all.prices.for.ticker, paste0(path.pricepanel, filename.price.panel))
+        data.table::fwrite(df.price.panel, paste0(path.pricepanel, filename.price.panel))
 
         message("Price panel for ", ticker, " successfully created.")
 
