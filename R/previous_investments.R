@@ -46,7 +46,9 @@ write_previous_investments <- function(path, file.name = "previous_investments.c
     ## add details
     df.previous <- merge(df.all, df.previous, by = c("ticker", "date"))
 
-    ## keep investments with quantity greater zero
+    ## TO DO: KEEP INVESTMENTS WHICH HAVE AT LEAST ONE SALES TRANSACTION (USE TRANSACTION HISTORY TO IDENTIFY THOSE)
+
+    ## keep investments with quantity equal to zero
     df.previous <- df.previous[df.previous$cum_quantity == 0, ]
 
     df.previous <- unique(df.previous)
@@ -57,11 +59,47 @@ write_previous_investments <- function(path, file.name = "previous_investments.c
 
     df.previous <- df.previous[, c("name", "isin", "ticker", "adjusted", "cum_quantity", "value")]
 
-    data.table::fwrite(df.previous, paste0(path.data, file.name))
+    previous.isins <- unique(df.previous$isin)
 
-    ## to do use df.transaction.history and Purchases and Sales to get Realized return [EUR] and [%]
-    ## to this for each ticker which has at least one sales transaction
-    # ...
+    isins.sold <- unique(df.transaction.history$isin[df.transaction.history$transaction_type == "Sale"])
+    isins.purchase <- unique(df.transaction.history$isin[df.transaction.history$transaction_type == "Purchase"])
+    isins.both <- intersect(isins.sold, isins.purchase)
+    previous.isins <- intersect(previous.isins, isins.both)
+
+    ## keep all transactions from ISINS which have both Purchase and Sale transactions
+    df.investments.sold <- unique(df.transaction.history[df.transaction.history$isin %in% isins.both, ])
+
+    df <- data.frame(matrix(nrow = 0, ncol = 7, dimnames = list(NULL, c("isin", "name", "investment", "income",
+                                                    "return_absolute", "return_percent", "quantity"))))
+
+    ## for each sold ISIN
+    for (i in 1:length(previous.isins)) {
+
+      previous.isin <- previous.isins[1]
+      df.sold.isin <- df.investments.sold[df.investments.sold$isin == previous.isin, ]
+
+      name <- df.sold.isin$name[1]
+
+      investment <- sum(df.sold.isin$transaction_value[df.sold.isin$transaction_type == "Purchase"
+                                                       | df.sold.isin$transaction_type == "Steuerpflichtige Vorabpauschale"])
+      income <- sum(df.sold.isin$transaction_value[df.sold.isin$transaction_type == "Dividend"
+                                     | df.sold.isin$transaction_type == "Sale"
+                                     | df.sold.isin$transaction_type == "Sale - Part"])
+      return.abs <- income - investment
+      return.perc <- return.abs / investment
+
+      quantity.sold <- sum(df.sold.isin$quantity[df.sold.isin$transaction_type == "Sale"
+                                            | df.sold.isin$transaction_type == "Sale - Part"])
+
+
+      df.temp <- data.frame(isin = previous.isin, name, investment, income, return_absolute = return.abs,
+                            return_percent = return.perc, quantity = quantity.sold)
+
+      df <- rbind(df, df.temp)
+
+    }
+
+    data.table::fwrite(df, paste0(path.data, file.name))
 
   } else { message("No price quantity panels available.") } ## end of if statement
 
