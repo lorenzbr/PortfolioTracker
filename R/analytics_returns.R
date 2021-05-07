@@ -126,6 +126,18 @@ write_annualized_returns <- function(path) {
   ## create folder if not exists and get folder name for price panel
   list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
   path.returns <- list.paths$path.returns
+  path.tickers <- list.paths$path.tickers
+  path.transactions <- list.paths$path.transactions
+
+  file.transactions <- "transaction_fullhistory.csv"
+  file.tickers <- "isin_ticker.csv"
+
+  df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
+  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
+
+  df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+
+
 
   returns.period <- "daily"
 
@@ -144,9 +156,11 @@ write_annualized_returns <- function(path) {
 
   annualize.return.periods <- c(1, 3, 5, 10)
 
-  for(annualize.return.period in annualize.return.periods){
+  for (annualize.return.period in annualize.return.periods) {
 
     xts.returns.Xy <- xts.returns.max[paste0(Sys.Date() - lubridate::years(annualize.return.period), "/")]
+
+    ## compute annualized return if prices exist for X years
 
     annualized.returns.Xy <- PerformanceAnalytics::Return.annualized(xts.returns.Xy)
 
@@ -155,7 +169,7 @@ write_annualized_returns <- function(path) {
 
     df.annualized <- cbind(df.annualized, df.temp)
 
-  } # end of for loop
+  }
 
   annualized.returns.max <- PerformanceAnalytics::Return.annualized(xts.returns.max)
   df.temp <- as.data.frame(t(annualized.returns.max))

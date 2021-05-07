@@ -8,9 +8,6 @@
 #' @export
 write_quantity_panels <- function(df.transaction.history, path, file.ticker = "isin_ticker.csv"){
 
-  #### get full set of all quantity panels
-
-  ## create folder if not exists and get folder name for quantity panel and tickers
   list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
   path.quantitypanel <- list.paths$path.quantitypanel
   path.tickers <- list.paths$path.tickers

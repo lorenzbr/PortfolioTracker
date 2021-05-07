@@ -75,3 +75,38 @@ rebalance_portfolio <- function(df, df.target.shares, money.to.invest, step.size
   return(df)
 
 } ## end of function rebalance_portfolio
+
+
+#' Write default target shares to csv file
+#'
+#' @usage write_default_target_shares(df.target.shares, path)
+#' @param df.target.shares A data frame containing a column for \code{isin} (character) and \code{target_share} (numeric)
+#' @param path A single character string. Folder where all data are stored.
+#'
+#' @export
+write_default_target_shares <- function(df.target.shares, path) {
+
+  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  path.rebalance <- list.paths$path.rebalance
+
+  if (is.data.frame(df.target.shares)) {
+
+    if ( all( c("isin", "target_share") %in% names(df.target.shares) )) {
+
+    data.table::fwrite(df.target.shares, paste0(path.rebalance, "default_target_shares.csv"))
+
+    }
+
+    else {
+
+      "Data frame needs to contain at least two columns with names 'isin' and 'target_share'"
+
+      }
+
+    } else {
+
+      message("Input has to be of type data.frame. ")
+
+  }
+
+} ## end of function write_default_target_shares

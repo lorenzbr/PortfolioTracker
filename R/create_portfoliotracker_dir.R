@@ -18,6 +18,7 @@ create_portfoliotracker_dir <- function(path){
   path.pricequantitypanel <- paste0(path, "/data/price_quantity_panel/")
   path.dividends <- paste0(path, "/data/dividends/")
   path.transactions <- paste0(path, "/data/transactions/")
+  path.rebalance <- paste0(path, "/data/rebalance/")
   path.returns <- paste0(path, "/data/returns/")
 
   if (!dir.exists(path.data)) dir.create(path.data, recursive = TRUE)
@@ -28,6 +29,7 @@ create_portfoliotracker_dir <- function(path){
   if (!dir.exists(path.pricequantitypanel)) dir.create(path.pricequantitypanel, recursive = TRUE)
   if (!dir.exists(path.dividends)) dir.create(path.dividends, recursive = TRUE)
   if (!dir.exists(path.transactions)) dir.create(path.transactions, recursive = TRUE)
+  if (!dir.exists(path.rebalance)) dir.create(path.rebalance, recursive = TRUE)
   if (!dir.exists(path.returns)) dir.create(path.returns, recursive = TRUE)
 
   output.list <- list(
@@ -39,6 +41,7 @@ create_portfoliotracker_dir <- function(path){
     path.pricequantitypanel = path.pricequantitypanel,
     path.dividends = path.dividends,
     path.transactions = path.transactions,
+    path.rebalance = path.rebalance,
     path.returns = path.returns
   )
 
