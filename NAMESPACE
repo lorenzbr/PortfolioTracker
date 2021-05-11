@@ -2,6 +2,7 @@
 
 export(create_portfoliotracker_dir)
 export(get_dividends_max)
+export(get_isins_missing_tickers)
 export(get_prices_from_yahoo)
 export(get_returns_all)
 export(get_ticker_from_investing)
