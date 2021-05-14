@@ -12,7 +12,7 @@ write_dividend_history <- function(df.transaction.history, path, file.dividend.h
   #### get dividend history
 
   ## create folder if not exists and get folder name for price panel
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.dividends <- list.paths$path.dividends
 
   ## get list of dividends
@@ -50,7 +50,7 @@ write_dividend_by_yr <- function(path, file.dividend.history = "dividends_fullhi
   tryCatch({
 
     ## create folder if not exists and get folder name for price panel
-    list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+    list.paths <- create_portfoliotracker_dir(path)
     path.dividends <- list.paths$path.dividends
 
     ## load dividend history
@@ -103,7 +103,7 @@ write_dividend_by_month <- function(path, file.dividend.history = "dividends_ful
   tryCatch({
 
     ## create folder if not exists and get folder name for price panel
-    list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+    list.paths <- create_portfoliotracker_dir(path)
     path.dividends <- list.paths$path.dividends
 
     ## load dividend history

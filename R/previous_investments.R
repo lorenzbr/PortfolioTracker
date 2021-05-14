@@ -14,7 +14,7 @@ write_previous_investments <- function(path, file.name = "previous_investments.c
                                     file.transactions = "transaction_fullhistory.csv"){
 
   ## create folder if not exists and get folder name for quantity panel and tickers
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.pricequantitypanel <- list.paths$path.pricequantitypanel
   path.tickers <- list.paths$path.tickers
   path.transactions <- list.paths$path.transactions

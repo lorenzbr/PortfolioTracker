@@ -5,11 +5,8 @@
 #' @return create_portfoliotracker_dir returns a list with path names for data storage
 #'
 #' @export
-create_portfoliotracker_dir <- function(path){
+create_portfoliotracker_dir <- function(path) {
 
-  #### create directory for PortfolioTracker
-
-  ## create folders for tickers and prices (if not exists)
   path.data <- paste0(path, "/data/")
   path.tickers <- paste0(path, "/data/tickers/")
   path.prices.raw <- paste0(path, "/data/prices_raw/")
@@ -20,7 +17,10 @@ create_portfoliotracker_dir <- function(path){
   path.transactions <- paste0(path, "/data/transactions/")
   path.rebalance <- paste0(path, "/data/rebalance/")
   path.returns <- paste0(path, "/data/returns/")
+  path.fiat <- paste0(path, "/data/currencies/fiat/")
+  path.crypto <- paste0(path, "/data/currencies/crypto")
 
+  ## create folders for tickers and prices (if not exists)
   if (!dir.exists(path.data)) dir.create(path.data, recursive = TRUE)
   if (!dir.exists(path.tickers)) dir.create(path.tickers, recursive = TRUE)
   if (!dir.exists(path.prices.raw)) dir.create(path.prices.raw, recursive = TRUE)
@@ -31,6 +31,8 @@ create_portfoliotracker_dir <- function(path){
   if (!dir.exists(path.transactions)) dir.create(path.transactions, recursive = TRUE)
   if (!dir.exists(path.rebalance)) dir.create(path.rebalance, recursive = TRUE)
   if (!dir.exists(path.returns)) dir.create(path.returns, recursive = TRUE)
+  if (!dir.exists(path.fiat)) dir.create(path.fiat, recursive = TRUE)
+  if (!dir.exists(path.crypto)) dir.create(path.crypto, recursive = TRUE)
 
   output.list <- list(
     path.data = path.data,
@@ -42,7 +44,9 @@ create_portfoliotracker_dir <- function(path){
     path.dividends = path.dividends,
     path.transactions = path.transactions,
     path.rebalance = path.rebalance,
-    path.returns = path.returns
+    path.returns = path.returns,
+    path.fiat = path.fiat,
+    path.crypto = path.crypto
   )
 
   return(output.list)

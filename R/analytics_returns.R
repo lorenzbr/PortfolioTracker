@@ -9,7 +9,7 @@ write_returns <- function(path) {
   #### write returns for all tickers
 
   ## create folder if not exists and get folder name for price panel
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.pricepanel <- list.paths$path.pricepanel
   path.returns <- list.paths$path.returns
   files.pricepanels <- list.files(path.pricepanel)
@@ -33,7 +33,7 @@ write_returns <- function(path) {
       ticker <- stringr::str_match(files[i], "price_panel_(.*?)_from")[, 2]
       df.pricepanel <- list.dfs[[i]]
 
-      df.temp <- PortfolioTracker::get_returns_all(df.pricepanel, ticker)
+      df.temp <- get_returns_all(df.pricepanel, ticker)
 
       ticker.daily <- paste0(ticker, ".daily")
       ticker.monthly <- paste0(ticker, ".monthly")
@@ -124,7 +124,7 @@ write_annualized_returns <- function(path) {
   #### write annualized returns to csv
 
   ## create folder if not exists and get folder name for price panel
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.returns <- list.paths$path.returns
   path.tickers <- list.paths$path.tickers
   path.transactions <- list.paths$path.transactions

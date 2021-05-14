@@ -12,7 +12,7 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
   #### update and store prices for tickers as csv. Starts with transaction date
 
   ## create folders for tickers and prices (if not exists)
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.tickers <- list.paths$path.tickers
   path.prices.raw <- list.paths$path.prices.raw
 
@@ -20,7 +20,7 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
   isins <- unique(df.transactions$isin)
 
   ## update ISIN-ticker table
-  PortfolioTracker::update_ticker_isin(isins, path.tickers)
+  update_ticker_isin(isins, path.tickers)
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
   df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
@@ -76,7 +76,7 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
       if(!(file.exists(paste0(path.prices.raw, filename.data.raw.prices)))){
 
         ## get price data from Yahoo Finance
-        df.ticker.prices <- PortfolioTracker::get_prices_from_yahoo(ticker, from = transaction.date, to = today)
+        df.ticker.prices <- get_prices_from_yahoo(ticker, from = transaction.date, to = today)
 
         ## start and end date
         from <- min(df.ticker.prices$date)
@@ -130,7 +130,7 @@ update_latest_prices <- function(path){
   #### update all price data based on all tickers in folder and last date for each ticker
 
   ## create folders for tickers and prices (if not exists)
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.tickers <- list.paths$path.tickers
   path.prices.raw <- list.paths$path.prices.raw
 
@@ -173,7 +173,7 @@ update_latest_prices <- function(path){
         if(today > from){
 
           ## get price data for ticker
-          df.updated.prices <- PortfolioTracker::get_prices_from_yahoo(ticker, from = from, to = today)
+          df.updated.prices <- get_prices_from_yahoo(ticker, from = from, to = today)
 
           ## start and end date
           from <- min(df.updated.prices$date)

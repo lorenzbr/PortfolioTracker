@@ -7,7 +7,7 @@
 write_portfolio_stats <- function(path) {
 
   ## create folder if not exists and get folder name for price panel
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.returns <- list.paths$path.returns
   path.data <- list.paths$path.data
   path.transactions <- list.paths$path.transactions
@@ -28,7 +28,7 @@ write_portfolio_stats <- function(path) {
   ## total price gains and until time t
   price.gains.max <- total.portfolio.value - amount.invested.max
 
-  dividends.max <- PortfolioTracker::get_dividends_max(path)
+  dividends.max <- get_dividends_max(path)
 
   df.stats <- data.frame(info = c("total_portfolio_value","amount_invested_max", "price_gains_max", "dividends_max"),
              max = c(total.portfolio.value, amount.invested.max, price.gains.max, dividends.max))
@@ -50,7 +50,7 @@ get_dividends_max <- function(path, file.dividend.history = "dividends_fullhisto
   #### get total dividends
 
   ## create folder if not exists and get folder name for price panel
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.dividends <- list.paths$path.dividends
 
   ## load dividend history

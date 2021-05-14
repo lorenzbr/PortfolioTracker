@@ -4,14 +4,14 @@
 \alias{add_ticker_manually}
 \title{Add ISIN-ticker pairs to table}
 \usage{
-add_ticker_manually(df.isin.ticker, path.tickers, file.ticker = "isin_ticker.csv")
+add_ticker_manually(df.isin.ticker.new, path.tickers, file.ticker = "isin_ticker.csv")
 }
 \arguments{
-\item{df.isin.ticker}{A data frame containing a column for isin and ticker.}
+\item{df.isin.ticker.new}{A data frame containing a column for isin and ticker.}
 
 \item{path.tickers}{A single character string. Folder where ISIN-ticker table is stored.}
 
-\item{file.ticker}{A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)}
+\item{file.ticker}{A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv).}
 }
 \description{
 Add ISIN-ticker pairs to table

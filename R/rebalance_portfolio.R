@@ -86,7 +86,7 @@ rebalance_portfolio <- function(df, df.target.shares, money.to.invest, step.size
 #' @export
 write_default_target_shares <- function(df.target.shares, path) {
 
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.rebalance <- list.paths$path.rebalance
 
   if (is.data.frame(df.target.shares)) {

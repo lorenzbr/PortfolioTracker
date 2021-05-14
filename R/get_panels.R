@@ -8,7 +8,7 @@
 #' @export
 write_quantity_panels <- function(df.transaction.history, path, file.ticker = "isin_ticker.csv"){
 
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.quantitypanel <- list.paths$path.quantitypanel
   path.tickers <- list.paths$path.tickers
 
@@ -33,7 +33,7 @@ write_quantity_panels <- function(df.transaction.history, path, file.ticker = "i
   }
 
   ## create quantity panels for all tickers
-  output <- mapply(PortfolioTracker::write_quantity_panel, tickers,
+  output <- mapply(write_quantity_panel, tickers,
                    MoreArgs = list(df.transaction.history, path.quantitypanel))
 
   return("Done!")
@@ -142,7 +142,7 @@ write_price_panels <- function(df.transactions, path){
   #### get panel of prices for each ticker
 
   ## create folder if not exists and get folder name for price panel and tickers
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.pricepanel <- list.paths$path.pricepanel
   path.prices.raw <- list.paths$path.prices.raw
 
@@ -203,7 +203,7 @@ write_price_quantity_panels <- function(df.transactions, path){
   #### get panels for prices times quantity for all tickers
 
   ## create folder if not exists and get folder name for quantity panel and tickers
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.pricequantitypanel <- list.paths$path.pricequantitypanel
   path.tickers <- list.paths$path.tickers
 
@@ -216,7 +216,7 @@ write_price_quantity_panels <- function(df.transactions, path){
   }
 
   ## write price-quantity panels
-  output <- mapply(PortfolioTracker::write_price_quantity_panel, tickers, MoreArgs = list(path))
+  output <- mapply(write_price_quantity_panel, tickers, MoreArgs = list(path))
 
 } ## end of function write_price_quantity_panels
 
@@ -232,7 +232,7 @@ write_price_quantity_panel <- function(ticker, path){
   #### get price quantity panel for a ticker
 
   ## create folder if not exists and get folder name for price panel and tickers
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.quantitypanel <- list.paths$path.quantitypanel
   path.pricepanel <- list.paths$path.pricepanel
   path.pricequantitypanel <- list.paths$path.pricequantitypanel
@@ -281,7 +281,7 @@ get_tickers_from_transactions <- function(df.transaction.history, path, file.tic
   #### get all tickers from the history of all transactions
 
   ## create folder if not exists and get folder name for quantity panel and tickers
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.tickers <- list.paths$path.tickers
 
   ## get table that converts ISIN to ticker

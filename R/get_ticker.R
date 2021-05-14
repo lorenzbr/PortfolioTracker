@@ -28,7 +28,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
   isins <- isins[!grepl("^$", isins)]
 
   ## create csv if not exists
-  PortfolioTracker::init_isin_ticker(path.tickers, file.ticker)
+  init_isin_ticker(path.tickers, file.ticker)
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
   df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
@@ -44,7 +44,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
 
       try({
 
-        ticker <- PortfolioTracker::get_ticker_from_xetra(isin)
+        ticker <- get_ticker_from_xetra(isin)
 
         df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
 
@@ -141,19 +141,19 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = ""){
 
 #' Add ISIN-ticker pairs to table
 #'
-#' @usage add_ticker_manually(df.isin.ticker, path.tickers, file.ticker = "isin_ticker.csv")
-#' @param df.isin.ticker A data frame containing a column for isin and ticker.
+#' @usage add_ticker_manually(df.isin.ticker.new, path.tickers, file.ticker = "isin_ticker.csv")
+#' @param df.isin.ticker.new A data frame containing a column for isin and ticker.
 #' @param path.tickers A single character string. Folder where ISIN-ticker table is stored.
-#' @param file.ticker A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)
+#' @param file.ticker A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv).
 #'
 #' @export
-add_ticker_manually <- function(df.isin.ticker, path.tickers, file.ticker = "isin_ticker.csv"){
+add_ticker_manually <- function(df.isin.ticker.new, path.tickers, file.ticker = "isin_ticker.csv"){
 
-  isins <- unique(df.isin.ticker$isin)
+  isins <- unique(df.isin.ticker.new$isin)
   isins <- isins[!grepl("^$", isins)]
 
   ## create csv if not exists
-  PortfolioTracker::init_isin_ticker(path.tickers, file.ticker)
+  init_isin_ticker(path.tickers, file.ticker)
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
   df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
@@ -169,11 +169,11 @@ add_ticker_manually <- function(df.isin.ticker, path.tickers, file.ticker = "isi
 
       try({
 
-        df.isin.ticker.new <- df.isin.ticker[grepl(isin, df.isin.ticker$isin), ]
+        df.isin.ticker.add <- df.isin.ticker.new[grepl(isin, df.isin.ticker.new$isin), ]
 
-        data.table::fwrite(df.isin.ticker.new, paste0(path.tickers, file.ticker), append = TRUE)
+        data.table::fwrite(df.isin.ticker.add, paste0(path.tickers, file.ticker), append = TRUE)
 
-        message("Ticker was missing. ", df.isin.ticker.new$ticker, " added.")
+        message("Ticker was missing. ", df.isin.ticker.add$ticker, " added.")
 
       })
 

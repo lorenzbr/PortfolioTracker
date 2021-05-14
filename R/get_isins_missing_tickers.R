@@ -9,7 +9,7 @@ get_isins_missing_tickers <- function(path){
 
   file.ticker = "isin_ticker.csv"
   file.transactions = "transaction_fullhistory.csv"
-  list.paths <- PortfolioTracker::create_portfoliotracker_dir(path)
+  list.paths <- create_portfoliotracker_dir(path)
   path.tickers <- list.paths$path.tickers
   path.transactions <- list.paths$path.transactions
 
