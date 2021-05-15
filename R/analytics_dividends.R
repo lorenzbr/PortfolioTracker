@@ -45,8 +45,6 @@ write_dividend_history <- function(df.transaction.history, path, file.dividend.h
 #' @importFrom magrittr %>%
 write_dividend_by_yr <- function(path, file.dividend.history = "dividends_fullhistory.csv") {
 
-  #### get dividend by year from first dividend payment until today
-
   tryCatch({
 
     ## create folder if not exists and get folder name for price panel

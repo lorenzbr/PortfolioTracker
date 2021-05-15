@@ -6,8 +6,6 @@
 #' @export
 write_returns <- function(path) {
 
-  #### write returns for all tickers
-
   ## create folder if not exists and get folder name for price panel
   list.paths <- create_portfoliotracker_dir(path)
   path.pricepanel <- list.paths$path.pricepanel
@@ -67,8 +65,6 @@ write_returns <- function(path) {
 #' @export
 get_returns_all <- function(df, ticker) {
 
-  #### get all returns
-
   df$date <- as.Date(df$date, "%Y-%m-%d")
 
   df <- df[, c("date", "adjusted")]
@@ -119,9 +115,9 @@ get_returns_all <- function(df, ticker) {
 #' @param path A single character string. Directory where all data are stored.
 #'
 #' @export
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
 write_annualized_returns <- function(path) {
-
-  #### write annualized returns to csv
 
   ## create folder if not exists and get folder name for price panel
   list.paths <- create_portfoliotracker_dir(path)
@@ -177,10 +173,27 @@ write_annualized_returns <- function(path) {
   df.annualized <- cbind(df.annualized, df.temp)
 
   col.names <- names(df.annualized)
-
   df.annualized$ticker <- rownames(df.annualized)
-
   df.annualized <- df.annualized[, c("ticker", col.names)]
+
+
+  df.ticker.date <- df.transaction.history[df.transaction.history$transaction_type == "Purchase",
+                                                      c("ticker", "transaction_date")]
+  names(df.ticker.date)[names(df.ticker.date) == "transaction_date"] <- "date"
+  df.ticker.date$date <- as.Date(df.ticker.date$date, "%d-%m-%Y")
+  df.ticker.date <- df.ticker.date %>% dplyr::group_by(.data$ticker) %>% dplyr::filter(date == min(.data$date))
+  df.ticker.date <- df.ticker.date %>% dplyr::group_by(.data$ticker) %>% dplyr::sample_n(size = 1)
+  df.ticker.date$age_yrs <- floor(lubridate::time_length(difftime(Sys.Date(), df.ticker.date$date), "years"))
+
+
+  ## make return NA or "-" if column year greater than age_yrs
+  df.annualized <- merge(df.annualized, df.ticker.date, by = "ticker")
+  for (i in 1:nrow(df.annualized)) {
+    incomplete.positions <- which(df.annualized$age_yrs[i] < annualize.return.periods) + 1
+    df.annualized[i, incomplete.positions] <- NA
+  }
+
+  df.annualized <- df.annualized[, names(df.annualized) != "age_yrs" & names(df.annualized) != "date"]
 
   file.name.annualized <- "annualized_returns.csv"
 
@@ -189,9 +202,9 @@ write_annualized_returns <- function(path) {
 } ## end of function write_annualized_returns
 
 
+
 # PerformanceAnalytics::Return.cumulative
 # PerformanceAnalytics::Return.portfolio()
-
 
 # ## load tables with annual return
 # if (!rlang::is_empty(list.files(paste0(path.returns), pattern = "^annual_returns_all_from_"))) {
