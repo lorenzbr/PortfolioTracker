@@ -218,9 +218,7 @@ update_latest_prices <- function(path){
 #'
 #' @export
 get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "Xetra",
-                                  stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU")){
-
-  #### get prices from Yahoo Finance API and clean output data a bit
+                                  stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU")) {
 
   ## produce final ticker for Yahoo Finance
   if (preferred.stock.exchange == "Xetra") {
@@ -235,40 +233,56 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
     ticker.yahoo <- paste0(ticker, ".DU")
   }
 
-  ## get prices
-  try(ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to, auto.assign = FALSE))
+  ## get prices from Yahoo API
+  try({
+    suppressWarnings( ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+                                                            auto.assign = FALSE, warnings = FALSE) )
+    })
 
   iter.stock.exchanges <- 1
   while (!exists("ticker.prices") && iter.stock.exchanges <= length(stock.exchanges)) {
     stock.exchange <- stock.exchanges[iter.stock.exchanges]
     ticker.yahoo <- paste0(ticker, stock.exchange)
     iter.stock.exchanges <- iter.stock.exchanges + 1
-    try(ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to, auto.assign = FALSE))
+    try({
+      suppressWarnings( ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+                                                              auto.assign = FALSE, warnings = FALSE) )
+      })
   }
 
-  ## convert to data frame
-  df.ticker.prices <- data.frame(ticker.prices)
+  if(exists("ticker.prices")) {
 
-  ## change column names
-  names(df.ticker.prices) <- gsub(paste0(ticker.yahoo, "\\."), "", names(df.ticker.prices))
+    ## convert to data frame
+    df.ticker.prices <- data.frame(ticker.prices)
 
-  ## column names to lower case
-  names(df.ticker.prices) <- tolower(names(df.ticker.prices))
+    ## change column names
+    names(df.ticker.prices) <- gsub(paste0(ticker.yahoo, "\\."), "", names(df.ticker.prices))
 
-  ## create date variable based on row names
-  df.ticker.prices$date <- rownames(df.ticker.prices)
+    ## column names to lower case
+    names(df.ticker.prices) <- tolower(names(df.ticker.prices))
 
-  ## new index for row names
-  rownames(df.ticker.prices) <- 1:nrow(df.ticker.prices)
+    ## create date variable based on row names
+    df.ticker.prices$date <- rownames(df.ticker.prices)
 
-  ##  convert dates to date format
-  df.ticker.prices$date <- as.Date(df.ticker.prices$date)
+    ## new index for row names
+    rownames(df.ticker.prices) <- 1:nrow(df.ticker.prices)
 
-  ## remove entries with prices equal to NA
-  df.ticker.prices <- df.ticker.prices[!(is.na(df.ticker.prices$adjusted)),]
+    ##  convert dates to date format
+    df.ticker.prices$date <- as.Date(df.ticker.prices$date)
 
-  print(paste("Prices for ticker", ticker.yahoo, "found."))
+    ## remove entries with prices equal to NA
+    df.ticker.prices <- df.ticker.prices[!(is.na(df.ticker.prices$adjusted)),]
 
-  return(df.ticker.prices)
+    message("Prices for ticker ", ticker.yahoo, " found.")
 
-} ## end of function get_prices_from_yahoo
+    return(df.ticker.prices)
+
+  } else {
+
+    message("Prices for ticker ", ticker, " not found!")
+
+    return(NULL)
+
+  }
+
+}
