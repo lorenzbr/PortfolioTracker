@@ -22,9 +22,9 @@ Imports:
     stringr,
     tidyr,
     xts,
-    extractBankStatements
+    cryptowatchR
 Remotes: 
-    lorenzbr/extractBankStatements@main
+    lorenzbr/cryptowatchR@main
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
