@@ -271,7 +271,7 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
     df.ticker.prices$date <- as.Date(df.ticker.prices$date)
 
     ## remove entries with prices equal to NA
-    df.ticker.prices <- df.ticker.prices[!(is.na(df.ticker.prices$adjusted)),]
+    df.ticker.prices <- df.ticker.prices[!(is.na(df.ticker.prices$adjusted)), ]
 
     message("Prices for ticker ", ticker.yahoo, " found.")
 

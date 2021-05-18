@@ -6,11 +6,11 @@
 #' @export
 write_portfolio_stats <- function(path) {
 
-  ## create folder if not exists and get folder name for price panel
-  list.paths <- create_portfoliotracker_dir(path)
-  path.returns <- list.paths$path.returns
-  path.data <- list.paths$path.data
-  path.transactions <- list.paths$path.transactions
+  list.names <- get_names(path)
+  path.returns <- list.names$path.returns
+  path.data <- list.names$path.data
+  path.transactions <- list.names$path.transactions
+  file.stats <- list.names$file.stats
 
   df.current <- data.table::fread(paste0(path.data, "current_portfolio.csv"))
   df.transaction.history <- data.table::fread(paste0(path.transactions, "transaction_fullhistory.csv"))
@@ -33,9 +33,9 @@ write_portfolio_stats <- function(path) {
   df.stats <- data.frame(info = c("total_portfolio_value","amount_invested_max", "price_gains_max", "dividends_max"),
              max = c(total.portfolio.value, amount.invested.max, price.gains.max, dividends.max))
 
-  data.table::fwrite(df.stats, paste0(path.data, "portfolio_stats.csv"))
+  data.table::fwrite(df.stats, paste0(path.data, file.stats))
 
-} ## end of function write_portfolio_stats
+}
 
 
 #' Get total dividend payments
@@ -47,11 +47,9 @@ write_portfolio_stats <- function(path) {
 #' @export
 get_dividends_max <- function(path, file.dividend.history = "dividends_fullhistory.csv") {
 
-  #### get total dividends
-
   ## create folder if not exists and get folder name for price panel
-  list.paths <- create_portfoliotracker_dir(path)
-  path.dividends <- list.paths$path.dividends
+  list.names <- get_names(path)
+  path.dividends <- list.names$path.dividends
 
   ## load dividend history
   df.dividend.history <- data.table::fread(paste0(path.dividends, file.dividend.history))

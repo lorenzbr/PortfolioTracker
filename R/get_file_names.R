@@ -16,8 +16,11 @@ get_file_names <- function(path){
   file.dividend.month <- "dividends_by_month.csv"
   file.target.shares <- "default_target_shares.csv"
   file.stats <- "portfolio_stats.csv"
+  file.returns.daily <- "daily_returns.csv"
+  file.returns.monthly <- "monthly_returns.csv"
   file.returns.annual <- "annual_returns.csv"
   file.returns.annualized <- "annualized_returns.csv"
+  file.return.portfolio.daily <- "daily_portfolio_return.csv"
 
   output.list <- list(
     file.transactions = file.transactions,
@@ -30,9 +33,10 @@ get_file_names <- function(path){
     file.target.shares = file.target.shares,
     file.stats = file.stats,
     file.returns.annual = file.returns.annual,
-    file.returns.annualized = file.returns.annualized
+    file.returns.annualized = file.returns.annualized,
+    file.return.portfolio.daily = file.return.portfolio.daily
   )
 
   return(output.list)
 
-} ## end of function get_file_names
+}

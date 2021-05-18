@@ -16,39 +16,18 @@ This R package contains functions to track the financial performance of your inv
 
 ...
 
+
 ## Overview
 
 ...
 
 
-## Contact
-
-Please contact <lorenz.brachtendorf@gmx.de> if you want to:
-* contribute to this project
-* have additional features (e.g., returns on investments, cash reserves, other currencies, ...)
-
-You can also submit bug reports and suggestions via e-mail or <https://github.com/lorenzbr/PortfolioTracker/issues> 
-
-
 ## Installation
-
 
 ```R
 devtools::install_github("lorenzbr/PortfolioTracker")
 ```
 
-
-## Dependencies
-
-```R
-install.packages("data.table")
-install.packages("dplyr")
-install.packages("magrittr")
-install.packages("quantmod")
-install.packages("rlang")
-install.packages("rvest")
-install.packages("stringr")
-```
 
 ## Usage
 
@@ -79,6 +58,7 @@ PortfolioTracker::write_portfolio_stats(path)
 # write returns
 PortfolioTracker::write_returns(path)
 PortfolioTracker::write_annualized_returns(path)
+PortfolioTracker::write_portfolio_return(path)
 
 # write dividends
 PortfolioTracker::write_dividend_history(df.transactions, path,
@@ -102,6 +82,16 @@ Geometric mean
 
 Investment return
 :   ...
+
+
+## Contact
+
+Please contact <lorenz.brachtendorf@gmx.de> if you want to:
+* contribute to this project
+* have additional features (e.g., returns on investments, cash reserves, other currencies, ...)
+
+You can also submit bug reports and suggestions via e-mail or <https://github.com/lorenzbr/PortfolioTracker/issues> 
+
 
 ## License
 

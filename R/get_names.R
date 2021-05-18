@@ -14,4 +14,4 @@ get_names <- function(path) {
 
   return(output.list)
 
-} ## end of function get_names
+}
