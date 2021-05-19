@@ -7,14 +7,14 @@
 #' @export
 get_isins_missing_tickers <- function(path){
 
-  file.ticker = "isin_ticker.csv"
-  file.transactions = "transaction_fullhistory.csv"
-  list.paths <- create_portfoliotracker_dir(path)
-  path.tickers <- list.paths$path.tickers
-  path.transactions <- list.paths$path.transactions
+  list.names <- get_names(path)
+  path.tickers <- list.names$path.tickers
+  path.transactions <- list.names$path.transactions
+  file.tickers <- list.names$file.tickers
+  file.transactions <- list.names$file.transactions
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
+  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
   df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
 
   ## missing tickers
@@ -24,4 +24,4 @@ get_isins_missing_tickers <- function(path){
 
   return(df.missings)
 
-} ## end of function get_isins_missing_tickers
+}

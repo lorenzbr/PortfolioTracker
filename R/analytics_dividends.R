@@ -1,19 +1,15 @@
 #' Write history of dividends in a csv file
 #'
-#' @usage write_dividend_history(df.transaction.history, path,
-#'          file.dividend.history = "dividends_fullhistory.csv")
+#' @usage write_dividend_history(df.transaction.history, path)
 #' @param df.transaction.history data frame containing history of transactions.
 #' @param path A single character string. Directory where all data are stored.
-#' @param file.dividend.history file name of csv.
 #'
 #' @export
-write_dividend_history <- function(df.transaction.history, path, file.dividend.history = "dividends_fullhistory.csv") {
+write_dividend_history <- function(df.transaction.history, path) {
 
-  #### get dividend history
-
-  ## create folder if not exists and get folder name for price panel
-  list.paths <- create_portfoliotracker_dir(path)
-  path.dividends <- list.paths$path.dividends
+  list.names <- get_names(path)
+  path.dividends <- list.names$path.dividends
+  file.dividend.history <- list.names$file.dividend.history
 
   ## get list of dividends
   df.dividend.history <- df.transaction.history[grepl("Dividend", df.transaction.history$transaction_type), ]
@@ -30,26 +26,25 @@ write_dividend_history <- function(df.transaction.history, path, file.dividend.h
 
     message("No dividend transactions available.")
 
-  } ## end of if else statement whether dividends exist
+  }
 
-} ## end of function write_dividend_history
-
+}
 
 #' Write dividend payments by year to a csv file
 #'
-#' @usage write_dividend_by_yr(path, file.dividend.history = "dividends_fullhistory.csv")
+#' @usage write_dividend_by_yr(path)
 #' @param path A single character string. Directory where all data are stored.
-#' @param file.dividend.history A single character string. Name of csv containing full history of dividends.
 #'
 #' @export
 #' @importFrom magrittr %>%
-write_dividend_by_yr <- function(path, file.dividend.history = "dividends_fullhistory.csv") {
+write_dividend_by_yr <- function(path) {
 
   tryCatch({
 
-    ## create folder if not exists and get folder name for price panel
-    list.paths <- create_portfoliotracker_dir(path)
-    path.dividends <- list.paths$path.dividends
+    list.names <- get_names(path)
+    path.dividends <- list.names$path.dividends
+    file.dividend.history <- list.names$file.dividend.history
+    file.dividend.year <- list.names$file.dividend.year
 
     ## load dividend history
     df.dividend.history <- data.table::fread(paste0(path.dividends, file.dividend.history))
@@ -70,9 +65,7 @@ write_dividend_by_yr <- function(path, file.dividend.history = "dividends_fullhi
     df.dividend.history.sum.yr <- as.data.frame(df.dividend.history.sum.yr)
     df.dividend.history.sum.yr$transaction_value[is.na(df.dividend.history.sum.yr$transaction_value)] <- 0
 
-    file.dividend.yr <- "dividends_by_year.csv"
-
-    data.table::fwrite(df.dividend.history.sum.yr, paste0(path.dividends, file.dividend.yr))
+    data.table::fwrite(df.dividend.history.sum.yr, paste0(path.dividends, file.dividend.year))
 
   },
 
@@ -80,29 +73,26 @@ write_dividend_by_yr <- function(path, file.dividend.history = "dividends_fullhi
 
     message(e)
 
-  }) ## end of tryCatch statement
+  })
 
-} ## end of function write_dividend_by_yr
+}
 
 #' Write dividend payments by month to a csv file
 #'
-#' @usage write_dividend_by_month(path,
-#'            file.dividend.history = "dividends_fullhistory.csv")
+#' @usage write_dividend_by_month(path)
 #' @param path A single character string. Directory where all data are stored.
-#' @param file.dividend.history A single character string. Name of csv containing full history of dividends.
 #'
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
-write_dividend_by_month <- function(path, file.dividend.history = "dividends_fullhistory.csv") {
+write_dividend_by_month <- function(path) {
 
-  #### get dividend payments by month from first payment until today
+  list.names <- get_names(path)
+  path.dividends <- list.names$path.dividends
+  file.dividend.history <- list.names$file.dividend.history
+  file.dividend.month <- list.names$file.dividend.month
 
   tryCatch({
-
-    ## create folder if not exists and get folder name for price panel
-    list.paths <- create_portfoliotracker_dir(path)
-    path.dividends <- list.paths$path.dividends
 
     ## load dividend history
     df.dividend.history <- data.table::fread(paste0(path.dividends, file.dividend.history))
@@ -123,8 +113,6 @@ write_dividend_by_month <- function(path, file.dividend.history = "dividends_ful
     df.dividend.history.sum.month <- as.data.frame(df.dividend.history.sum.month)
     df.dividend.history.sum.month$transaction_value[is.na(df.dividend.history.sum.month$transaction_value)] <- 0
 
-    file.dividend.month <- "dividends_by_month.csv"
-
     data.table::fwrite(df.dividend.history.sum.month, paste0(path.dividends, file.dividend.month))
 
   },
@@ -133,6 +121,6 @@ write_dividend_by_month <- function(path, file.dividend.history = "dividends_ful
 
     message(e)
 
-  }) ## end of tryCatch statement
+  })
 
-} ## end of function write_dividend_by_month
+}

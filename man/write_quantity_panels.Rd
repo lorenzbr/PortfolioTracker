@@ -4,14 +4,12 @@
 \alias{write_quantity_panels}
 \title{Write full history of quantities for all tickers as csv}
 \usage{
-write_quantity_panels(df.transaction.history, path, file.ticker = "isin_ticker.csv")
+write_quantity_panels(df.transaction.history, path)
 }
 \arguments{
 \item{df.transaction.history}{A data.frame containing the full history of transactions.}
 
 \item{path}{A single character string. Directory of your data.}
-
-\item{file.ticker}{A single character string. Name of csv containing ISIN-ticker pairs.}
 }
 \description{
 Write full history of quantities for all tickers as csv

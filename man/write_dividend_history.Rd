@@ -4,15 +4,12 @@
 \alias{write_dividend_history}
 \title{Write history of dividends in a csv file}
 \usage{
-write_dividend_history(df.transaction.history, path,
-         file.dividend.history = "dividends_fullhistory.csv")
+write_dividend_history(df.transaction.history, path)
 }
 \arguments{
 \item{df.transaction.history}{data frame containing history of transactions.}
 
 \item{path}{A single character string. Directory where all data are stored.}
-
-\item{file.dividend.history}{file name of csv.}
 }
 \description{
 Write history of dividends in a csv file

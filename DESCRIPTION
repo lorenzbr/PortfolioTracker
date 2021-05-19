@@ -1,6 +1,6 @@
 Package: PortfolioTracker
 Type: Package
-Title: Track the performance of your investment portfolio
+Title: Track the Performance of Your Investment Portfolio
 Version: 0.1.0
 Authors@R: 
     person(given = "Lorenz",

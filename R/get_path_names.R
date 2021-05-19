@@ -19,6 +19,7 @@ get_path_names <- function(path){
   path.returns <- paste0(path, "/data/returns/")
   path.fiat <- paste0(path, "/data/currencies/fiat/")
   path.crypto <- paste0(path, "/data/currencies/crypto")
+  path.value.panel <- paste0(path, "/data/value_panel/")
 
   output.list <- list(
     path.data = path.data,
@@ -32,7 +33,8 @@ get_path_names <- function(path){
     path.rebalance = path.rebalance,
     path.returns = path.returns,
     path.fiat = path.fiat,
-    path.crypto = path.crypto
+    path.crypto = path.crypto,
+    path.value.panel = path.value.panel
   )
 
   return(output.list)

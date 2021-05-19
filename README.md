@@ -47,9 +47,10 @@ PortfolioTracker::update_prices_based_on_transactions(df.transactions, path)
 PortfolioTracker::update_latest_prices(path)
 
 # write panels as csv
-PortfolioTracker::write_quantity_panels(df.transactions, path, file.ticker = "isin_ticker.csv")
+PortfolioTracker::write_quantity_panels(df.transactions, path)
 PortfolioTracker::write_price_panels(df.transactions, path)
 PortfolioTracker::write_price_quantity_panels(df.transactions, path)
+PortfolioTracker::write_all_value_panels(df.transaction.history, path)
 
 # write current portfolio and create portfolio statistics
 PortfolioTracker::write_current_portfolio(path)
@@ -61,8 +62,7 @@ PortfolioTracker::write_annualized_returns(path)
 PortfolioTracker::write_portfolio_return(path)
 
 # write dividends
-PortfolioTracker::write_dividend_history(df.transactions, path,
-                                         file.dividend.history = "dividends_fullhistory.csv")
+PortfolioTracker::write_dividend_history(df.transactions, path)
 PortfolioTracker::write_dividend_by_month(path)
 PortfolioTracker::write_dividend_by_yr(path)
 ```

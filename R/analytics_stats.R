@@ -47,7 +47,6 @@ write_portfolio_stats <- function(path) {
 #' @export
 get_dividends_max <- function(path, file.dividend.history = "dividends_fullhistory.csv") {
 
-  ## create folder if not exists and get folder name for price panel
   list.names <- get_names(path)
   path.dividends <- list.names$path.dividends
 
@@ -61,4 +60,4 @@ get_dividends_max <- function(path, file.dividend.history = "dividends_fullhisto
 
   return(dividends.max)
 
-} ## end of function get_dividends_max
+}

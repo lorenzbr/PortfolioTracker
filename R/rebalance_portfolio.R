@@ -12,7 +12,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 rebalance_portfolio <- function(df, df.target.shares, money.to.invest, step.size = 500,
-                                exclude.from.rebalancing = NA){
+                                exclude.from.rebalancing = NA) {
 
   ## function should be iterative or nested function, resp., with step size of investing money and adapting actual shares, stop when
   ## target shares are reached more or less or when money to invest is too small
@@ -70,12 +70,11 @@ rebalance_portfolio <- function(df, df.target.shares, money.to.invest, step.size
     ## calculate new shares
     df$new_share <- df$new_value / sum(df$new_value)
 
-  } ## end of for loop
+  }
 
   return(df)
 
-} ## end of function rebalance_portfolio
-
+}
 
 #' Write default target shares to csv file
 #'
@@ -86,14 +85,16 @@ rebalance_portfolio <- function(df, df.target.shares, money.to.invest, step.size
 #' @export
 write_default_target_shares <- function(df.target.shares, path) {
 
-  list.paths <- create_portfoliotracker_dir(path)
-  path.rebalance <- list.paths$path.rebalance
+  list.names <- get_names(path)
+  path.rebalance <- list.names$path.rebalance
+  file.target.shares <- list.names$file.target.shares
+
 
   if (is.data.frame(df.target.shares)) {
 
     if ( all( c("isin", "target_share") %in% names(df.target.shares) )) {
 
-    data.table::fwrite(df.target.shares, paste0(path.rebalance, "default_target_shares.csv"))
+    data.table::fwrite(df.target.shares, paste0(path.rebalance, file.target.shares))
 
     }
 
@@ -109,4 +110,4 @@ write_default_target_shares <- function(df.target.shares, path) {
 
   }
 
-} ## end of function write_default_target_shares
+}

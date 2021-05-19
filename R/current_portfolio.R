@@ -1,24 +1,19 @@
 #' Write current portfolio investments to a csv file
 #'
-#' @usage write_current_portfolio(path, file.name = "current_portfolio.csv",
-#'                       file.tickers = "isin_ticker.csv",
-#'                       file.transactions = "transaction_fullhistory.csv")
+#' @usage write_current_portfolio(path)
 #' @param path A single character string. Directory of your data.
-#' @param file.name A single character string. Name of created csv file containing current portfolio.
-#' @param file.tickers A single character string. Name of csv containing ISIN-ticker pairs.
-#' @param file.transactions A single character string. Name of csv file containing transactions.
 #'
 #' @export
-write_current_portfolio <- function(path, file.name = "current_portfolio.csv",
-                                    file.tickers = "isin_ticker.csv",
-                                    file.transactions = "transaction_fullhistory.csv"){
+write_current_portfolio <- function(path) {
 
-  ## create folder if not exists and get folder name for quantity panel and tickers
-  list.paths <- create_portfoliotracker_dir(path)
-  path.pricequantitypanel <- list.paths$path.pricequantitypanel
-  path.tickers <- list.paths$path.tickers
-  path.transactions <- list.paths$path.transactions
-  path.data <- list.paths$path.data
+  list.names <- get_names(path)
+  path.pricequantitypanel <- list.names$path.pricequantitypanel
+  path.tickers <- list.names$path.tickers
+  path.transactions <- list.names$path.transactions
+  path.data <- list.names$path.data
+  file.current <- list.names$file.current
+  file.tickers <- list.names$file.tickers
+  file.transactions <- list.names$file.transactions
 
   ## load price quantity panels if exists
   if (!rlang::is_empty(list.files(path.pricequantitypanel))) {
@@ -63,8 +58,8 @@ write_current_portfolio <- function(path, file.name = "current_portfolio.csv",
     ## compute weight of each investment in total portfolio value
     df.current$weight <- df.current$value / total.portfolio.value
 
-    data.table::fwrite(df.current, paste0(path.data, file.name))
+    data.table::fwrite(df.current, paste0(path.data, file.current))
 
-  } else { message("No price quantity panels available.") } ## end of if statement
+  } else { message("No price quantity panels available.") }
 
-} # end of function write_current_portfolio
+}

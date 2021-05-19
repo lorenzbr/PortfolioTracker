@@ -4,12 +4,10 @@
 \alias{write_dividend_by_yr}
 \title{Write dividend payments by year to a csv file}
 \usage{
-write_dividend_by_yr(path, file.dividend.history = "dividends_fullhistory.csv")
+write_dividend_by_yr(path)
 }
 \arguments{
 \item{path}{A single character string. Directory where all data are stored.}
-
-\item{file.dividend.history}{A single character string. Name of csv containing full history of dividends.}
 }
 \description{
 Write dividend payments by year to a csv file

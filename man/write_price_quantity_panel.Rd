@@ -9,7 +9,7 @@ write_price_quantity_panel(ticker, path)
 \arguments{
 \item{ticker}{A single character string containing a ticker symbol.}
 
-\item{path}{A single character string.}
+\item{path}{A single character string containing the directory of the project.}
 }
 \description{
 Write panel for the product of prices and quantity for input ticker as csv

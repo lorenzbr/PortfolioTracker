@@ -1,20 +1,16 @@
 #' Update and store prices as csv based on new financial transactions
 #'
-#' @usage update_prices_based_on_transactions(df.transactions, path,
-#'                                            file.ticker = "isin_ticker.csv")
+#' @usage update_prices_based_on_transactions(df.transactions, path)
 #' @param df.transactions A data frame. Results from [extractBankStatements::get_transactions()]
 #' @param path A single character string. Folder where all data are stored.
-#' @param file.ticker A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)
 #'
 #' @export
-update_prices_based_on_transactions <- function(df.transactions, path, file.ticker = "isin_ticker.csv"){
+update_prices_based_on_transactions <- function(df.transactions, path){
 
-  #### update and store prices for tickers as csv. Starts with transaction date
-
-  ## create folders for tickers and prices (if not exists)
-  list.paths <- create_portfoliotracker_dir(path)
-  path.tickers <- list.paths$path.tickers
-  path.prices.raw <- list.paths$path.prices.raw
+  list.names <- get_names(path)
+  path.tickers <- list.names$path.tickers
+  path.prices.raw <- list.names$path.prices.raw
+  file.ticker <- list.names$file.ticker
 
   ## unique ISINs
   isins <- unique(df.transactions$isin)
@@ -112,12 +108,11 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
 
     }
 
-    ) ## end of tryCatch
+    )
 
-  } ## end of for loop over all transactions in file
+  }
 
-} ## end of function update_prices_based_on_transactions
-
+}
 
 #' Update most recent prices and store as csv
 #'
@@ -125,20 +120,17 @@ update_prices_based_on_transactions <- function(df.transactions, path, file.tick
 #' @param path A single character string. Folder where all data are stored.
 #'
 #' @export
-update_latest_prices <- function(path){
+update_latest_prices <- function(path) {
 
-  #### update all price data based on all tickers in folder and last date for each ticker
-
-  ## create folders for tickers and prices (if not exists)
-  list.paths <- create_portfoliotracker_dir(path)
-  path.tickers <- list.paths$path.tickers
-  path.prices.raw <- list.paths$path.prices.raw
+  list.names <- get_names(path)
+  path.tickers <- list.names$path.tickers
+  path.prices.raw <- list.names$path.prices.raw
 
   ## load file names for price data
   filename.prices.raw.with.ticker <- list.files(path.prices.raw)
 
   ## only run code if filename.prices.raw.with.ticker is not empty
-  if(!(rlang::is_empty(filename.prices.raw.with.ticker))){
+  if (!rlang::is_empty(filename.prices.raw.with.ticker)) {
 
     ## create data frame
     df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
@@ -189,22 +181,21 @@ update_latest_prices <- function(path){
 
         } else {print(paste("Prices for ticker", ticker, "up to date."))}
 
-        }, error = function(e) { skip_to_next <- TRUE})
+        }, error = function(e) { skip_to_next <- TRUE })
 
-        if(skip_to_next) { next }
+        if (skip_to_next) { next }
 
-      } ## end of for loop over all tickers which are not up to date
-
+      }
 
     } else {
 
       print("Everything up to date!")
 
-    } ## end of else statement that checks whether updates are needed
+    }
 
-  } else {print("No prices available for update.")} ## end of if else statement whether file names are non empty
+  } else { print("No prices available for update.") }
 
-} ## end of function update_latest_prices
+}
 
 #' Get price data from Yahoo Finance
 #'

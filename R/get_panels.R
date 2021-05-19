@@ -1,16 +1,16 @@
 #' Write full history of quantities for all tickers as csv
 #'
-#' @usage write_quantity_panels(df.transaction.history, path, file.ticker = "isin_ticker.csv")
+#' @usage write_quantity_panels(df.transaction.history, path)
 #' @param df.transaction.history A data.frame containing the full history of transactions.
 #' @param path A single character string. Directory of your data.
-#' @param file.ticker A single character string. Name of csv containing ISIN-ticker pairs.
 #'
 #' @export
-write_quantity_panels <- function(df.transaction.history, path, file.ticker = "isin_ticker.csv"){
+write_quantity_panels <- function(df.transaction.history, path) {
 
   list.names <- get_names(path)
   path.quantitypanel <- list.names$path.quantitypanel
   path.tickers <- list.names$path.tickers
+  file.tickers <- list.names$file.tickers
 
   ## convert to data frame
   df.transaction.history <- as.data.frame(df.transaction.history)
@@ -19,7 +19,7 @@ write_quantity_panels <- function(df.transaction.history, path, file.ticker = "i
   df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date, "%d-%m-%Y")
 
   ## get table that converts ISIN to ticker
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
+  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
 
   ## add ticker to transaction data
   df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
@@ -47,7 +47,7 @@ write_quantity_panels <- function(df.transaction.history, path, file.ticker = "i
 #'
 #' @export
 #' @import data.table
-write_quantity_panel <- function(ticker, df.transaction.history, path.quantitypanel){
+write_quantity_panel <- function(ticker, df.transaction.history, path.quantitypanel) {
 
   ## get transactions only for ticker
   df.transaction.history.ticker <- df.transaction.history[df.transaction.history$ticker == ticker, ]
@@ -132,7 +132,7 @@ write_quantity_panel <- function(ticker, df.transaction.history, path.quantitypa
 #'
 #' @usage write_price_panels(df.transactions, path)
 #' @param df.transactions A data.frame containing transaction history.
-#' @param path A single character string.
+#' @param path A single character string containing the directory of the project.
 #'
 #' @export
 #' @importFrom magrittr %>%
@@ -192,7 +192,7 @@ write_price_panels <- function(df.transactions, path){
 #'
 #' @usage write_price_quantity_panels(df.transactions, path)
 #' @param df.transactions A data.frame containing transaction history.
-#' @param path A single character string.
+#' @param path A single character string containing the directory of the project.
 #'
 #' @export
 write_price_quantity_panels <- function(df.transactions, path) {
@@ -218,7 +218,7 @@ write_price_quantity_panels <- function(df.transactions, path) {
 #'
 #' @usage write_price_quantity_panel(ticker, path)
 #' @param ticker A single character string containing a ticker symbol.
-#' @param path A single character string.
+#' @param path A single character string containing the directory of the project.
 #'
 #' @export
 write_price_quantity_panel <- function(ticker, path) {
@@ -264,16 +264,138 @@ write_price_quantity_panel <- function(ticker, path) {
 
 }
 
+#' Write value panel for purchase, dividend and sales transactions for given ticker
+#'
+#' @usage write_value_panel(transaction.type, path, ticker, df.transaction.history)
+#' @param transaction.type A single character string containing the transaction type (e.g., \emph{Purchase}, \emph{Sale} or \emph{Dividend})
+#' @param path A single character string containing the directory of the project.
+#' @param ticker A single character string containing the ticker symbol.
+#' @param df.transaction.history A data.frame containing the full history of transactions.
+#'
+#' @export
+#' @import data.table
+write_value_panel <- function(transaction.type, path, ticker, df.transaction.history) {
+
+  list.names <- get_names(path)
+  path.value.panel <- list.names$path.value.panel
+
+  df.transaction.history.ticker <- df.transaction.history[df.transaction.history$ticker == ticker, ]
+
+  df.transaction.history.ticker <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_type == transaction.type, ]
+
+  if (nrow(df.transaction.history.ticker) > 0) {
+
+    df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "transaction_value")]
+    df.transaction.history.ticker <- df.transaction.history.ticker[order(df.transaction.history.ticker$transaction_date), ]
+    df.transaction.history.ticker$cum_value <- cumsum(df.transaction.history.ticker$transaction_value)
+    df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "cum_value")]
+
+    ## if transaction date is unequal NA
+    if ( all(!is.na(df.transaction.history.ticker$transaction_date)) ) {
+
+      ## earliest transaction_date
+      earliest.date <- min(df.transaction.history.ticker$transaction_date)
+
+      df.transaction.history.ticker.first <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_date == earliest.date, ]
+
+      ## create panel with date and value for ticker from transaction date until today (remove Saturday and Sunday)
+      today <- Sys.Date()
+      ## daily sequence from earliest transaction date until today
+      dates <- seq(earliest.date, today, by = 1)
+      mysysgetlocale <- Sys.getlocale('LC_TIME')
+      Sys.setlocale('LC_TIME', 'ENGLISH')
+      ## remove weekends
+      dates <- dates[!weekdays(dates) %in% c('Saturday', 'Sunday')]
+      Sys.setlocale('LC_TIME', mysysgetlocale)
+      df.panel <- data.frame(date = dates)
+      df.panel$ticker <- ticker
+
+      data.table::setDT(df.panel)
+      data.table::setDT(df.transaction.history.ticker)
+      data.table::setkey(df.panel, "date")
+      data.table::setkey(df.transaction.history.ticker, "transaction_date")
+      DT.panel <- df.transaction.history.ticker[df.panel, roll = TRUE]
+      df.panel <- data.table::setDF(DT.panel)
+      names(df.panel)[names(df.panel) == "transaction_date"] <- "date"
+
+      from <- min(df.panel$date)
+      to <- max(df.panel$date)
+
+      file.value.panel <- paste0(tolower(transaction.type), "value_panel_", ticker, "_from_", from, "_to_", to, ".csv")
+
+      data.table::fwrite(df.panel, paste0(path.value.panel, file.value.panel))
+
+      message(transaction.type, "-value panel for ", ticker, " successfully created!")
+
+    } else { message("Transaction dates contain NA. Please check!") }
+
+  } else { message("No purchase, dividend or sale transactions available.") }
+
+}
+
+#' Write value panels for purchase, dividend and sales transactions for given ticker
+#'
+#' @usage write_value_panel_all_types(ticker, df.transaction.history, path)
+#' @param ticker A single character string containing the ticker symbol.
+#' @param df.transaction.history A data.frame containing the full history of transactions.
+#' @param path A single character string containing the directory of the project.
+#'
+#' @export
+write_value_panel_all_types <- function(ticker, df.transaction.history, path) {
+
+  transaction.types <- c("Purchase", "Sale", "Dividend")
+
+  mapply(write_value_panel, transaction.types, MoreArgs = list(path, ticker, df.transaction.history))
+
+}
+
+#' Write all value panels for purchase, dividend and sales transactions for all tickers
+#'
+#' @usage write_all_value_panels(df.transaction.history, path)
+#' @param df.transaction.history A data.frame containing the full history of transactions.
+#' @param path A single character string containing the directory of the project.
+#'
+#' @export
+write_all_value_panels <- function(df.transaction.history, path) {
+
+  list.names <- get_names(path)
+  path.value.panel <- list.names$path.value.panel
+  path.tickers <- list.names$path.tickers
+  file.tickers <- list.names$file.tickers
+
+  df.transaction.history <- as.data.frame(df.transaction.history)
+
+  ## convert transaction date into date type
+  df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date, "%d-%m-%Y")
+
+  ## get table that converts ISIN to ticker
+  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
+
+  ## add ticker to transaction data
+  df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+
+  ## all tickers
+  tickers <- unique(df.transaction.history$ticker)
+
+  ## delete all files in folder
+  if (!rlang::is_empty(list.files(path.value.panel))) {
+    file.remove(paste0(path.value.panel, list.files(path.value.panel)))
+  }
+
+  mapply(write_value_panel_all_types, tickers, MoreArgs = list(path, df.transaction.history))
+
+}
 
 # Helpers -----------------------------------------------------------------
 
-get_tickers_from_transactions <- function(df.transaction.history, path, file.ticker = "isin_ticker.csv") {
+get_tickers_from_transactions <- function(df.transaction.history, path) {
 
   list.names <- get_names(path)
   path.tickers <- list.names$path.tickers
+  file.tickers <- list.names$file.ticker
 
   ## get table that converts ISIN to ticker
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
+  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
 
   ## add ticker to transaction data
   df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")

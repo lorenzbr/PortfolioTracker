@@ -4,18 +4,10 @@
 \alias{write_previous_investments}
 \title{Write previous portfolio investments to a csv file}
 \usage{
-write_previous_investments(path, file.name = "previous_investments.csv",
-                      file.tickers = "isin_ticker.csv",
-                      file.transactions = "transaction_fullhistory.csv")
+write_previous_investments(path)
 }
 \arguments{
 \item{path}{A single character string. Directory of your data.}
-
-\item{file.name}{A single character string. Name of created csv file containing current portfolio.}
-
-\item{file.tickers}{A single character string. Name of csv containing ISIN-ticker pairs.}
-
-\item{file.transactions}{A single character string. Name of csv file containing transactions.}
 }
 \description{
 Write previous portfolio investments to a csv file
