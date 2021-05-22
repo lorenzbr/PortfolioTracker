@@ -17,6 +17,7 @@ get_path_names <- function(path){
   path.transactions <- paste0(path, "/data/transactions/")
   path.rebalance <- paste0(path, "/data/rebalance/")
   path.returns <- paste0(path, "/data/returns/")
+  path.returns.roi <- paste0(path, path.returns, "roi/")
   path.fiat <- paste0(path, "/data/currencies/fiat/")
   path.crypto <- paste0(path, "/data/currencies/crypto")
   path.value.panel <- paste0(path, "/data/value_panel/")
@@ -32,6 +33,7 @@ get_path_names <- function(path){
     path.transactions = path.transactions,
     path.rebalance = path.rebalance,
     path.returns = path.returns,
+    path.returns.roi = path.returns.roi,
     path.fiat = path.fiat,
     path.crypto = path.crypto,
     path.value.panel = path.value.panel

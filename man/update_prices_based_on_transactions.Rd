@@ -7,7 +7,7 @@
 update_prices_based_on_transactions(df.transactions, path)
 }
 \arguments{
-\item{df.transactions}{A data frame. Results from [extractBankStatements::get_transactions()]}
+\item{df.transactions}{A data frame. Results from [BankStatementParser::get_transactions()]}
 
 \item{path}{A single character string. Folder where all data are stored.}
 }

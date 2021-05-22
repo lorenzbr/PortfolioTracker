@@ -263,10 +263,116 @@ write_portfolio_return <- function(path) {
 
 }
 
+#' Write cumulative daily investment returns to a csv file
+#'
+#' @usage write_cum_investment_returns_daily(path)
+#' @param path A single character string. Directory where all data are stored.
+#'
+#' @export
+write_cum_investment_returns_daily <- function(path) {
+
+  list.names <- get_names(path)
+  path.value.panel <- list.names$path.value.panel
+  path.tickers <- list.names$path.tickers
+  path.transactions <- list.names$path.transactions
+  file.transactions <- list.names$file.transactions
+  file.tickers <- list.names$file.tickers
+
+  df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
+
+  ## get tickers from history of transactions
+  tickers <- get_tickers_from_transactions(df.transaction.history, path)
+
+  ## write cumulative daily investment return for all tickers
+  output <- mapply(write_cum_investment_return_daily, tickers, MoreArgs = list(path))
+
+}
+
+#' Write cumulative daily investment returns to a csv file
+#'
+#' @usage write_cum_investment_return_daily(ticker, path)
+#' @param ticker A single character string containing the ticker.
+#' @param path A single character string. Directory where all data are stored.
+#'
+#' @export
+write_cum_investment_return_daily <- function(ticker, path) {
+
+  list.names <- get_names(path)
+  path.value.panel <- list.names$path.value.panel
+  path.pricequantitypanel <- list.names$path.pricequantitypanel
+  path.returns.roi <- list.names$path.returns.roi
+  path.tickers <- list.names$path.tickers
+  path.transactions <- list.names$path.transactions
+  file.transactions <- list.names$file.transactions
+  file.tickers <- list.names$file.tickers
+
+  if (!rlang::is_empty(list.files(paste0(path.pricequantitypanel), pattern = ticker))) {
+
+    df.pricequantitypanel <- data.table::fread(paste0(path.pricequantitypanel,
+                                              list.files(paste0(path.pricequantitypanel), pattern = ticker)))
+
+    df.pricequantitypanel <- df.pricequantitypanel[, c("date", "adjusted", "value", "cum_quantity")]
+
+    ## load value panels
+    if (!rlang::is_empty(list.files(paste0(path.value.panel), pattern = ticker))) {
+
+      ticker.value.panels <- list.files(paste0(path.value.panel), pattern = ticker)
+
+      purchase.exist <- grepl("^purchase", ticker.value.panels)
+      sale.exist <- grepl("^sale", ticker.value.panels)
+      dividend.exist <- grepl("^dividend", ticker.value.panels)
+      if (any(purchase.exist)) df.purchasevaluepanel <- data.table::fread(paste0(path.value.panel, ticker.value.panels[purchase.exist]))
+      if (any(sale.exist)) df.salevaluepanel <- data.table::fread(paste0(path.value.panel, ticker.value.panels[sale.exist]))
+      if (any(dividend.exist)) df.dividendvaluepanel <- data.table::fread(paste0(path.value.panel, ticker.value.panels[dividend.exist]))
+
+      if ( exists("df.purchasevaluepanel") ) {
+
+        df.roi <- merge(df.pricequantitypanel, df.purchasevaluepanel, by = "date", all = TRUE)
+
+        if ( exists("df.salevaluepanel") ) {
+          df.roi <- merge(df.roi, df.salevaluepanel, by = "date", all = TRUE)
+        } else {
+          df.roi$sale_cum_value <- 0
+          df.roi$sale_value <- 0
+          }
+
+        if ( exists("df.dividendvaluepanel") ) {
+          df.roi <- merge(df.roi, df.dividendvaluepanel, by = "date", all = TRUE)
+        } else {
+          df.roi$dividend_cum_value <- 0
+          df.roi$dividend_value <- 0
+          }
+
+      }
+
+      df.roi[is.na(df.roi)] <- 0
+      df.roi <- df.roi[df.roi$cum_quantity != 0 | df.roi$sale_value != 0 | df.roi$dividend_value != 0, ]
+
+      df.roi$daily_cum_roi <- (df.roi$value + df.roi$sale_cum_value + df.roi$dividend_cum_value ) / df.roi$purchase_cum_value
+
+      df.roi <- df.roi[, c("date", "daily_cum_roi")]
+
+      ## start and end date
+      from <- min(df.roi$date)
+      to <- max(df.roi$date)
+
+      ## file name
+      filename.roi.panel <- paste0("return_on_investment_daily_", ticker, "_from_", from, "_to_", to, ".csv")
+
+      ## store price quantity panel as csv
+      data.table::fwrite(df.roi, paste0(path.returns.roi, filename.roi.panel))
+
+      message("Daily investment return for ", ticker, " successfully created!")
+
+    } else { message("No transaction value panels available.") }
+
+  } else { message("No price-quantity panel available.") }
+
+
+}
 
 # PerformanceAnalytics::Return.cumulative
 # PerformanceAnalytics::Return.portfolio()
-
 
 # ## load tables with annual return
 # if (!rlang::is_empty(list.files(paste0(path.returns), pattern = "^annual_returns_all_from_"))) {

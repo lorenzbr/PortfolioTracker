@@ -17,6 +17,7 @@ create_portfoliotracker_dir <- function(path) {
   path.transactions <- paste0(path, "/data/transactions/")
   path.rebalance <- paste0(path, "/data/rebalance/")
   path.returns <- paste0(path, "/data/returns/")
+  path.returns.roi <- paste0(path, path.returns, "roi/")
   path.fiat <- paste0(path, "/data/currencies/fiat/")
   path.crypto <- paste0(path, "/data/currencies/crypto")
   path.value.panel <- paste0(path, "/data/value_panel/")
@@ -32,6 +33,7 @@ create_portfoliotracker_dir <- function(path) {
   if (!dir.exists(path.transactions)) dir.create(path.transactions, recursive = TRUE)
   if (!dir.exists(path.rebalance)) dir.create(path.rebalance, recursive = TRUE)
   if (!dir.exists(path.returns)) dir.create(path.returns, recursive = TRUE)
+  if (!dir.exists(path.returns.roi)) dir.create(path.returns.roi, recursive = TRUE)
   if (!dir.exists(path.fiat)) dir.create(path.fiat, recursive = TRUE)
   if (!dir.exists(path.crypto)) dir.create(path.crypto, recursive = TRUE)
   if (!dir.exists(path.value.panel)) dir.create(path.value.panel, recursive = TRUE)
@@ -47,6 +49,7 @@ create_portfoliotracker_dir <- function(path) {
     path.transactions = path.transactions,
     path.rebalance = path.rebalance,
     path.returns = path.returns,
+    path.returns.roi = path.returns.roi,
     path.fiat = path.fiat,
     path.crypto = path.crypto,
     path.value.panel = path.value.panel

@@ -4,16 +4,16 @@
 \alias{write_value_panel}
 \title{Write value panel for purchase, dividend and sales transactions for given ticker}
 \usage{
-write_value_panel(transaction.type, path, ticker, df.transaction.history)
+write_value_panel(transaction.type, ticker, df.transaction.history, path)
 }
 \arguments{
 \item{transaction.type}{A single character string containing the transaction type (e.g., \emph{Purchase}, \emph{Sale} or \emph{Dividend})}
 
-\item{path}{A single character string containing the directory of the project.}
-
 \item{ticker}{A single character string containing the ticker symbol.}
 
 \item{df.transaction.history}{A data.frame containing the full history of transactions.}
+
+\item{path}{A single character string containing the directory of the project.}
 }
 \description{
 Write value panel for purchase, dividend and sales transactions for given ticker

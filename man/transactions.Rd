@@ -22,7 +22,7 @@ A data frame with 4 rows and 12 columns/variables:
 }
 }
 \source{
-Data come from the R package \code{extractBankStatements}. See \url{https://github.com/lorenzbr/extractBankStatements}
+Data come from the R package \code{BankStatementParser}. See \url{https://github.com/lorenzbr/BankStatementParser}
 }
 \usage{
 transactions

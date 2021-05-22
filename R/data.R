@@ -18,5 +18,5 @@
 #' \item{document_page}{Page of the transaction in the PDF document.}
 #' \item{document_name}{Name of the PDF document.}
 #' }
-#' @source Data come from the R package \code{extractBankStatements}. See \url{https://github.com/lorenzbr/extractBankStatements}
+#' @source Data come from the R package \code{BankStatementParser}. See \url{https://github.com/lorenzbr/BankStatementParser}
 "transactions"

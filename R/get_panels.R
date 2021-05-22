@@ -236,7 +236,7 @@ write_price_quantity_panel <- function(ticker, path) {
                                               list.files(paste0(path.pricepanel), pattern = ticker)))
 
     ## load quantity panel
-    if(!rlang::is_empty(list.files(paste0(path.quantitypanel), pattern = ticker))) {
+    if (!rlang::is_empty(list.files(paste0(path.quantitypanel), pattern = ticker))) {
 
       df.quantitypanel <- data.table::fread(paste0(path.quantitypanel,
                                                    list.files(paste0(path.quantitypanel), pattern = ticker)))
@@ -266,15 +266,15 @@ write_price_quantity_panel <- function(ticker, path) {
 
 #' Write value panel for purchase, dividend and sales transactions for given ticker
 #'
-#' @usage write_value_panel(transaction.type, path, ticker, df.transaction.history)
+#' @usage write_value_panel(transaction.type, ticker, df.transaction.history, path)
 #' @param transaction.type A single character string containing the transaction type (e.g., \emph{Purchase}, \emph{Sale} or \emph{Dividend})
-#' @param path A single character string containing the directory of the project.
 #' @param ticker A single character string containing the ticker symbol.
 #' @param df.transaction.history A data.frame containing the full history of transactions.
+#' @param path A single character string containing the directory of the project.
 #'
 #' @export
 #' @import data.table
-write_value_panel <- function(transaction.type, path, ticker, df.transaction.history) {
+write_value_panel <- function(transaction.type, ticker, df.transaction.history, path) {
 
   list.names <- get_names(path)
   path.value.panel <- list.names$path.value.panel
@@ -286,9 +286,11 @@ write_value_panel <- function(transaction.type, path, ticker, df.transaction.his
   if (nrow(df.transaction.history.ticker) > 0) {
 
     df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "transaction_value")]
+    df.transaction.history.ticker.keep <- df.transaction.history.ticker
     df.transaction.history.ticker <- df.transaction.history.ticker[order(df.transaction.history.ticker$transaction_date), ]
     df.transaction.history.ticker$cum_value <- cumsum(df.transaction.history.ticker$transaction_value)
     df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "cum_value")]
+    names(df.transaction.history.ticker)[names(df.transaction.history.ticker) == "cum_value"] <- paste0(tolower(transaction.type), "_cum_value")
 
     ## if transaction date is unequal NA
     if ( all(!is.na(df.transaction.history.ticker$transaction_date)) ) {
@@ -308,7 +310,6 @@ write_value_panel <- function(transaction.type, path, ticker, df.transaction.his
       dates <- dates[!weekdays(dates) %in% c('Saturday', 'Sunday')]
       Sys.setlocale('LC_TIME', mysysgetlocale)
       df.panel <- data.frame(date = dates)
-      df.panel$ticker <- ticker
 
       data.table::setDT(df.panel)
       data.table::setDT(df.transaction.history.ticker)
@@ -316,7 +317,11 @@ write_value_panel <- function(transaction.type, path, ticker, df.transaction.his
       data.table::setkey(df.transaction.history.ticker, "transaction_date")
       DT.panel <- df.transaction.history.ticker[df.panel, roll = TRUE]
       df.panel <- data.table::setDF(DT.panel)
+
+      df.panel <- merge(df.panel, df.transaction.history.ticker.keep, by = "transaction_date", all.x = TRUE)
+      df.panel$transaction_value[is.na(df.panel$transaction_value)] <- 0
       names(df.panel)[names(df.panel) == "transaction_date"] <- "date"
+      names(df.panel)[names(df.panel) == "transaction_value"] <- paste0(tolower(transaction.type), "_value")
 
       from <- min(df.panel$date)
       to <- max(df.panel$date)
@@ -325,11 +330,11 @@ write_value_panel <- function(transaction.type, path, ticker, df.transaction.his
 
       data.table::fwrite(df.panel, paste0(path.value.panel, file.value.panel))
 
-      message(transaction.type, "-value panel for ", ticker, " successfully created!")
+      message(transaction.type, "-value panel for ticker ", ticker, " successfully created!")
 
-    } else { message("Transaction dates contain NA. Please check!") }
+    } else { message("Transaction dates of ticker ", ticker, " contain NA. Please check!") }
 
-  } else { message("No purchase, dividend or sale transactions available.") }
+  } else { message("No ", tolower(transaction.type), " transactions for ticker ", ticker, " available.") }
 
 }
 
@@ -345,7 +350,7 @@ write_value_panel_all_types <- function(ticker, df.transaction.history, path) {
 
   transaction.types <- c("Purchase", "Sale", "Dividend")
 
-  mapply(write_value_panel, transaction.types, MoreArgs = list(path, ticker, df.transaction.history))
+  mapply(write_value_panel, transaction.types, MoreArgs = list(ticker, df.transaction.history, path))
 
 }
 
@@ -371,8 +376,8 @@ write_all_value_panels <- function(df.transaction.history, path) {
   ## get table that converts ISIN to ticker
   df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
 
-  ## add ticker to transaction data
-  df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+  ## add ticker to transaction data if not yet exists
+  if( !any( names(df.transaction.history) == "ticker") ) df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
 
   ## all tickers
   tickers <- unique(df.transaction.history$ticker)
@@ -382,7 +387,9 @@ write_all_value_panels <- function(df.transaction.history, path) {
     file.remove(paste0(path.value.panel, list.files(path.value.panel)))
   }
 
-  mapply(write_value_panel_all_types, tickers, MoreArgs = list(path, df.transaction.history))
+  ## mapply causes error with $ operator: intermediate solution
+  for(ticker in tickers) { write_value_panel_all_types(ticker, df.transaction.history, path) }
+  # mapply(write_value_panel_all_types, tickers, MoreArgs = list(path, df.transaction.history))
 
 }
 
