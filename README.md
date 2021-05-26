@@ -9,7 +9,7 @@ public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostat
 [![R-CMD-check](https://github.com/lorenzbr/PortfolioTracker/workflows/R-CMD-check/badge.svg)](https://github.com/lorenzbr/PortfolioTracker/actions)
 <!-- badges: end -->
 
-This R package contains functions to track the performance of your investment portfolio.
+This R package contains functions to track the performance of your investment portfolio. It works with the Shiny App [shinyPortfolioTracker](https://github.com/lorenzbr/shinyPortfolioTracker).
 
 
 ## Installation
@@ -20,6 +20,8 @@ devtools::install_github("lorenzbr/PortfolioTracker")
 
 
 ## Usage
+
+Please have a look at the Shiny App [shinyPortfolioTracker](https://github.com/lorenzbr/shinyPortfolioTracker).
 
 ```R
 # Example
@@ -41,6 +43,7 @@ PortfolioTracker::write_quantity_panels(df.transactions, path)
 PortfolioTracker::write_price_panels(df.transactions, path)
 PortfolioTracker::write_price_quantity_panels(df.transactions, path)
 PortfolioTracker::write_all_value_panels(df.transaction.history, path)
+PortfolioTracker::write_complete_panels(path)
 
 # write current portfolio and create portfolio statistics
 PortfolioTracker::write_current_portfolio(path)
@@ -50,6 +53,7 @@ PortfolioTracker::write_portfolio_stats(path)
 PortfolioTracker::write_returns(path)
 PortfolioTracker::write_annualized_returns(path)
 PortfolioTracker::write_portfolio_return(path)
+PortfolioTracker::write_cum_investment_returns_daily(path)
 
 # write dividends
 PortfolioTracker::write_dividend_history(df.transactions, path)
