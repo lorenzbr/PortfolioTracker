@@ -4,14 +4,14 @@
 \alias{write_quantity_panel}
 \title{Write quantity panel for ticker}
 \usage{
-write_quantity_panel(ticker, df.transaction.history, path.quantitypanel)
+write_quantity_panel(ticker, df.transaction.history, path.quantity.panel)
 }
 \arguments{
 \item{ticker}{A single character string containing the ticker symbol.}
 
-\item{df.transaction.history}{A data.frame containing the full history of transactions.}
+\item{df.transaction.history}{A data.frame containing transactions and ticker.}
 
-\item{path.quantitypanel}{A single character string containing the folder of quantity panels.}
+\item{path.quantity.panel}{A single character string containing the folder of quantity panels.}
 }
 \description{
 Write quantity panel for ticker

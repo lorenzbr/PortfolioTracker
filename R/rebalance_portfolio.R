@@ -85,10 +85,7 @@ rebalance_portfolio <- function(df, df.target.shares, money.to.invest, step.size
 #' @export
 write_default_target_shares <- function(df.target.shares, path) {
 
-  list.names <- get_names(path)
-  path.rebalance <- list.names$path.rebalance
-  file.target.shares <- list.names$file.target.shares
-
+  get_names(path)
 
   if (is.data.frame(df.target.shares)) {
 
@@ -100,7 +97,7 @@ write_default_target_shares <- function(df.target.shares, path) {
 
     else {
 
-      "Data frame needs to contain at least two columns with names 'isin' and 'target_share'"
+      "Data.frame needs to contain at least two columns with names 'isin' and 'target_share'"
 
       }
 

@@ -7,9 +7,7 @@
 #' @export
 write_dividend_history <- function(df.transaction.history, path) {
 
-  list.names <- get_names(path)
-  path.dividends <- list.names$path.dividends
-  file.dividend.history <- list.names$file.dividend.history
+  get_names(path)
 
   ## get list of dividends
   df.dividend.history <- df.transaction.history[grepl("Dividend", df.transaction.history$transaction_type), ]
@@ -41,10 +39,7 @@ write_dividend_by_yr <- function(path) {
 
   tryCatch({
 
-    list.names <- get_names(path)
-    path.dividends <- list.names$path.dividends
-    file.dividend.history <- list.names$file.dividend.history
-    file.dividend.year <- list.names$file.dividend.year
+    get_names(path)
 
     ## load dividend history
     df.dividend.history <- data.table::fread(paste0(path.dividends, file.dividend.history))
@@ -87,10 +82,7 @@ write_dividend_by_yr <- function(path) {
 #' @importFrom rlang .data
 write_dividend_by_month <- function(path) {
 
-  list.names <- get_names(path)
-  path.dividends <- list.names$path.dividends
-  file.dividend.history <- list.names$file.dividend.history
-  file.dividend.month <- list.names$file.dividend.month
+  get_names(path)
 
   tryCatch({
 

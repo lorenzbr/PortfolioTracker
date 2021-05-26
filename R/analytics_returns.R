@@ -6,21 +6,15 @@
 #' @export
 write_returns <- function(path) {
 
-  list.names <- get_names(path)
-  path.pricepanel <- list.names$path.pricepanel
-  path.returns <- list.names$path.returns
-  file.returns.daily <- list.names$file.returns.daily
-  file.returns.monthly <- list.names$file.returns.monthly
-  file.returns.annual <- list.names$file.returns.annual
+  get_names(path)
 
+  files.price.panels <- list.files(path.price.panel)
 
-  files.pricepanels <- list.files(path.pricepanel)
+  no.price.panels <- rlang::is_empty(files.price.panels)
 
-  no.pricepanels <- rlang::is_empty(files.pricepanels)
+  if (!no.price.panels) {
 
-  if (!no.pricepanels) {
-
-    files <- paste0(path.pricepanel, files.pricepanels)
+    files <- paste0(path.price.panel, files.price.panels)
     list.dfs <- lapply(files, data.table::fread)
 
     # last.year <- lubridate::year(Sys.Date()) - 1
@@ -33,9 +27,9 @@ write_returns <- function(path) {
     for (i in 1:length(list.dfs)) {
 
       ticker <- stringr::str_match(files[i], "price_panel_(.*?)_from")[, 2]
-      df.pricepanel <- list.dfs[[i]]
+      df.price.panel <- list.dfs[[i]]
 
-      df.temp <- get_returns_all(df.pricepanel, ticker)
+      df.temp <- get_returns_all(df.price.panel, ticker)
 
       ticker.daily <- paste0(ticker, ".daily")
       ticker.monthly <- paste0(ticker, ".monthly")
@@ -103,13 +97,7 @@ get_returns_all <- function(df, ticker) {
 #' @importFrom rlang .data
 write_annualized_returns <- function(path) {
 
-  list.names <- get_names(path)
-  path.returns <- list.names$path.returns
-  path.tickers <- list.names$path.tickers
-  path.transactions <- list.names$path.transactions
-  file.transactions <- list.names$file.transactions
-  file.tickers <- list.names$file.tickers
-  file.name.annualized <- list.names$file.name.annualized
+  get_names(path)
 
   df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
   df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
@@ -174,7 +162,7 @@ write_annualized_returns <- function(path) {
 
   df.annualized <- df.annualized[, names(df.annualized) != "age_yrs" & names(df.annualized) != "date"]
 
-  data.table::fwrite(df.annualized, paste0(path.returns, file.name.annualized))
+  data.table::fwrite(df.annualized, paste0(path.returns, file.returns.annualized))
 
 }
 
@@ -186,14 +174,7 @@ write_annualized_returns <- function(path) {
 #' @export
 write_portfolio_return <- function(path) {
 
-  list.names <- get_names(path)
-  path.returns <- list.names$path.returns
-  path.tickers <- list.names$path.tickers
-  path.pricequantitypanel <- list.names$path.pricequantitypanel
-  path.transactions <- list.names$path.transactions
-  file.transactions <- list.names$file.transactions
-  file.tickers <- list.names$file.tickers
-  file.return.portfolio.daily <- list.names$file.return.portfolio.daily
+  get_names(path)
 
   df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
   df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
@@ -216,13 +197,13 @@ write_portfolio_return <- function(path) {
 
 
 
-  files.pricequantitypanels <- list.files(path.pricequantitypanel)
+  files.pricequantity.panels <- list.files(path.pricequantity.panel)
 
-  no.pricequantitypanels <- rlang::is_empty(files.pricequantitypanels)
+  no.pricequantity.panels <- rlang::is_empty(files.pricequantity.panels)
 
-  if (!no.pricequantitypanels) {
+  if (!no.pricequantity.panels) {
 
-    files <- paste0(path.pricequantitypanel, files.pricequantitypanels)
+    files <- paste0(path.pricequantity.panel, files.pricequantity.panels)
     list.dfs <- lapply(files, data.table::fread)
 
   }
@@ -232,12 +213,12 @@ write_portfolio_return <- function(path) {
   for (i in 1:length(list.dfs)) {
 
     ticker <- stringr::str_match(files[i], "pricequantity_panel_(.*?)_from")[, 2]
-    df.pricequantitypanel <- list.dfs[[i]]
+    df.pricequantity.panel <- list.dfs[[i]]
 
-    df.weightpanel <- df.pricequantitypanel[, c("date", "value")]
-    names(df.weightpanel)[2] <- ticker
+    df.weight.panel <- df.pricequantity.panel[, c("date", "value")]
+    names(df.weight.panel)[2] <- ticker
 
-    df.weight.final <- merge(df.weight.final, df.weightpanel, by = "date", all.x = TRUE, all.y = TRUE)
+    df.weight.final <- merge(df.weight.final, df.weight.panel, by = "date", all.x = TRUE, all.y = TRUE)
 
   }
 
@@ -271,12 +252,7 @@ write_portfolio_return <- function(path) {
 #' @export
 write_cum_investment_returns_daily <- function(path) {
 
-  list.names <- get_names(path)
-  path.value.panel <- list.names$path.value.panel
-  path.tickers <- list.names$path.tickers
-  path.transactions <- list.names$path.transactions
-  file.transactions <- list.names$file.transactions
-  file.tickers <- list.names$file.tickers
+  get_names(path)
 
   df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
 
@@ -297,79 +273,76 @@ write_cum_investment_returns_daily <- function(path) {
 #' @export
 write_cum_investment_return_daily <- function(ticker, path) {
 
-  list.names <- get_names(path)
-  path.value.panel <- list.names$path.value.panel
-  path.pricequantitypanel <- list.names$path.pricequantitypanel
-  path.returns.roi <- list.names$path.returns.roi
-  path.tickers <- list.names$path.tickers
-  path.transactions <- list.names$path.transactions
-  file.transactions <- list.names$file.transactions
-  file.tickers <- list.names$file.tickers
+  get_names(path)
 
-  if (!rlang::is_empty(list.files(paste0(path.pricequantitypanel), pattern = ticker))) {
+  if (!rlang::is_empty(list.files(paste0(path.complete.panel), pattern = ticker))) {
 
-    df.pricequantitypanel <- data.table::fread(paste0(path.pricequantitypanel,
-                                              list.files(paste0(path.pricequantitypanel), pattern = ticker)))
+    df.complete.panel <- data.table::fread(paste0(path.complete.panel,
+                                              list.files(paste0(path.complete.panel), pattern = ticker)))
 
-    df.pricequantitypanel <- df.pricequantitypanel[, c("date", "adjusted", "value", "cum_quantity")]
 
-    ## load value panels
-    if (!rlang::is_empty(list.files(paste0(path.value.panel), pattern = ticker))) {
+    df.complete.panel[is.na(df.complete.panel)] <- 0
+    df.complete.panel <- df.complete.panel[df.complete.panel$cum_quantity != 0 | df.complete.panel$sale_value != 0
+                                           | df.complete.panel$dividend_value != 0, ]
 
-      ticker.value.panels <- list.files(paste0(path.value.panel), pattern = ticker)
+    df.complete.panel$daily_cum_roi <- (df.complete.panel$value + df.complete.panel$sale_cum_value
+                                        + df.complete.panel$dividend_cum_value ) / df.complete.panel$purchase_cum_value
 
-      purchase.exist <- grepl("^purchase", ticker.value.panels)
-      sale.exist <- grepl("^sale", ticker.value.panels)
-      dividend.exist <- grepl("^dividend", ticker.value.panels)
-      if (any(purchase.exist)) df.purchasevaluepanel <- data.table::fread(paste0(path.value.panel, ticker.value.panels[purchase.exist]))
-      if (any(sale.exist)) df.salevaluepanel <- data.table::fread(paste0(path.value.panel, ticker.value.panels[sale.exist]))
-      if (any(dividend.exist)) df.dividendvaluepanel <- data.table::fread(paste0(path.value.panel, ticker.value.panels[dividend.exist]))
+    df.roi <- df.complete.panel[, c("date", "daily_cum_roi")]
 
-      if ( exists("df.purchasevaluepanel") ) {
+    ## start and end date
+    from <- min(df.roi$date)
+    to <- max(df.roi$date)
 
-        df.roi <- merge(df.pricequantitypanel, df.purchasevaluepanel, by = "date", all = TRUE)
+    ## file name
+    file.roi.panel <- paste0("return_on_investment_daily_", ticker, "_from_", from, "_to_", to, ".csv")
 
-        if ( exists("df.salevaluepanel") ) {
-          df.roi <- merge(df.roi, df.salevaluepanel, by = "date", all = TRUE)
-        } else {
-          df.roi$sale_cum_value <- 0
-          df.roi$sale_value <- 0
-          }
+    ## store price quantity panel as csv
+    data.table::fwrite(df.roi, paste0(path.returns.roi, file.roi.panel))
 
-        if ( exists("df.dividendvaluepanel") ) {
-          df.roi <- merge(df.roi, df.dividendvaluepanel, by = "date", all = TRUE)
-        } else {
-          df.roi$dividend_cum_value <- 0
-          df.roi$dividend_value <- 0
-          }
+    message("Daily investment return for ", ticker, " successfully created!")
 
-      }
-
-      df.roi[is.na(df.roi)] <- 0
-      df.roi <- df.roi[df.roi$cum_quantity != 0 | df.roi$sale_value != 0 | df.roi$dividend_value != 0, ]
-
-      df.roi$daily_cum_roi <- (df.roi$value + df.roi$sale_cum_value + df.roi$dividend_cum_value ) / df.roi$purchase_cum_value
-
-      df.roi <- df.roi[, c("date", "daily_cum_roi")]
-
-      ## start and end date
-      from <- min(df.roi$date)
-      to <- max(df.roi$date)
-
-      ## file name
-      filename.roi.panel <- paste0("return_on_investment_daily_", ticker, "_from_", from, "_to_", to, ".csv")
-
-      ## store price quantity panel as csv
-      data.table::fwrite(df.roi, paste0(path.returns.roi, filename.roi.panel))
-
-      message("Daily investment return for ", ticker, " successfully created!")
-
-    } else { message("No transaction value panels available.") }
-
-  } else { message("No price-quantity panel available.") }
-
+  } else { message("No complete panel available for ", ticker, ".") }
 
 }
+
+#' Get return on investment for specific period
+#'
+#' @usage get_roi_varying_periods(df.roi, period)
+#' @param df.roi A data.frame containing the complete panel.
+#' @param period An integer indicating the number of months.
+#'
+#' @return df.roi.period A data.frame containing return on investment for period.
+#'
+#' @export
+get_roi_varying_periods <-function(df.roi, period) {
+
+  df.roi.period <- df.roi[df.roi$date >= Sys.Date() - months(period), ]
+
+  index.first.period <- df.roi.period$date == min(df.roi.period$date)
+
+  df.roi.period <- df.roi.period[order(df.roi.period$date), ]
+
+  ## re-compute purchase cum value and first entry is simply equal to value
+  df.roi.period$purchase_value[index.first.period] <- df.roi.period$value[index.first.period]
+  df.roi.period$purchase_cum_value <- cumsum(df.roi.period$purchase_value)
+
+  ## re-compute dividend and sale cum value
+  df.roi.period$sale_cum_value <- cumsum(df.roi.period$sale_value)
+  df.roi.period$dividend_cum_value <- cumsum(df.roi.period$dividend_value)
+
+  df.roi.period[is.na(df.roi.period)] <- 0
+  df.roi.period <- df.roi.period[df.roi.period$cum_quantity != 0 | df.roi.period$sale_value != 0
+                                 | df.roi.period$dividend_value != 0, ]
+
+  df.roi.period$daily_cum_roi <- (df.roi.period$value + df.roi.period$sale_cum_value
+                                  + df.roi.period$dividend_cum_value ) / df.roi.period$purchase_cum_value
+
+
+  return(df.roi.period)
+
+}
+
 
 # PerformanceAnalytics::Return.cumulative
 # PerformanceAnalytics::Return.portfolio()

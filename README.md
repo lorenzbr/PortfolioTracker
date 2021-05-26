@@ -9,17 +9,7 @@ public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostat
 [![R-CMD-check](https://github.com/lorenzbr/PortfolioTracker/workflows/R-CMD-check/badge.svg)](https://github.com/lorenzbr/PortfolioTracker/actions)
 <!-- badges: end -->
 
-This R package contains functions to track the financial performance of your investment portfolio.
-
-
-## Introduction
-
-...
-
-
-## Overview
-
-...
+This R package contains functions to track the performance of your investment portfolio.
 
 
 ## Installation
@@ -67,21 +57,14 @@ PortfolioTracker::write_dividend_by_month(path)
 PortfolioTracker::write_dividend_by_yr(path)
 ```
 
-## Documentation
 
-Generally, [www.investopedia.com](https://www.investopedia.com) is a good starting point to understand the different approaches to measure portfolio performances.
+## Documentation
 
 Annualized return
 :   "An annualized total return is the geometric average amount of money earned by an investment each year over a given time period." See [here](https://www.investopedia.com/terms/a/annualized-total-return.asp) for further details.
 
 Annual return
 :   "The annual return is the return that an investment provides over a period of time, expressed as a time-weighted annual percentage." See [here](https://www.investopedia.com/terms/a/annual-return.asp) for further details.
-
-Geometric mean
-:   ...
-
-Investment return
-:   ...
 
 
 ## Contact

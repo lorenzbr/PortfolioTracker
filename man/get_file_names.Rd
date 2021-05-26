@@ -4,13 +4,7 @@
 \alias{get_file_names}
 \title{Get file names for PortfolioTracker}
 \usage{
-get_file_names(path)
-}
-\arguments{
-\item{path}{A single character string. A directory where all data are stored.}
-}
-\value{
-\code{get_file_names} returns a list with file names.
+get_file_names()
 }
 \description{
 Get file names for PortfolioTracker

@@ -9,9 +9,6 @@ get_path_names(path)
 \arguments{
 \item{path}{A single character string. A directory where all data are stored.}
 }
-\value{
-\code{get_path_names} returns a list with path names.
-}
 \description{
 Get path names for PortfolioTracker
 }

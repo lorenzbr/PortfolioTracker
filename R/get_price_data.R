@@ -7,10 +7,7 @@
 #' @export
 update_prices_based_on_transactions <- function(df.transactions, path) {
 
-  list.names <- get_names(path)
-  path.tickers <- list.names$path.tickers
-  path.prices.raw <- list.names$path.prices.raw
-  file.ticker <- list.names$file.ticker
+  get_names(path)
 
   ## unique ISINs
   isins <- unique(df.transactions$isin)
@@ -19,7 +16,7 @@ update_prices_based_on_transactions <- function(df.transactions, path) {
   update_ticker_isin(isins, path.tickers)
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
+  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
 
   ## add ticker to transaction data
   df.transactions <- merge(df.transactions, df.isin.ticker, by = "isin", all.x = TRUE)
@@ -122,9 +119,7 @@ update_prices_based_on_transactions <- function(df.transactions, path) {
 #' @export
 update_latest_prices <- function(path) {
 
-  list.names <- get_names(path)
-  path.tickers <- list.names$path.tickers
-  path.prices.raw <- list.names$path.prices.raw
+  get_names(path)
 
   ## load file names for price data
   filename.prices.raw.with.ticker <- list.files(path.prices.raw)
@@ -151,9 +146,9 @@ update_latest_prices <- function(path) {
     df.files.price.data <- df.files.price.data[df.files.price.data$last_date < today,]
 
     ## if at least one ticker is not up to date
-    if(nrow(df.files.price.data) > 0){
+    if (nrow(df.files.price.data) > 0) {
 
-      for(i in 1:nrow(df.files.price.data)){
+      for (i in 1:nrow(df.files.price.data)) {
 
         skip_to_next <- FALSE
 
@@ -162,7 +157,7 @@ update_latest_prices <- function(path) {
         from <- as.Date(df.files.price.data$last_date[i]) + 1
         ticker <- df.files.price.data$ticker[i]
 
-        if(today > from){
+        if (today > from) {
 
           ## get price data for ticker
           df.updated.prices <- get_prices_from_yahoo(ticker, from = from, to = today)
@@ -179,7 +174,7 @@ update_latest_prices <- function(path) {
 
           print(paste("Prices for", ticker, "from", from, "to", to, "successfully downloaded."))
 
-        } else {print(paste("Prices for ticker", ticker, "up to date."))}
+        } else { print(paste("Prices for ticker", ticker, "up to date.")) }
 
         }, error = function(e) { skip_to_next <- TRUE })
 

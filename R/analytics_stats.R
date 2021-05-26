@@ -6,14 +6,10 @@
 #' @export
 write_portfolio_stats <- function(path) {
 
-  list.names <- get_names(path)
-  path.returns <- list.names$path.returns
-  path.data <- list.names$path.data
-  path.transactions <- list.names$path.transactions
-  file.stats <- list.names$file.stats
+  get_names(path)
 
-  df.current <- data.table::fread(paste0(path.data, "current_portfolio.csv"))
-  df.transaction.history <- data.table::fread(paste0(path.transactions, "transaction_fullhistory.csv"))
+  df.current <- data.table::fread(paste0(path.data, file.current))
+  df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
 
   ## current total portfolio value
   total.portfolio.value <- sum(df.current$value)
@@ -47,8 +43,7 @@ write_portfolio_stats <- function(path) {
 #' @export
 get_dividends_max <- function(path, file.dividend.history = "dividends_fullhistory.csv") {
 
-  list.names <- get_names(path)
-  path.dividends <- list.names$path.dividends
+  get_names(path)
 
   ## load dividend history
   df.dividend.history <- data.table::fread(paste0(path.dividends, file.dividend.history))

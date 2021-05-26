@@ -7,11 +7,7 @@
 #' @export
 get_isins_missing_tickers <- function(path){
 
-  list.names <- get_names(path)
-  path.tickers <- list.names$path.tickers
-  path.transactions <- list.names$path.transactions
-  file.tickers <- list.names$file.tickers
-  file.transactions <- list.names$file.transactions
+  get_names(path)
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
   df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))

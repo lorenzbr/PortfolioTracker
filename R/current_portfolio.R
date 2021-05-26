@@ -6,20 +6,13 @@
 #' @export
 write_current_portfolio <- function(path) {
 
-  list.names <- get_names(path)
-  path.pricequantitypanel <- list.names$path.pricequantitypanel
-  path.tickers <- list.names$path.tickers
-  path.transactions <- list.names$path.transactions
-  path.data <- list.names$path.data
-  file.current <- list.names$file.current
-  file.tickers <- list.names$file.tickers
-  file.transactions <- list.names$file.transactions
+  get_names(path)
 
   ## load price quantity panels if exists
-  if (!rlang::is_empty(list.files(path.pricequantitypanel))) {
+  if ( !rlang::is_empty(list.files(path.pricequantity.panel)) ) {
 
-    filenames <- paste0(path.pricequantitypanel, list.files(path.pricequantitypanel))
-    list.dfs <- lapply(filenames, data.table::fread)
+    files <- paste0(path.pricequantity.panel, list.files(path.pricequantity.panel))
+    list.dfs <- lapply(files, data.table::fread)
 
     ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
     df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))

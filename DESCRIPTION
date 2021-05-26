@@ -8,7 +8,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "lorenz.brachtendorf@gmx.de",
            comment = c(ORCID = "0000-0001-7066-0838"))
-Description: This R package contains functions to track the financial performance of your investment portfolio.
+Description: Track the performance of your investment portfolio.
 Imports: 
     data.table,
     dplyr,
