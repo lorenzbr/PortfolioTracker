@@ -9,7 +9,7 @@ public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostat
 [![R-CMD-check](https://github.com/lorenzbr/PortfolioTracker/workflows/R-CMD-check/badge.svg)](https://github.com/lorenzbr/PortfolioTracker/actions)
 <!-- badges: end -->
 
-This R package contains functions to track the performance of your investment portfolio. It works with the Shiny App [shinyPortfolioTracker](https://github.com/lorenzbr/shinyPortfolioTracker).
+This R package contains functions to track the performance of your investment portfolio. It works with the Shiny App [shinyPortfolioTracker](https://github.com/lorenzbr/shinyPortfolioTracker#readme).
 
 
 ## Installation
@@ -21,7 +21,7 @@ devtools::install_github("lorenzbr/PortfolioTracker")
 
 ## Usage
 
-Please have a look at the Shiny App [shinyPortfolioTracker](https://github.com/lorenzbr/shinyPortfolioTracker).
+Please have a look at the Shiny App [shinyPortfolioTracker](https://github.com/lorenzbr/shinyPortfolioTracker#readme).
 
 ```R
 # Example
