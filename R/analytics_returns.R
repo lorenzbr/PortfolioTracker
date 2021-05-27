@@ -317,33 +317,37 @@ get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max
   if(period == "max") df.complete.panel.period <- df.complete.panel
 
 
-  if(period == "months" || period == "weeks") {
+  if ( nrow(df.complete.panel.period) > 0) {
 
-    index.first.period <- df.complete.panel.period$date == min(df.complete.panel.period$date)
+    if(period == "months" || period == "weeks") {
 
-    df.complete.panel.period <- df.complete.panel.period[order(df.complete.panel.period$date), ]
+      index.first.period <- df.complete.panel.period$date == min(df.complete.panel.period$date)
 
-    ## re-compute purchase cum value and first entry is simply equal to value
-    df.complete.panel.period$purchase_value[index.first.period] <- df.complete.panel.period$value[index.first.period]
-    df.complete.panel.period$purchase_cum_value <- cumsum(df.complete.panel.period$purchase_value)
+      df.complete.panel.period <- df.complete.panel.period[order(df.complete.panel.period$date), ]
 
-    ## re-compute dividend and sale cum value
-    df.complete.panel.period$sale_cum_value <- cumsum(df.complete.panel.period$sale_value)
-    df.complete.panel.period$dividend_cum_value <- cumsum(df.complete.panel.period$dividend_value)
+      ## re-compute purchase cum value and first entry is simply equal to value
+      df.complete.panel.period$purchase_value[index.first.period] <- df.complete.panel.period$value[index.first.period]
+      df.complete.panel.period$purchase_cum_value <- cumsum(df.complete.panel.period$purchase_value)
+
+      ## re-compute dividend and sale cum value
+      df.complete.panel.period$sale_cum_value <- cumsum(df.complete.panel.period$sale_value)
+      df.complete.panel.period$dividend_cum_value <- cumsum(df.complete.panel.period$dividend_value)
+
+    }
+
+    df.complete.panel.period[is.na(df.complete.panel.period)] <- 0
+    df.complete.panel.period <- df.complete.panel.period[df.complete.panel.period$cum_quantity != 0
+                                                         | df.complete.panel.period$sale_value != 0
+                                                         | df.complete.panel.period$dividend_value != 0, ]
+
+    df.complete.panel.period$daily_cum_roi <- (df.complete.panel.period$value + df.complete.panel.period$sale_cum_value
+                                    + df.complete.panel.period$dividend_cum_value ) / df.complete.panel.period$purchase_cum_value
+
+    df.roi.period <- df.complete.panel.period[, c("date", "daily_cum_roi")]
+
+    return(df.roi.period)
 
   }
-
-  df.complete.panel.period[is.na(df.complete.panel.period)] <- 0
-  df.complete.panel.period <- df.complete.panel.period[df.complete.panel.period$cum_quantity != 0
-                                                       | df.complete.panel.period$sale_value != 0
-                                                       | df.complete.panel.period$dividend_value != 0, ]
-
-  df.complete.panel.period$daily_cum_roi <- (df.complete.panel.period$value + df.complete.panel.period$sale_cum_value
-                                  + df.complete.panel.period$dividend_cum_value ) / df.complete.panel.period$purchase_cum_value
-
-  df.roi.period <- df.complete.panel.period[, c("date", "daily_cum_roi")]
-
-  return(df.roi.period)
 
 }
 
