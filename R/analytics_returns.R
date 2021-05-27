@@ -246,11 +246,11 @@ write_portfolio_return <- function(path) {
 
 #' Write cumulative daily investment returns to a csv file
 #'
-#' @usage write_cum_investment_returns_daily(path)
+#' @usage write_roi_by_period_all(path)
 #' @param path A single character string. Directory where all data are stored.
 #'
 #' @export
-write_cum_investment_returns_daily <- function(path) {
+write_roi_by_period_all <- function(path) {
 
   get_names(path)
 
@@ -260,18 +260,18 @@ write_cum_investment_returns_daily <- function(path) {
   tickers <- get_tickers_from_transactions(df.transaction.history, path)
 
   ## write cumulative daily investment return for all tickers
-  output <- mapply(write_cum_investment_return_daily, tickers, MoreArgs = list(path))
+  output <- mapply(write_roi_by_period, tickers, MoreArgs = list(path))
 
 }
 
 #' Write cumulative daily investment returns to a csv file
 #'
-#' @usage write_cum_investment_return_daily(ticker, path)
+#' @usage write_roi_by_period(ticker, path)
 #' @param ticker A single character string containing the ticker.
 #' @param path A single character string. Directory where all data are stored.
 #'
 #' @export
-write_cum_investment_return_daily <- function(ticker, path) {
+write_roi_by_period <- function(ticker, path) {
 
   get_names(path)
 
@@ -280,15 +280,7 @@ write_cum_investment_return_daily <- function(ticker, path) {
     df.complete.panel <- data.table::fread(paste0(path.complete.panel,
                                               list.files(paste0(path.complete.panel), pattern = ticker)))
 
-
-    df.complete.panel[is.na(df.complete.panel)] <- 0
-    df.complete.panel <- df.complete.panel[df.complete.panel$cum_quantity != 0 | df.complete.panel$sale_value != 0
-                                           | df.complete.panel$dividend_value != 0, ]
-
-    df.complete.panel$daily_cum_roi <- (df.complete.panel$value + df.complete.panel$sale_cum_value
-                                        + df.complete.panel$dividend_cum_value ) / df.complete.panel$purchase_cum_value
-
-    df.roi <- df.complete.panel[, c("date", "daily_cum_roi")]
+    df.roi <- get_roi_by_period(df.complete.panel, nb_period = NULL, period = "max")
 
     ## start and end date
     from <- min(df.roi$date)
@@ -308,36 +300,48 @@ write_cum_investment_return_daily <- function(ticker, path) {
 
 #' Get return on investment for specific period
 #'
-#' @usage get_roi_varying_periods(df.roi, period)
-#' @param df.roi A data.frame containing the complete panel.
-#' @param period An integer indicating the number of months.
+#' @usage get_roi_by_period(df.complete.panel, nb_period = NULL, period = "max")
+#' @param df.complete.panel A data.frame containing the complete panel.
+#' @param nb_period An integer indicating the number of months. Default is \emph{NULL}.
+#' @param period A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.
 #'
-#' @return df.roi.period A data.frame containing return on investment for period.
+#' @return df.roi.period A data.frame containing return on investment for a given period.
 #'
 #' @export
-get_roi_varying_periods <-function(df.roi, period) {
+get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max") {
 
-  df.roi.period <- df.roi[df.roi$date >= Sys.Date() - months(period), ]
+  if(period == "months") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - months(nb_period), ]
 
-  index.first.period <- df.roi.period$date == min(df.roi.period$date)
+  if(period == "weeks") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - lubridate::weeks(nb_period), ]
 
-  df.roi.period <- df.roi.period[order(df.roi.period$date), ]
+  if(period == "max") df.complete.panel.period <- df.complete.panel
 
-  ## re-compute purchase cum value and first entry is simply equal to value
-  df.roi.period$purchase_value[index.first.period] <- df.roi.period$value[index.first.period]
-  df.roi.period$purchase_cum_value <- cumsum(df.roi.period$purchase_value)
 
-  ## re-compute dividend and sale cum value
-  df.roi.period$sale_cum_value <- cumsum(df.roi.period$sale_value)
-  df.roi.period$dividend_cum_value <- cumsum(df.roi.period$dividend_value)
+  if(period == "months" || period == "weeks") {
 
-  df.roi.period[is.na(df.roi.period)] <- 0
-  df.roi.period <- df.roi.period[df.roi.period$cum_quantity != 0 | df.roi.period$sale_value != 0
-                                 | df.roi.period$dividend_value != 0, ]
+    index.first.period <- df.complete.panel.period$date == min(df.complete.panel.period$date)
 
-  df.roi.period$daily_cum_roi <- (df.roi.period$value + df.roi.period$sale_cum_value
-                                  + df.roi.period$dividend_cum_value ) / df.roi.period$purchase_cum_value
+    df.complete.panel.period <- df.complete.panel.period[order(df.complete.panel.period$date), ]
 
+    ## re-compute purchase cum value and first entry is simply equal to value
+    df.complete.panel.period$purchase_value[index.first.period] <- df.complete.panel.period$value[index.first.period]
+    df.complete.panel.period$purchase_cum_value <- cumsum(df.complete.panel.period$purchase_value)
+
+    ## re-compute dividend and sale cum value
+    df.complete.panel.period$sale_cum_value <- cumsum(df.complete.panel.period$sale_value)
+    df.complete.panel.period$dividend_cum_value <- cumsum(df.complete.panel.period$dividend_value)
+
+  }
+
+  df.complete.panel.period[is.na(df.complete.panel.period)] <- 0
+  df.complete.panel.period <- df.complete.panel.period[df.complete.panel.period$cum_quantity != 0
+                                                       | df.complete.panel.period$sale_value != 0
+                                                       | df.complete.panel.period$dividend_value != 0, ]
+
+  df.complete.panel.period$daily_cum_roi <- (df.complete.panel.period$value + df.complete.panel.period$sale_cum_value
+                                  + df.complete.panel.period$dividend_cum_value ) / df.complete.panel.period$purchase_cum_value
+
+  df.roi.period <- df.complete.panel.period[, c("date", "daily_cum_roi")]
 
   return(df.roi.period)
 

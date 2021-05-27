@@ -460,6 +460,9 @@ write_complete_panel <- function(ticker, path) {
       df.panel[is.na(df.panel)] <- 0
       df.panel <- df.panel[df.panel$cum_quantity != 0 | df.panel$sale_value != 0 | df.panel$dividend_value != 0, ]
 
+      ## add ticker (makes it a bit easier when using lapply to read all panels)
+      df.panel$ticker <- ticker
+
       ## start and end date
       from <- min(df.panel$date)
       to <- max(df.panel$date)
