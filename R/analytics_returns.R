@@ -310,16 +310,18 @@ write_roi_by_period <- function(ticker, path) {
 #' @export
 get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max") {
 
-  if(period == "months") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - months(nb_period), ]
+  if (period == "months") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - months(nb_period), ]
 
-  if(period == "weeks") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - lubridate::weeks(nb_period), ]
+  if (period == "weeks") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - lubridate::weeks(nb_period), ]
 
-  if(period == "max") df.complete.panel.period <- df.complete.panel
+  if (period == "days") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - lubridate::days(nb_period), ]
+
+  if (period == "max") df.complete.panel.period <- df.complete.panel
 
 
   if ( nrow(df.complete.panel.period) > 0) {
 
-    if(period == "months" || period == "weeks") {
+    if(period == "months" || period == "weeks" || period == "days") {
 
       index.first.period <- df.complete.panel.period$date == min(df.complete.panel.period$date)
 
