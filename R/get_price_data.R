@@ -1,8 +1,8 @@
 #' Update and store prices as csv based on new financial transactions
 #'
 #' @usage update_prices_based_on_transactions(df.transactions, path)
-#' @param df.transactions A data frame. Results from [BankStatementParser::get_transactions()]
-#' @param path A single character string. Folder where all data are stored.
+#' @param df.transactions A data.frame. Results from [BankStatementParser::get_transactions()]
+#' @param path A single character string. Path where data are stored.
 #'
 #' @export
 update_prices_based_on_transactions <- function(df.transactions, path) {
@@ -114,7 +114,7 @@ update_prices_based_on_transactions <- function(df.transactions, path) {
 #' Update most recent prices and store as csv
 #'
 #' @usage update_latest_prices(path)
-#' @param path A single character string. Folder where all data are stored.
+#' @param path A single character string. Path where data are stored.
 #'
 #' @export
 update_latest_prices <- function(path) {

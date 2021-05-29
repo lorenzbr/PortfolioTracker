@@ -390,7 +390,7 @@ write_all_value_panels <- function(df.transaction.history, path) {
 #' Write complete panels to a csv file
 #'
 #' @usage write_complete_panels(path)
-#' @param path A single character string. Directory where all data are stored.
+#' @param path A single character string. Path where data are stored.
 #'
 #' @export
 write_complete_panels <- function(path) {
@@ -411,7 +411,7 @@ write_complete_panels <- function(path) {
 #'
 #' @usage write_complete_panel(ticker, path)
 #' @param ticker A single character string containing the ticker.
-#' @param path A single character string. Directory where all data are stored.
+#' @param path A single character string. Path where data are stored.
 #'
 #' @export
 write_complete_panel <- function(ticker, path) {
@@ -485,7 +485,7 @@ write_complete_panel <- function(ticker, path) {
 #'
 #' @usage write_investment_value_panel(ticker, path)
 #' @param ticker A single character string containing the ticker symbol.
-#' @param path A single character string containing the directory of the project.
+#' @param path A single character string. Path where data are stored.
 #'
 #' @export
 #'

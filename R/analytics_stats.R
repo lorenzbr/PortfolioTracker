@@ -1,7 +1,7 @@
 #' Write portfolio statistics
 #'
 #' @usage write_portfolio_stats(path)
-#' @param path A single character string. Directory where all data are stored.
+#' @param path A single character string. Path where data are stored.
 #'
 #' @export
 write_portfolio_stats <- function(path) {
@@ -37,7 +37,7 @@ write_portfolio_stats <- function(path) {
 #' Get total dividend payments
 #'
 #' @usage get_dividends_max(path, file.dividend.history = "dividends_fullhistory.csv")
-#' @param path A single character string. Directory where all data are stored.
+#' @param path A single character string. Path where data are stored.
 #' @param file.dividend.history A single character string. Name of csv containing full history of dividends.
 #'
 #' @export

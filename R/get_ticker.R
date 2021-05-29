@@ -1,7 +1,7 @@
 #' Create ISIN-ticker table as csv if no such file exists
 #'
 #' @usage init_isin_ticker(path, file = "isin_ticker.csv")
-#' @param path A single character string. Folder where all data are stored.
+#' @param path A single character string. Path where data are stored.
 #' @param file A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)
 #'
 #' @export

@@ -1,7 +1,7 @@
 #' Create directory for PortfolioTracker
 #'
 #' @usage create_portfoliotracker_dir(path)
-#' @param path A single character string. Folder where all data are stored.
+#' @param path A single character string. Path where data are stored.
 #' @return create_portfoliotracker_dir returns a list with path names for data storage
 #'
 #' @export

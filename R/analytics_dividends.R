@@ -1,8 +1,8 @@
 #' Write history of dividends in a csv file
 #'
 #' @usage write_dividend_history(df.transaction.history, path)
-#' @param df.transaction.history data frame containing history of transactions.
-#' @param path A single character string. Directory where all data are stored.
+#' @param df.transaction.history data.frame containing history of transactions.
+#' @param path A single character string. Path where data are stored.
 #'
 #' @export
 write_dividend_history <- function(df.transaction.history, path) {
@@ -31,7 +31,7 @@ write_dividend_history <- function(df.transaction.history, path) {
 #' Write dividend payments by year to a csv file
 #'
 #' @usage write_dividend_by_yr(path)
-#' @param path A single character string. Directory where all data are stored.
+#' @param path A single character string. Path where data are stored.
 #'
 #' @export
 #' @importFrom magrittr %>%
@@ -45,7 +45,8 @@ write_dividend_by_yr <- function(path) {
     df.dividend.history <- data.table::fread(paste0(path.dividends, file.dividend.history))
 
     ## storno needs to be a negative amount (i.e. payment)
-    df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"] <- -df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"]
+    is.storno <- df.dividend.history$transaction_type == "Storno - Dividend"
+    df.dividend.history$transaction_value[is.storno] <- (-1) * df.dividend.history$transaction_value[is.storno]
 
     df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date, "%d-%m-%y")
 
@@ -75,7 +76,7 @@ write_dividend_by_yr <- function(path) {
 #' Write dividend payments by month to a csv file
 #'
 #' @usage write_dividend_by_month(path)
-#' @param path A single character string. Directory where all data are stored.
+#' @param path A single character string. Path where data are stored.
 #'
 #' @export
 #' @importFrom magrittr %>%
@@ -90,7 +91,8 @@ write_dividend_by_month <- function(path) {
     df.dividend.history <- data.table::fread(paste0(path.dividends, file.dividend.history))
 
     ## storno needs to be a negative amount (i.e., payment)
-    df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"] <- -df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"]
+    is.storno <- df.dividend.history$transaction_type == "Storno - Dividend"
+    df.dividend.history$transaction_value[is.storno] <- (-1) * df.dividend.history$transaction_value[is.storno]
 
     df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date, "%d-%m-%y")
 
