@@ -316,6 +316,7 @@ get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max
 
     first.date <- Sys.Date() - months(nb_period)
 
+    j <- 1
     while ( is.na(first.date) && j < 10) {
       first.date <- (Sys.Date() - j) - months(nb_period)
       j = j + 1
@@ -325,6 +326,7 @@ get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max
 
     first.date <- Sys.Date() - lubridate::weeks(nb_period)
 
+    j <- 1
     while ( is.na(first.date) && j < 10 ) {
       first.date <- (Sys.Date() - j) - lubridate::weeks(nb_period)
       j = j + 1
@@ -334,6 +336,7 @@ get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max
 
     first.date <- Sys.Date() - lubridate::days(nb_period)
 
+    j <- 1
     while ( is.na(first.date) && j < 10) {
       first.date <- (Sys.Date() - j) - lubridate::days(nb_period)
       j = j + 1
