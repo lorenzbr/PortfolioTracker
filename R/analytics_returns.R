@@ -310,18 +310,44 @@ write_roi_by_period <- function(ticker, path) {
 #' @export
 get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max") {
 
-  if (period == "months") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - months(nb_period), ]
 
-  if (period == "weeks") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - lubridate::weeks(nb_period), ]
 
-  if (period == "days") df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= Sys.Date() - lubridate::days(nb_period), ]
+  if (period == "months") {
 
-  if (period == "max") df.complete.panel.period <- df.complete.panel
+    first.date <- Sys.Date() - months(nb_period)
 
+    while ( is.na(first.date) && j < 10) {
+      first.date <- (Sys.Date() - j) - months(nb_period)
+      j = j + 1
+    }
+
+  } else if (period == "weeks") {
+
+    first.date <- Sys.Date() - lubridate::weeks(nb_period)
+
+    while ( is.na(first.date) && j < 10 ) {
+      first.date <- (Sys.Date() - j) - lubridate::weeks(nb_period)
+      j = j + 1
+    }
+
+  } else if (period == "days") {
+
+    first.date <- Sys.Date() - lubridate::days(nb_period)
+
+    while ( is.na(first.date) && j < 10) {
+      first.date <- (Sys.Date() - j) - lubridate::days(nb_period)
+      j = j + 1
+    }
+
+  } else if (period == "max") { df.complete.panel.period <- df.complete.panel }
+
+  if (period == "months" || period == "weeks" || period == "days") {
+    df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= first.date, ]
+  }
 
   if ( nrow(df.complete.panel.period) > 0) {
 
-    if(period == "months" || period == "weeks" || period == "days") {
+    if (period == "months" || period == "weeks" || period == "days") {
 
       index.first.period <- df.complete.panel.period$date == min(df.complete.panel.period$date)
 
