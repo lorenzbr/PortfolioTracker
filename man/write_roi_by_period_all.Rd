@@ -7,7 +7,7 @@
 write_roi_by_period_all(path)
 }
 \arguments{
-\item{path}{A single character string. Directory where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Write cumulative daily investment returns to a csv file

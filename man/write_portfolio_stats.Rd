@@ -7,7 +7,7 @@
 write_portfolio_stats(path)
 }
 \arguments{
-\item{path}{A single character string. Directory where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Write portfolio statistics

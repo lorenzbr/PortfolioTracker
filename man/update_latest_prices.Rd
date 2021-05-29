@@ -7,7 +7,7 @@
 update_latest_prices(path)
 }
 \arguments{
-\item{path}{A single character string. Folder where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Update most recent prices and store as csv

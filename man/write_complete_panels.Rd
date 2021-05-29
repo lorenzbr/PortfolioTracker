@@ -7,7 +7,7 @@
 write_complete_panels(path)
 }
 \arguments{
-\item{path}{A single character string. Directory where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Write complete panels to a csv file

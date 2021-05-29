@@ -9,7 +9,7 @@ write_complete_panel(ticker, path)
 \arguments{
 \item{ticker}{A single character string containing the ticker.}
 
-\item{path}{A single character string. Directory where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Write complete panel to a csv file

@@ -9,7 +9,7 @@ write_investment_value_panel(ticker, path)
 \arguments{
 \item{ticker}{A single character string containing the ticker symbol.}
 
-\item{path}{A single character string containing the directory of the project.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Write investment value panel for given ticker

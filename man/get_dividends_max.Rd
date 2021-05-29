@@ -7,7 +7,7 @@
 get_dividends_max(path, file.dividend.history = "dividends_fullhistory.csv")
 }
 \arguments{
-\item{path}{A single character string. Directory where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 
 \item{file.dividend.history}{A single character string. Name of csv containing full history of dividends.}
 }

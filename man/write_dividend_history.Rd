@@ -7,9 +7,9 @@
 write_dividend_history(df.transaction.history, path)
 }
 \arguments{
-\item{df.transaction.history}{data frame containing history of transactions.}
+\item{df.transaction.history}{data.frame containing history of transactions.}
 
-\item{path}{A single character string. Directory where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Write history of dividends in a csv file

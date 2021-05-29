@@ -9,7 +9,7 @@ write_default_target_shares(df.target.shares, path)
 \arguments{
 \item{df.target.shares}{A data frame containing a column for \code{isin} (character) and \code{target_share} (numeric)}
 
-\item{path}{A single character string. Folder where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Write default target shares to csv file

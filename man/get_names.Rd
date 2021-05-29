@@ -7,7 +7,7 @@
 get_names(path)
 }
 \arguments{
-\item{path}{A single character string. A directory where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Get path and file names for PortfolioTracker

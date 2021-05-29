@@ -7,7 +7,7 @@
 write_dividend_by_yr(path)
 }
 \arguments{
-\item{path}{A single character string. Directory where all data are stored.}
+\item{path}{A single character string. Path where data are stored.}
 }
 \description{
 Write dividend payments by year to a csv file
