@@ -9,15 +9,22 @@ get_isins_missing_tickers <- function(path){
 
   get_names(path)
 
-  ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
-  df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
+  transaction.history.exists <- file.exists(file.path(path.transactions.file.transactions))
+  isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-  ## missing tickers
-  df.missings <- dplyr::anti_join(df.transaction.history, df.isin.ticker, by = "isin")
+  if (transaction.history.exists && isin.ticker.exists) {
 
-  df.missings <- df.missings[, c("isin", "wkn", "name")]
+    ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
+    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+    df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
 
-  return(df.missings)
+    ## missing tickers
+    df.missings <- dplyr::anti_join(df.transaction.history, df.isin.ticker, by = "isin")
+
+    df.missings <- df.missings[, c("isin", "wkn", "name")]
+
+    return(df.missings)
+
+  }
 
 }

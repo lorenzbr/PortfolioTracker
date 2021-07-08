@@ -15,97 +15,103 @@ update_prices_based_on_transactions <- function(df.transactions, path) {
   ## update ISIN-ticker table
   update_ticker_isin(isins, path.tickers)
 
-  ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
+  isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-  ## add ticker to transaction data
-  df.transactions <- merge(df.transactions, df.isin.ticker, by = "isin", all.x = TRUE)
+  if (isin.ticker.exists) {
 
-  ## transaction date to date format
-  df.transactions$transaction_date <- as.Date(df.transactions$transaction_date, "%d-%m-%Y")
+    ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
+    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-  ## get current date
-  today <- Sys.Date()
+    ## add ticker to transaction data
+    df.transactions <- merge(df.transactions, df.isin.ticker, by = "isin", all.x = TRUE)
 
-  ## for loop over all transactions in file
-  for (i in 1:nrow(df.transactions)) {
+    ## transaction date to date format
+    df.transactions$transaction_date <- as.Date(df.transactions$transaction_date, "%d-%m-%Y")
 
-    tryCatch({
+    ## get current date
+    today <- Sys.Date()
 
-    ## select transaction date and ticker
-    transaction.date <- df.transactions$transaction_date[i]
-    ticker <- df.transactions$ticker[i]
+    ## for loop over all transactions in file
+    for (i in 1:nrow(df.transactions)) {
 
-    ## check whether price data for this ticker based on transaction date already exists
-    # if no: continue
-    # if yes: 1) if the focal one is younger, don't do anything 2) if the focal one is older, continue
+      tryCatch({
 
-    ## get all price data with same ticker
-    df.prices.same.ticker <- data.frame(filename = list.files(path.prices.raw, pattern = ticker))
+      ## select transaction date and ticker
+      transaction.date <- df.transactions$transaction_date[i]
+      ticker <- df.transactions$ticker[i]
 
-    ## initialize earliest.date (required to have an existing date)
-    earliest.date <- as.Date("1900-01-01", "%Y-%m-%d")
+      ## check whether price data for this ticker based on transaction date already exists
+      # if no: continue
+      # if yes: 1) if the focal one is younger, don't do anything 2) if the focal one is older, continue
 
-    ## identify earliest date for each of those files and compare to transaction.date
-    if(nrow(df.prices.same.ticker) > 0){
+      ## get all price data with same ticker
+      df.prices.same.ticker <- data.frame(filename = list.files(path.prices.raw, pattern = ticker))
 
-      df.prices.same.ticker$first_date <- stringr::str_match(df.prices.same.ticker$filename, "from_(.*?)_to")[,2]
-      df.prices.same.ticker$first_date <- as.Date(df.prices.same.ticker$first_date, "%Y-%m-%d")
-      df.prices.same.ticker <- df.prices.same.ticker[df.prices.same.ticker$first_date == min(df.prices.same.ticker$first_date),]
-      earliest.date <- unique(df.prices.same.ticker$first_date)
+      ## initialize earliest.date (required to have an existing date)
+      earliest.date <- as.Date("1900-01-01", "%Y-%m-%d")
 
-      ## if new transaction is older than earliest date updated "to" date
-      if(transaction.date < earliest.date & !(is.na(earliest.date))){today <- earliest.date - 1}
+      ## identify earliest date for each of those files and compare to transaction.date
+      if (nrow(df.prices.same.ticker) > 0) {
 
-    } ## end of if statement
+        df.prices.same.ticker$first_date <- stringr::str_match(df.prices.same.ticker$filename, "from_(.*?)_to")[, 2]
+        df.prices.same.ticker$first_date <- as.Date(df.prices.same.ticker$first_date, "%Y-%m-%d")
+        df.prices.same.ticker <- df.prices.same.ticker[df.prices.same.ticker$first_date == min(df.prices.same.ticker$first_date), ]
+        earliest.date <- unique(df.prices.same.ticker$first_date)
 
-    ## file name for the data
-    filename.data.raw.prices <- paste0("prices_ticker_", ticker, "_from_", transaction.date, "_to_", today, ".csv")
+        ## if new transaction is older than earliest date updated "to" date
+        if(transaction.date < earliest.date & !(is.na(earliest.date))){today <- earliest.date - 1}
 
-    ## if transaction.date is older than earliest.date of existing transactions or no prices with same ticker exist, do this
-    if(transaction.date < earliest.date | nrow(df.prices.same.ticker) == 0){
+      }
 
-      ## check whether such a file exists already, then no need to download again
-      if(!(file.exists(paste0(path.prices.raw, filename.data.raw.prices)))){
+      ## file name for the data
+      filename.data.raw.prices <- paste0("prices_ticker_", ticker, "_from_", transaction.date, "_to_", today, ".csv")
 
-        ## get price data from Yahoo Finance
-        df.ticker.prices <- get_prices_from_yahoo(ticker, from = transaction.date, to = today)
+      ## if transaction.date is older than earliest.date of existing transactions or no prices with same ticker exist, do this
+      if (transaction.date < earliest.date | nrow(df.prices.same.ticker) == 0) {
 
-        ## start and end date
-        from <- min(df.ticker.prices$date)
-        to <- max(df.ticker.prices$date)
+        ## check whether such a file exists already, then no need to download again
+        if ( !(file.exists(paste0(path.prices.raw, filename.data.raw.prices))) ) {
 
-        ## file name for the data
-        filename.data.raw.prices <- paste0("prices_ticker_", ticker, "_from_", from, "_to_", to, ".csv")
+          ## get price data from Yahoo Finance
+          df.ticker.prices <- get_prices_from_yahoo(ticker, from = transaction.date, to = today)
 
-        ## store as csv in raw price data
-        data.table::fwrite(df.ticker.prices, paste0(path.prices.raw, filename.data.raw.prices))
+          ## start and end date
+          from <- min(df.ticker.prices$date)
+          to <- max(df.ticker.prices$date)
 
-        if (today != Sys.Date()) {
+          ## file name for the data
+          filename.data.raw.prices <- paste0("prices_ticker_", ticker, "_from_", from, "_to_", to, ".csv")
 
-          print(paste("Older transaction: Price data update for", ticker, "from", transaction.date, "to",
-                      today, "successfully downloaded."))
+          ## store as csv in raw price data
+          data.table::fwrite(df.ticker.prices, paste0(path.prices.raw, filename.data.raw.prices))
 
-        } else {print(paste("Price data for", ticker, "from", transaction.date, "to", today, "successfully downloaded."))}
+          if (today != Sys.Date()) {
 
-      } else {
+            print(paste("Older transaction: Price data update for", ticker, "from", transaction.date, "to",
+                        today, "successfully downloaded."))
 
-        print(paste("Price data for", ticker, "from", transaction.date, "to", today, "already downloaded.", " File",
-                    filename.data.raw.prices, "exists already."))
+          } else {print(paste("Price data for", ticker, "from", transaction.date, "to", today, "successfully downloaded."))}
 
-      } ## end of else if condition which checks whether file already exists
+        } else {
 
-    } else {print("Prices based on older transaction already exist.")} ## end of if else statement: transaction.date older than any other or no transactions exist
+          print(paste("Price data for", ticker, "from", transaction.date, "to", today, "already downloaded.", " File",
+                      filename.data.raw.prices, "exists already."))
 
-    }, error = function(cond){
+        } ## end of else if condition which checks whether file already exists
 
-      message(paste0("No prices for ticker '", ticker, "' available."))
-      message("Original message:")
-      message(cond)
+      } else {print("Prices based on older transaction already exist.")} ## end of if else statement: transaction.date older than any other or no transactions exist
+
+      }, error = function(cond){
+
+        message(paste0("No prices for ticker '", ticker, "' available."))
+        message("Original message:")
+        message(cond)
+
+      }
+
+      )
 
     }
-
-    )
 
   }
 

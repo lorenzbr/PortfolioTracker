@@ -103,11 +103,6 @@ write_annualized_returns <- function(path) {
 
   get_names(path)
 
-  df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
-
-  df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
-
   returns.period <- "daily"
 
   file.name <- list.files(path.returns, pattern = returns.period)
@@ -149,24 +144,37 @@ write_annualized_returns <- function(path) {
   df.annualized$ticker <- rownames(df.annualized)
   df.annualized <- df.annualized[, c("ticker", col.names)]
 
-  df.ticker.date <- df.transaction.history[df.transaction.history$transaction_type == "Purchase",
-                                                      c("ticker", "transaction_date")]
-  names(df.ticker.date)[names(df.ticker.date) == "transaction_date"] <- "date"
-  df.ticker.date$date <- as.Date(df.ticker.date$date, "%d-%m-%Y")
-  df.ticker.date <- df.ticker.date %>% dplyr::group_by(.data$ticker) %>% dplyr::filter(date == min(.data$date))
-  df.ticker.date <- df.ticker.date %>% dplyr::group_by(.data$ticker) %>% dplyr::sample_n(size = 1)
-  df.ticker.date$age_yrs <- floor(lubridate::time_length(difftime(Sys.Date(), df.ticker.date$date), "years"))
 
-  ## make return NA or "-" if column year greater than age_yrs
-  df.annualized <- merge(df.annualized, df.ticker.date, by = "ticker")
-  for (i in 1:nrow(df.annualized)) {
-    incomplete.positions <- which(df.annualized$age_yrs[i] < annualize.return.periods) + 1
-    df.annualized[i, incomplete.positions] <- NA
+  transaction.history.exists <- file.exists(file.path(path.transactions.file.transactions))
+  isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
+
+  if (transaction.history.exists && isin.ticker.exists) {
+
+    df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
+    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+
+    df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+
+    df.ticker.date <- df.transaction.history[df.transaction.history$transaction_type == "Purchase",
+                                                        c("ticker", "transaction_date")]
+    names(df.ticker.date)[names(df.ticker.date) == "transaction_date"] <- "date"
+    df.ticker.date$date <- as.Date(df.ticker.date$date, "%d-%m-%Y")
+    df.ticker.date <- df.ticker.date %>% dplyr::group_by(.data$ticker) %>% dplyr::filter(date == min(.data$date))
+    df.ticker.date <- df.ticker.date %>% dplyr::group_by(.data$ticker) %>% dplyr::sample_n(size = 1)
+    df.ticker.date$age_yrs <- floor(lubridate::time_length(difftime(Sys.Date(), df.ticker.date$date), "years"))
+
+    ## make return NA or "-" if column year greater than age_yrs
+    df.annualized <- merge(df.annualized, df.ticker.date, by = "ticker")
+    for (i in 1:nrow(df.annualized)) {
+      incomplete.positions <- which(df.annualized$age_yrs[i] < annualize.return.periods) + 1
+      df.annualized[i, incomplete.positions] <- NA
+    }
+
+    df.annualized <- df.annualized[, names(df.annualized) != "age_yrs" & names(df.annualized) != "date"]
+
+    data.table::fwrite(df.annualized, paste0(path.returns, file.returns.annualized))
+
   }
-
-  df.annualized <- df.annualized[, names(df.annualized) != "age_yrs" & names(df.annualized) != "date"]
-
-  data.table::fwrite(df.annualized, paste0(path.returns, file.returns.annualized))
 
 }
 
@@ -180,10 +188,10 @@ write_portfolio_return <- function(path) {
 
   get_names(path)
 
-  df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
-
-  df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+  # df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
+  # df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+  #
+  # df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
 
   returns.period <- "daily"
 
@@ -198,7 +206,6 @@ write_portfolio_return <- function(path) {
   df.returns[is.na(df.returns)] <- 0
 
   xts.returns.max <- xts::as.xts(df.returns)
-
 
 
   files.pricequantity.panels <- list.files(path.pricequantity.panel)

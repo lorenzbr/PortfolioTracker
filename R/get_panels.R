@@ -15,23 +15,29 @@ write_quantity_panels <- function(df.transaction.history, path) {
   ## convert transaction date into date type
   df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date, "%d-%m-%Y")
 
-  ## get table that converts ISIN to ticker
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
+  isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-  ## add ticker to transaction data
-  df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+  if (isin.ticker.exists) {
 
-  ## all tickers
-  tickers <- unique(df.transaction.history$ticker)
+    ## get table that converts ISIN to ticker
+    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-  ## delete all files in folder
-  if ( !rlang::is_empty(list.files(path.quantity.panel)) ) {
-    file.remove(paste0(path.quantity.panel, list.files(path.quantity.panel)))
+    ## add ticker to transaction data
+    df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+
+    ## all tickers
+    tickers <- unique(df.transaction.history$ticker)
+
+    ## delete all files in folder
+    if ( !rlang::is_empty(list.files(path.quantity.panel)) ) {
+      file.remove(paste0(path.quantity.panel, list.files(path.quantity.panel)))
+    }
+
+    ## create quantity panels for all tickers
+    output <- mapply(write_quantity_panel, tickers,
+                     MoreArgs = list(df.transaction.history, path.quantity.panel))
+
   }
-
-  ## create quantity panels for all tickers
-  output <- mapply(write_quantity_panel, tickers,
-                   MoreArgs = list(df.transaction.history, path.quantity.panel))
 
 }
 
@@ -367,23 +373,30 @@ write_all_value_panels <- function(df.transaction.history, path) {
   ## convert transaction date into date type
   df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date, "%d-%m-%Y")
 
-  ## get table that converts ISIN to ticker
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
+  isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-  ## add ticker to transaction data if not yet exists
-  if( !any( names(df.transaction.history) == "ticker") ) df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+  if (isin.ticker.exists) {
 
-  ## all tickers
-  tickers <- unique(df.transaction.history$ticker)
+    ## get table that converts ISIN to ticker
+    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-  ## delete all files in folder
-  if ( !rlang::is_empty(list.files(path.value.panel)) ) {
-    file.remove(paste0(path.value.panel, list.files(path.value.panel)))
+    ## add ticker to transaction data if not yet exists
+    if( !any( names(df.transaction.history) == "ticker") ) df.transaction.history <- merge(df.transaction.history,
+                                                                                           df.isin.ticker, by = "isin")
+
+    ## all tickers
+    tickers <- unique(df.transaction.history$ticker)
+
+    ## delete all files in folder
+    if ( !rlang::is_empty(list.files(path.value.panel)) ) {
+      file.remove(paste0(path.value.panel, list.files(path.value.panel)))
+    }
+
+    ## mapply causes error with $ operator: intermediate solution
+    for(ticker in tickers) { write_value_panel_all_types(ticker, df.transaction.history, path) }
+    # mapply(write_value_panel_all_types, tickers, MoreArgs = list(path, df.transaction.history))
+
   }
-
-  ## mapply causes error with $ operator: intermediate solution
-  for(ticker in tickers) { write_value_panel_all_types(ticker, df.transaction.history, path) }
-  # mapply(write_value_panel_all_types, tickers, MoreArgs = list(path, df.transaction.history))
 
 }
 

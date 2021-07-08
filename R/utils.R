@@ -4,15 +4,21 @@ get_tickers_from_transactions <- function(df.transaction.history, path) {
 
   get_names(path)
 
-  ## get table that converts ISIN to ticker
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.tickers))
+  isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-  ## add ticker to transaction data
-  df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+  if (isin.ticker.exists) {
 
-  ## all tickers
-  tickers <- unique(df.transaction.history$ticker)
+    ## get table that converts ISIN to ticker
+    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-  return(tickers)
+    ## add ticker to transaction data
+    df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+
+    ## all tickers
+    tickers <- unique(df.transaction.history$ticker)
+
+    return(tickers)
+
+  }
 
 }
