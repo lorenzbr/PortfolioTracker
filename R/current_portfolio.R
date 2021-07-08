@@ -14,7 +14,7 @@ write_current_portfolio <- function(path) {
     files <- paste0(path.pricequantity.panel, list.files(path.pricequantity.panel))
     list.dfs <- lapply(files, data.table::fread)
 
-    transaction.history.exists <- file.exists(file.path(path.transactions.file.transactions))
+    transaction.history.exists <- file.exists(file.path(path.transactions, file.transactions))
     isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
     if (transaction.history.exists && isin.ticker.exists) {

@@ -145,7 +145,7 @@ write_annualized_returns <- function(path) {
   df.annualized <- df.annualized[, c("ticker", col.names)]
 
 
-  transaction.history.exists <- file.exists(file.path(path.transactions.file.transactions))
+  transaction.history.exists <- file.exists(file.path(path.transactions, file.transactions))
   isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
   if (transaction.history.exists && isin.ticker.exists) {
