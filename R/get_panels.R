@@ -415,6 +415,11 @@ write_complete_panels <- function(path) {
   ## get tickers from history of transactions
   tickers <- get_tickers_from_transactions(df.transaction.history, path)
 
+  ## delete all files in folder
+  if ( !rlang::is_empty(list.files(path.complete.panel)) ) {
+    file.remove(paste0(path.complete.panel, list.files(path.complete.panel)))
+  }
+
   ## write complete panels for all tickers
   output <- mapply(write_complete_panel, tickers, MoreArgs = list(path))
 

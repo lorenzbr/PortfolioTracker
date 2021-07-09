@@ -104,8 +104,9 @@ write_annualized_returns <- function(path) {
   get_names(path)
 
   returns.period <- "daily"
+  returns.period.file <- "daily_returns"
 
-  file.name <- list.files(path.returns, pattern = returns.period)
+  file.name <- list.files(path.returns, pattern = returns.period.file)
 
   df.returns <- data.table::fread(paste0(path.returns, file.name))
 
@@ -194,8 +195,9 @@ write_portfolio_return <- function(path) {
   # df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
 
   returns.period <- "daily"
+  returns.period.file <- "daily_returns"
 
-  file.name <- list.files(path.returns, pattern = returns.period)
+  file.name <- list.files(path.returns, pattern = returns.period.file)
 
   df.returns <- data.table::fread(paste0(path.returns, file.name))
 
@@ -239,8 +241,10 @@ write_portfolio_return <- function(path) {
   df.weight.final[, 2:(length(df.weight.final) - 1)] <- df.weight.final[, 2:(length(df.weight.final) - 1)] / df.weight.final$sum
   df.weight.final <- df.weight.final[, names(df.weight.final) != "sum"]
   row.names(df.weight.final) <- df.weight.final$date
-  df.weight.final <- df.weight.final[, names(df.weight.final) != "date"]
+  # df.weight.final <- df.weight.final[, names(df.weight.final) != "date"]
   xts.weight <- xts::as.xts(df.weight.final)
+  xts.weight <- xts.weight[, names(xts.weight) != "date"]
+  storage.mode(xts.weight) <- "numeric"
 
   ## get daily portfolio returns
   xts.portfolio <- PerformanceAnalytics::Return.portfolio(xts.returns.max, xts.weight)
@@ -286,7 +290,7 @@ write_roi_by_period <- function(ticker, path) {
 
   get_names(path)
 
-  if (!rlang::is_empty(list.files(paste0(path.complete.panel), pattern = ticker))) {
+  if ( !rlang::is_empty(list.files(paste0(path.complete.panel), pattern = ticker)) ) {
 
     df.complete.panel <- data.table::fread(paste0(path.complete.panel,
                                               list.files(paste0(path.complete.panel), pattern = ticker)))
