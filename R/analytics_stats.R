@@ -62,8 +62,12 @@ get_dividends_max <- function(path, file.dividend.history = "dividends_fullhisto
     dividends.storno.max <- sum(df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"])
     dividends.max <- dividends.max - dividends.storno.max
 
-    return(dividends.max)
+  } else {
+
+    dividends.max <- 0
 
   }
+
+  return(dividends.max)
 
 }
