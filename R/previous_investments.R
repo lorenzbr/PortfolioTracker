@@ -60,40 +60,44 @@ write_previous_investments <- function(path) {
       isins.both <- intersect(isins.sold, isins.purchase)
       previous.isins <- intersect(previous.isins, isins.both)
 
-      ## keep all transactions from ISINS which have both Purchase and Sale transactions
-      df.investments.sold <- unique(df.transaction.history[df.transaction.history$isin %in% isins.both, ])
+      if(length(previous.isins) > 0) {
 
-      df <- data.frame(matrix(nrow = 0, ncol = 7, dimnames = list(NULL, c("isin", "name", "investment", "income",
-                                                      "return_absolute", "return_percent", "quantity"))))
+        ## keep all transactions from ISINS which have both Purchase and Sale transactions
+        df.investments.sold <- unique(df.transaction.history[df.transaction.history$isin %in% isins.both, ])
 
-      ## for each sold ISIN
-      for (i in 1:length(previous.isins)) {
+        df <- data.frame(matrix(nrow = 0, ncol = 7, dimnames = list(NULL, c("isin", "name", "investment", "income",
+                                                        "return_absolute", "return_percent", "quantity"))))
 
-        previous.isin <- previous.isins[1]
-        df.sold.isin <- df.investments.sold[df.investments.sold$isin == previous.isin, ]
+        ## for each sold ISIN
+        for (i in 1:length(previous.isins)) {
 
-        name <- df.sold.isin$name[1]
+          previous.isin <- previous.isins[i]
+          df.sold.isin <- df.investments.sold[df.investments.sold$isin == previous.isin, ]
 
-        investment <- sum(df.sold.isin$transaction_value[df.sold.isin$transaction_type == "Purchase"
-                                                         | df.sold.isin$transaction_type == "Steuerpflichtige Vorabpauschale"])
-        income <- sum(df.sold.isin$transaction_value[df.sold.isin$transaction_type == "Dividend"
-                                       | df.sold.isin$transaction_type == "Sale"
-                                       | df.sold.isin$transaction_type == "Sale - Part"])
-        return.abs <- income - investment
-        return.perc <- return.abs / investment
+          name <- df.sold.isin$name[i]
 
-        quantity.sold <- sum(df.sold.isin$quantity[df.sold.isin$transaction_type == "Sale"
-                                              | df.sold.isin$transaction_type == "Sale - Part"])
+          investment <- sum(df.sold.isin$transaction_value[df.sold.isin$transaction_type == "Purchase"
+                                                           | df.sold.isin$transaction_type == "Steuerpflichtige Vorabpauschale"])
+          income <- sum(df.sold.isin$transaction_value[df.sold.isin$transaction_type == "Dividend"
+                                         | df.sold.isin$transaction_type == "Sale"
+                                         | df.sold.isin$transaction_type == "Sale - Part"])
+          return.abs <- income - investment
+          return.perc <- return.abs / investment
+
+          quantity.sold <- sum(df.sold.isin$quantity[df.sold.isin$transaction_type == "Sale"
+                                                | df.sold.isin$transaction_type == "Sale - Part"])
 
 
-        df.temp <- data.frame(isin = previous.isin, name, investment, income, return_absolute = return.abs,
-                              return_percent = return.perc, quantity = quantity.sold)
+          df.temp <- data.frame(isin = previous.isin, name, investment, income, return_absolute = return.abs,
+                                return_percent = return.perc, quantity = quantity.sold)
 
-        df <- rbind(df, df.temp)
+          df <- rbind(df, df.temp)
+
+        }
+
+        data.table::fwrite(df, paste0(path.data, file.previous))
 
       }
-
-      data.table::fwrite(df, paste0(path.data, file.previous))
 
     }
 
