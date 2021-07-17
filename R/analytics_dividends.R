@@ -50,7 +50,7 @@ write_dividend_by_yr <- function(path) {
       is.storno <- df.dividend.history$transaction_type == "Storno - Dividend"
       df.dividend.history$transaction_value[is.storno] <- (-1) * df.dividend.history$transaction_value[is.storno]
 
-      df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date, "%d-%m-%y")
+      df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date, "%d-%m-%Y")
 
       ## get year
       df.dividend.history$year <- lubridate::year(df.dividend.history$transaction_date)
@@ -100,7 +100,7 @@ write_dividend_by_month <- function(path) {
       is.storno <- df.dividend.history$transaction_type == "Storno - Dividend"
       df.dividend.history$transaction_value[is.storno] <- (-1) * df.dividend.history$transaction_value[is.storno]
 
-      df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date, "%d-%m-%y")
+      df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date, "%d-%m-%Y")
 
       ## get year-month
       df.dividend.history$yearmon <- lubridate::floor_date(df.dividend.history$transaction_date, unit = "month")

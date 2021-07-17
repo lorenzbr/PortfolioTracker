@@ -17,4 +17,4 @@ get_transaction_statistics <- function(df.transactions) {
 
   return(df.stats)
 
-} ## end of function get_transaction_statistics
+}
