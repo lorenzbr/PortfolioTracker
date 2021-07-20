@@ -1,4 +1,4 @@
-#' Details on four transactions extracted from bank statements
+#' Details on tewelve transactions extracted from bank statements
 #'
 #' A data set containing details on four transactions extracted from PDF bank statements.
 #' The variables are as follows:

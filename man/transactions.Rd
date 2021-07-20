@@ -3,7 +3,7 @@
 \docType{data}
 \name{transactions}
 \alias{transactions}
-\title{Details on four transactions extracted from bank statements}
+\title{Details on tewelve transactions extracted from bank statements}
 \format{
 A data frame with 4 rows and 12 columns/variables:
 \describe{
