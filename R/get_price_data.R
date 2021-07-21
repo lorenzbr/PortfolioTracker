@@ -131,16 +131,16 @@ update_latest_prices <- function(path) {
   filename.prices.raw.with.ticker <- list.files(path.prices.raw)
 
   ## only run code if filename.prices.raw.with.ticker is not empty
-  if (!rlang::is_empty(filename.prices.raw.with.ticker)) {
+  if ( !rlang::is_empty(filename.prices.raw.with.ticker) ) {
 
     ## create data frame
     df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
 
     ## identify last date
-    df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename, "to_(.*?).csv")[,2]
+    df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename, "to_(.*?).csv")[, 2]
 
     ## identify tickers
-    df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename, "ticker_(.*?)_from")[,2]
+    df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename, "ticker_(.*?)_from")[, 2]
 
     ## keep latest date for each ticker
     df.files.price.data <- stats::aggregate(last_date ~ ticker, data = df.files.price.data, max)
@@ -149,12 +149,12 @@ update_latest_prices <- function(path) {
     today <- Sys.Date()
 
     ## keep only tickers which are not up to date
-    df.files.price.data <- df.files.price.data[df.files.price.data$last_date < today,]
+    df.files.price.data <- df.files.price.data[df.files.price.data$last_date < today, ]
 
     ## if at least one ticker is not up to date
-    if (nrow(df.files.price.data) > 0) {
+    if ( nrow(df.files.price.data) > 0 ) {
 
-      for (i in 1:nrow(df.files.price.data)) {
+      for ( i in 1:nrow(df.files.price.data) ) {
 
         skip_to_next <- FALSE
 
@@ -168,17 +168,21 @@ update_latest_prices <- function(path) {
           ## get price data for ticker
           df.updated.prices <- get_prices_from_yahoo(ticker, from = from, to = today)
 
-          ## start and end date
-          from <- min(df.updated.prices$date)
-          to <- max(df.updated.prices$date)
+          if ( !is.null(df.updated.prices) ) {
 
-          ## file name for the data
-          filename.prices.raw <- paste0("prices_ticker_", ticker, "_from_", from, "_to_", to, ".csv")
+            ## start and end date
+            from <- min(df.updated.prices$date)
+            to <- max(df.updated.prices$date)
 
-          ## store as csv in raw financial data
-          data.table::fwrite(df.updated.prices, paste0(path.prices.raw, filename.prices.raw))
+            ## file name for the data
+            filename.prices.raw <- paste0("prices_ticker_", ticker, "_from_", from, "_to_", to, ".csv")
 
-          print(paste("Prices for", ticker, "from", from, "to", to, "successfully downloaded."))
+            ## store as csv in raw financial data
+            data.table::fwrite(df.updated.prices, paste0(path.prices.raw, filename.prices.raw))
+
+            print(paste("Prices for", ticker, "from", from, "to", to, "successfully downloaded."))
+
+          } else { print(paste("No recent prices for", ticker, "available")) }
 
         } else { print(paste("Prices for ticker", ticker, "up to date.")) }
 
@@ -231,8 +235,9 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
                                                             auto.assign = FALSE, warnings = FALSE) )
     })
 
+  ## if not yet found, iterate over all other stock exchanges to get prices
   iter.stock.exchanges <- 1
-  while (!exists("ticker.prices") && iter.stock.exchanges <= length(stock.exchanges)) {
+  while ( !exists("ticker.prices") && iter.stock.exchanges <= length(stock.exchanges) ) {
     stock.exchange <- stock.exchanges[iter.stock.exchanges]
     ticker.yahoo <- paste0(ticker, stock.exchange)
     iter.stock.exchanges <- iter.stock.exchanges + 1
