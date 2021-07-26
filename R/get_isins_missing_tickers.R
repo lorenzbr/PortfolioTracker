@@ -16,12 +16,15 @@ get_isins_missing_tickers <- function(path){
 
     ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+    df.isin.ticker <- df.isin.ticker[df.isin.ticker$ticker != "", ]
     df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
 
     ## missing tickers
     df.missings <- dplyr::anti_join(df.transaction.history, df.isin.ticker, by = "isin")
 
     df.missings <- df.missings[, c("isin", "wkn", "name")]
+
+    df.missings <- unique(df.missings)
 
     return(df.missings)
 
