@@ -36,7 +36,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
   ## identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
   new.isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
 
-  if (!rlang::is_empty(new.isins)) {
+  if ( !rlang::is_empty(new.isins) ) {
 
     for (i in 1:length(new.isins)) {
 
@@ -46,19 +46,23 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
 
         ticker <- get_ticker_from_xetra(isin)
 
-        df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
+        if (ticker != "") {
 
-        data.table::fwrite(df.isin.ticker.new, paste0(path.tickers, file.ticker), append = TRUE)
+          df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
 
-        print(paste("Ticker was missing.", ticker, "added."))
+          data.table::fwrite(df.isin.ticker.new, paste0(path.tickers, file.ticker), append = TRUE)
+
+          print(paste("Ticker was missing.", ticker, "added."))
+
+        } else { message("Ticker not found on Xetra website! Please add manually!") }
 
       })
 
-    } ## end of for loop
+    }
 
-  } else (print("New transactions, but ticker already available.")) ## end of if statement ISIN not in table is empty
+  } else (print("New transactions, but ticker already available."))
 
-} ## end of function update_ticker_isin
+}
 
 #' Get ticker based on ISIN by crawling investing.com
 #'
