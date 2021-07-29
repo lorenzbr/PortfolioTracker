@@ -21,12 +21,13 @@ write_quantity_panels <- function(df.transaction.history, path) {
 
     ## get table that converts ISIN to ticker
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+    df.isin.ticker <- df.isin.ticker[df.isin.ticker$ticker != "", ]
 
     ## add ticker to transaction data
-    df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+    df.transactions.with.tickers <- merge(df.transaction.history, df.isin.ticker, by = "isin")
 
     ## all tickers
-    tickers <- unique(df.transaction.history$ticker)
+    tickers <- unique(df.transactions.with.tickers$ticker)
 
     ## delete all files in folder
     if ( !rlang::is_empty(list.files(path.quantity.panel)) ) {
@@ -35,7 +36,7 @@ write_quantity_panels <- function(df.transaction.history, path) {
 
     ## create quantity panels for all tickers
     output <- mapply(write_quantity_panel, tickers,
-                     MoreArgs = list(df.transaction.history, path.quantity.panel))
+                     MoreArgs = list(df.transactions.with.tickers, path.quantity.panel))
 
   }
 
@@ -43,32 +44,37 @@ write_quantity_panels <- function(df.transaction.history, path) {
 
 #' Write quantity panel for ticker
 #'
-#' @usage write_quantity_panel(ticker, df.transaction.history, path.quantity.panel)
+#' @usage write_quantity_panel(ticker, df.transactions.with.tickers, path.quantity.panel)
 #' @param ticker A single character string containing the ticker symbol.
-#' @param df.transaction.history A data.frame containing transactions and ticker.
+#' @param df.transactions.with.tickers A data.frame containing transactions and ticker.
 #' @param path.quantity.panel A single character string containing the folder of quantity panels.
 #'
 #' @export
 #' @import data.table
-write_quantity_panel <- function(ticker, df.transaction.history, path.quantity.panel) {
+write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quantity.panel) {
 
-  df.transaction.history <- as.data.frame(df.transaction.history)
+  df.transactions.with.tickers <- as.data.frame(df.transactions.with.tickers)
 
-  df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date, "%d-%m-%Y")
+  df.transactions.with.tickers$transaction_date <- as.Date(df.transactions.with.tickers$transaction_date, "%d-%m-%Y")
 
   ## get transactions only for ticker
-  df.transaction.history.ticker <- df.transaction.history[df.transaction.history$ticker == ticker, ]
+  df.transaction.history.ticker <- df.transactions.with.tickers[df.transactions.with.tickers$ticker == ticker, ]
 
   ## only sale and purchase transaction types are required to create quantity panels
   df.transaction.history.ticker <- df.transaction.history.ticker[grepl("^Sale$|^Purchase$", df.transaction.history.ticker$transaction_type), ]
 
-  if (nrow(df.transaction.history.ticker) > 0) {
+  if ( nrow(df.transaction.history.ticker) > 0 ) {
 
     ## if transaction type is a sale, quantity needs to be negative (in order to be subtracted at a given point in time)
-    df.transaction.history.ticker$quantity[df.transaction.history.ticker$transaction_type == "Sale"] <- (-1) * df.transaction.history.ticker$quantity[df.transaction.history.ticker$transaction_type == "Sale"]
+    is.sale.transaction <- df.transaction.history.ticker$transaction_type == "Sale"
+    df.transaction.history.ticker$quantity[is.sale.transaction] <- (-1) * df.transaction.history.ticker$quantity[is.sale.transaction]
+
+    df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "quantity")]
+
+    ## if several transactions per day, aggregate by transaction_date
+    df.transaction.history.ticker <- stats::aggregate(quantity ~ transaction_date, df.transaction.history.ticker, sum)
 
     ## take cumulative sum of transactions to get quantity over time
-    df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "quantity")]
     df.transaction.history.ticker.keep <- df.transaction.history.ticker
     df.transaction.history.ticker <- df.transaction.history.ticker[order(df.transaction.history.ticker$transaction_date), ]
     df.transaction.history.ticker$cum_quantity <- cumsum(df.transaction.history.ticker$quantity)
@@ -114,7 +120,7 @@ write_quantity_panel <- function(ticker, df.transaction.history, path.quantity.p
         names(df.quantity.panel)[names(df.quantity.panel) == "transaction_date"] <- "date"
 
         ## if cum_quantity of most recent date is zero, investment was sold and thus remove subsequent entries
-        if (df.quantity.panel$cum_quantity[df.quantity.panel$date == max(df.quantity.panel$date)] == 0) {
+        if ( df.quantity.panel$cum_quantity[df.quantity.panel$date == max(df.quantity.panel$date)] == 0 ) {
 
           last.date.nonzero.quantity <- max(df.quantity.panel$date[df.quantity.panel$cum_quantity != 0])
           entry.investment.was.sold <- which(df.quantity.panel$date == last.date.nonzero.quantity) + 1
