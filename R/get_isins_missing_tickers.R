@@ -26,6 +26,8 @@ get_isins_missing_tickers <- function(path){
 
     df.missings <- unique(df.missings)
 
+    df.missings$wkn[is.na(df.missings$wkn)] <- "-"
+
     return(df.missings)
 
   }
