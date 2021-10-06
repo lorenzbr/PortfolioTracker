@@ -12,7 +12,7 @@ write_returns <- function(path) {
 
   no.price.panels <- rlang::is_empty(files.price.panels)
 
-  if (!no.price.panels) {
+  if ( !no.price.panels ) {
 
     files <- paste0(path.price.panel, files.price.panels)
     list.dfs <- lapply(files, data.table::fread)
@@ -38,6 +38,8 @@ write_returns <- function(path) {
       df.daily.temp <- df.temp[!is.na(df.temp[, ticker.daily]), c("date", ticker.daily)]
       df.monthly.temp <- df.temp[!is.na(df.temp[, ticker.monthly]), c("date", ticker.monthly)]
       df.yearly.temp <- df.temp[!is.na(df.temp[, ticker.yearly]), c("date", ticker.yearly)]
+
+      df.yearly.temp$date <- lubridate::floor_date(df.yearly.temp$date, unit = "year")
 
       df.daily <- merge(df.daily, df.daily.temp, by = "date", all.x = TRUE, all.y = TRUE)
       df.monthly <- merge(df.monthly, df.monthly.temp, by = "date", all.x = TRUE, all.y = TRUE)
@@ -89,7 +91,7 @@ get_returns_all <- function(df, ticker) {
 
   return(df.allreturns)
 
-} ## end of function get_returns_all
+}
 
 #' Write annualized returns to a csv file
 #'
