@@ -11,6 +11,7 @@ get_file_names <- function() {
   assign("file.current", "current_portfolio.csv", envir = .GlobalEnv)
   assign("file.previous", "previous_investments.csv", envir = .GlobalEnv)
   assign("file.tickers", "isin_ticker.csv", envir = .GlobalEnv)
+  assign("file.ticker.exchange", "ticker_exchange.csv", envir = .GlobalEnv)
   assign("file.dividend.history", "dividends_fullhistory.csv", envir = .GlobalEnv)
   assign("file.dividend.year", "dividends_by_year.csv", envir = .GlobalEnv)
   assign("file.dividend.month", "dividends_by_month.csv", envir = .GlobalEnv)

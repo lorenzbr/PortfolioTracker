@@ -16,17 +16,17 @@ write_portfolio_stats <- function(path) {
     df.current <- data.table::fread(paste0(path.data, file.current))
     df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
 
-    ## current total portfolio value
+    ## Current total portfolio value
     total.portfolio.value <- sum(df.current$value)
 
-    ## total investment all time and until time t
+    ## Total investment all time and until time t
     amount.invested.alltime.purchase <- sum(df.transaction.history$transaction_value[grepl("^Purchase$",
                                                                                            df.transaction.history$transaction_type)])
     amount.invested.alltime.sale <- sum(df.transaction.history$transaction_value[grepl("^Sale$",
                                                                                        df.transaction.history$transaction_type)])
     amount.invested.max <- amount.invested.alltime.purchase - amount.invested.alltime.sale
 
-    ## total price gains and until time t
+    ## Total price gains and until time t
     price.gains.max <- total.portfolio.value - amount.invested.max
 
     dividends.max <- get_dividends_max(path)
@@ -54,7 +54,7 @@ get_dividends_max <- function(path, file.dividend.history = "dividends_fullhisto
 
   if ( file.exists(file.path(path.dividends, file.dividend.history)) ) {
 
-    ## load dividend history
+    ## Load dividend history
     df.dividend.history <- data.table::fread(file.path(path.dividends, file.dividend.history))
 
     ## compute max dividends

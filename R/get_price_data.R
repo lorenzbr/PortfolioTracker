@@ -222,38 +222,102 @@ update_latest_prices <- function(path) {
 get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "Xetra",
                                   stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU")) {
 
-  ## produce final ticker for Yahoo Finance
-  if (preferred.stock.exchange == "Xetra") {
-    ticker.yahoo <- paste0(ticker, ".DE")
-  } else if (preferred.stock.exchange == "Frankfurt") {
-    ticker.yahoo <- paste0(ticker, ".F")
-  } else if (preferred.stock.exchange == "Stuttgart") {
-    ticker.yahoo <- paste0(ticker, ".SG")
-  } else if (preferred.stock.exchange == "Muenchen") {
-    ticker.yahoo <- paste0(ticker, ".MU")
-  } else if (preferred.stock.exchange == "Duesseldorf") {
-    ticker.yahoo <- paste0(ticker, ".DU")
+
+  ## Check if specific exchange for ticker has been saved in file. Then, takes this one
+  ticker.exchange.file.exists <- file.exists(file.path(path.tickers, file.ticker.exchange))
+
+  if ( ticker.exchange.file.exists ) {
+
+    df.ticker.exchanges <- data.table::fread(file.path(path.tickers, file.ticker.exchange))
+
+    ## needed because using "ticker" produces same data frame
+    ticker.current <- ticker
+    df.ticker.exchange <- df.ticker.exchanges[df.ticker.exchanges$ticker == ticker.current, ]
+
+    if ( nrow(df.ticker.exchange) == 1 ) { ticker.yahoo <- paste0(ticker, df.ticker.exchange$exchange) }
+
   }
 
-  ## get prices from Yahoo API
+
+  if ( !exists("ticker.yahoo") ) {
+
+    ## produce final ticker for Yahoo Finance
+    if (preferred.stock.exchange == "Xetra") {
+      ticker.yahoo <- paste0(ticker, ".DE")
+    } else if (preferred.stock.exchange == "Frankfurt") {
+      ticker.yahoo <- paste0(ticker, ".F")
+    } else if (preferred.stock.exchange == "Stuttgart") {
+      ticker.yahoo <- paste0(ticker, ".SG")
+    } else if (preferred.stock.exchange == "Muenchen") {
+      ticker.yahoo <- paste0(ticker, ".MU")
+    } else if (preferred.stock.exchange == "Duesseldorf") {
+      ticker.yahoo <- paste0(ticker, ".DU")
+    }
+
+  }
+
+  ## Get prices from Yahoo API
   try({
     suppressWarnings( ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
                                                             auto.assign = FALSE, warnings = FALSE) )
-    })
+  })
 
-  ## if not yet found, iterate over all other stock exchanges to get prices
-  iter.stock.exchanges <- 1
-  while ( !exists("ticker.prices") && iter.stock.exchanges <= length(stock.exchanges) ) {
-    stock.exchange <- stock.exchanges[iter.stock.exchanges]
-    ticker.yahoo <- paste0(ticker, stock.exchange)
-    iter.stock.exchanges <- iter.stock.exchanges + 1
-    try({
-      suppressWarnings( ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
-                                                              auto.assign = FALSE, warnings = FALSE) )
+
+
+  ## If not yet found and ticker with exchanges does not exist, iterate over all other stock exchanges to get prices
+
+  if ( !ticker.exchange.file.exists) {
+
+    iter.stock.exchanges <- 1
+    while ( !exists("ticker.prices") && iter.stock.exchanges <= length(stock.exchanges) ) {
+      stock.exchange <- stock.exchanges[iter.stock.exchanges]
+      ticker.yahoo <- paste0(ticker, stock.exchange)
+      iter.stock.exchanges <- iter.stock.exchanges + 1
+      try({
+        suppressWarnings( ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+                                                                auto.assign = FALSE, warnings = FALSE) )
       })
+    }
+
+  } else if ( ticker.exchange.file.exists) {
+
+    if ( nrow(df.ticker.exchange) != 1 ) {
+
+      iter.stock.exchanges <- 1
+      while ( !exists("ticker.prices") && iter.stock.exchanges <= length(stock.exchanges) ) {
+        stock.exchange <- stock.exchanges[iter.stock.exchanges]
+        ticker.yahoo <- paste0(ticker, stock.exchange)
+        iter.stock.exchanges <- iter.stock.exchanges + 1
+        try({
+          suppressWarnings( ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+                                                                  auto.assign = FALSE, warnings = FALSE) )
+        })
+      }
+
+    }
+
   }
 
-  if(exists("ticker.prices")) {
+
+
+
+  if ( exists("ticker.prices") ) {
+
+    ## Store stock exchange and ticker in csv file
+    df.ticker.exchange <- data.frame(ticker = ticker, exchange = stock.exchange)
+    if ( file.exists(file.path(path.tickers, file.ticker.exchange)) ) {
+      df.ticker.exchanges <- data.table::fread(file.path(path.tickers, file.ticker.exchange))
+
+      df.ticker.exchanges <- rbind(df.ticker.exchanges, df.ticker.exchange)
+      df.ticker.exchanges <- unique(df.ticker.exchanges)
+
+      data.table::fwrite(df.ticker.exchanges, file = file.path(path.tickers, file.ticker.exchange))
+
+    } else {
+
+      data.table::fwrite(df.ticker.exchange, file = file.path(path.tickers, file.ticker.exchange))
+
+    }
 
     ## convert to data frame
     df.ticker.prices <- data.frame(ticker.prices)
