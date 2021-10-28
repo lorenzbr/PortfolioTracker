@@ -505,6 +505,26 @@ write_complete_panel <- function(ticker, path) {
 
 }
 
+#' Write all investment value panels to a csv file
+#'
+#' @usage write_investment_value_panels(path)
+#' @param path A single character string. Path where data are stored.
+#'
+#' @export
+write_investment_value_panels <- function(path) {
+
+  get_names(path)
+
+  df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
+
+  ## get tickers from history of transactions
+  tickers <- get_tickers_from_transactions(df.transaction.history, path)
+
+  ## write complete panels for all tickers
+  output <- mapply(write_investment_value_panel, tickers, MoreArgs = list(path))
+
+}
+
 #' Write investment value panel for given ticker
 #'
 #' @usage write_investment_value_panel(ticker, path)
@@ -518,17 +538,17 @@ write_investment_value_panel <- function(ticker, path) {
 
   get_names(path)
 
-  if ( !rlang::is_empty(list.files(paste0(path.pricequantity.panel), pattern = ticker)) ) {
+  if ( !rlang::is_empty(list.files(path.pricequantity.panel, pattern = ticker)) ) {
 
     df.pricequantity.panel <- data.table::fread(paste0(path.pricequantity.panel,
-                                                      list.files(paste0(path.pricequantity.panel), pattern = ticker)))
+                                                      list.files(path.pricequantity.panel, pattern = ticker)))
 
     df.pricequantity.panel <- df.pricequantity.panel[, c("date", "adjusted", "value", "quantity")]
 
     ## load value panels
-    if ( !rlang::is_empty(list.files(paste0(path.value.panel), pattern = ticker)) ) {
+    if ( !rlang::is_empty(list.files(path.value.panel, pattern = ticker)) ) {
 
-      ticker.value.panels <- list.files(paste0(path.value.panel), pattern = ticker)
+      ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
 
       purchase.exist <- grepl("^purchase", ticker.value.panels)
       sale.exist <- grepl("^sale", ticker.value.panels)
