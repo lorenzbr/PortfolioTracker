@@ -64,7 +64,7 @@ update_prices_based_on_transactions <- function(df.transactions, path) {
         earliest.date <- unique(df.prices.same.ticker$first_date)
 
         ## if new transaction is older than earliest date updated "to" date
-        if(transaction.date < earliest.date && !(is.na(earliest.date))){today <- earliest.date - 1}
+        if ( transaction.date < earliest.date && !(is.na(earliest.date)) ) today <- earliest.date - 1
 
       }
 
@@ -243,16 +243,18 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
 
     ## produce final ticker for Yahoo Finance
     if (preferred.stock.exchange == "Xetra") {
-      ticker.yahoo <- paste0(ticker, ".DE")
+      stock.exchange <- ".DE"
     } else if (preferred.stock.exchange == "Frankfurt") {
-      ticker.yahoo <- paste0(ticker, ".F")
+      stock.exchange <- ".F"
     } else if (preferred.stock.exchange == "Stuttgart") {
-      ticker.yahoo <- paste0(ticker, ".SG")
+      stock.exchange <- ".SG"
     } else if (preferred.stock.exchange == "Muenchen") {
-      ticker.yahoo <- paste0(ticker, ".MU")
+      stock.exchange <- ".MU"
     } else if (preferred.stock.exchange == "Duesseldorf") {
-      ticker.yahoo <- paste0(ticker, ".DU")
+      stock.exchange <- ".DU"
     }
+
+    ticker.yahoo <- paste0(ticker, stock.exchange)
 
   }
 
@@ -265,8 +267,7 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
 
 
   ## If not yet found and ticker with exchanges does not exist, iterate over all other stock exchanges to get prices
-
-  if ( !ticker.exchange.file.exists) {
+  if ( !ticker.exchange.file.exists && !exists("ticker.prices") ) {
 
     iter.stock.exchanges <- 1
     while ( !exists("ticker.prices") && iter.stock.exchanges <= length(stock.exchanges) ) {
@@ -279,7 +280,7 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
       })
     }
 
-  } else if ( ticker.exchange.file.exists) {
+  } else if ( ticker.exchange.file.exists ) {
 
     if ( nrow(df.ticker.exchange) != 1 ) {
 
