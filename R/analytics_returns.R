@@ -55,7 +55,7 @@ write_returns <- function(path) {
 
     message("No price panels to calculate annual returns.")
 
-  } ## end of if else statement
+  }
 
 }
 
@@ -327,8 +327,6 @@ write_roi_by_period <- function(ticker, path) {
 #' @export
 get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max") {
 
-
-
   if (period == "months") {
 
     first.date <- Sys.Date() - months(nb_period)
@@ -396,5 +394,98 @@ get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max
     return(df.roi.period)
 
   }
+
+}
+
+#' Get TWR factors on daily basis for portfolio
+#'
+#' Get the true-weighted return factors on a daily basis for the entire portfolio
+#'
+#' @usage get_twr_factors(path)
+#' @param path A single character string. Path where data are stored.
+#'
+#' @export
+get_twr_factors <- function(path) {
+
+  get_names(path)
+
+  files.complete.panels <- list.files(path.complete.panel)
+
+  no.complete.panels <- rlang::is_empty(files.complete.panels)
+
+  if ( !no.complete.panels ) {
+
+    ## load all complete panels
+    files <- paste0(path.complete.panel, files.complete.panels)
+    list.dfs <- lapply(files, data.table::fread)
+
+    df.all <- do.call(rbind, list.dfs)
+
+    df.all <- df.all[, c("date", "value", "purchase_value", "sale_value",
+                         "dividend_cum_value")]
+
+    ## take sum by group "date" for value, purchase_value, sale_value and dividend_cum_value
+    df.all <- data.table::setDT(df.all)[, lapply(.SD, sum, na.rm = TRUE), by = date]
+
+    first.day <- min(df.all$date)
+    last.day <- max(df.all$date)
+
+    ## get daily full time period but remove saturday and sunday
+    full.time.period <- seq(first.day, last.day, by = "day")
+    mysysgetlocale <- Sys.getlocale('LC_TIME')
+    Sys.setlocale('LC_TIME', 'ENGLISH')
+    ## remove weekends
+    full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
+    Sys.setlocale('LC_TIME', mysysgetlocale)
+
+    df.twr <- data.frame(date = full.time.period)
+
+    df.twr <- merge(df.twr, df.all, by = "date", all.x = TRUE)
+
+    df.twr[is.na(df.twr)] <- 0
+
+    ## remove all periods with no portfolio value, no purchase and no sale value at the same time
+    days.empty.portfolio <- df.twr$value == 0 & df.twr$purchase_value == 0 & df.twr$sale_value == 0
+
+    df.twr <- df.twr[ !days.empty.portfolio, ]
+
+    ## potential to do:
+      ## 1. for some days no prices (i.e. no value information) is available
+      ## if value is zero and pre period purchase is zero, take value from last period
+      ## OR 2. remove all periods which have pre-period value and cash flow (purchase and sale value)
+      ## equal to zero, because holding period return cannot be computed (divide by zero)
+
+    ## compute end value
+    df.twr$end_value <- df.twr$value + df.twr$dividend_cum_value
+    ## compute initial value
+    df.twr$initial_value <- data.table::shift(df.twr$value) + data.table::shift(df.twr$dividend_cum_value)
+    ## compute cash flow
+    df.twr$cash_flow <- df.twr$purchase_value - df.twr$sale_value
+
+    ## compute daily holding period return
+    df.twr$twr_factor <- df.twr$end_value / (df.twr$initial_value + df.twr$cash_flow)
+
+    data.table::fwrite(df.twr, paste0(path.returns, file.returns.twr.daily))
+
+  } else {
+
+    message("No complete panels to compute TWR factors available.")
+
+  }
+
+}
+
+#' Get true time-weighted rate of return (TTWROR) for portfolio
+#'
+#' @usage get_ttwror(path)
+#' @param path A single character string. Path where data are stored.
+#'
+#'  @export
+get_ttwror <- function(path) {
+
+  ## to do:
+
+  # need to choose period: e.g. max, 3m, 1y, 2y, ...
+  # and then multiply all HPRs with each other
 
 }

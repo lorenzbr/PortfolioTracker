@@ -22,5 +22,5 @@ get_file_names <- function() {
   assign("file.returns.annual", "annual_returns.csv", envir = .GlobalEnv)
   assign("file.returns.annualized", "annualized_returns.csv", envir = .GlobalEnv)
   assign("file.return.portfolio.daily", "daily_portfolio_return.csv", envir = .GlobalEnv)
-
+  assign("file.returns.twr.daily", "twr_portfolio_factors_daily.csv", envir = .GlobalEnv)
 }

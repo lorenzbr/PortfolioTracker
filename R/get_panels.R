@@ -112,7 +112,8 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
         df.quantity.panel <- data.table::setDF(DT.quantity.panel)
 
 
-        df.quantity.panel <- merge(df.quantity.panel, df.transaction.history.ticker.keep, by = "transaction_date", all = TRUE)
+        df.quantity.panel <- merge(df.quantity.panel, df.transaction.history.ticker.keep,
+                                   by = "transaction_date", all = TRUE)
         df.quantity.panel$quantity[is.na(df.quantity.panel$quantity)] <- 0
 
         df.quantity.panel$ticker <- ticker
@@ -442,7 +443,7 @@ write_complete_panel <- function(ticker, path) {
 
   get_names(path)
 
-  if ( !rlang::is_empty(list.files(paste0(path.pricequantity.panel), pattern = ticker)) ) {
+  if ( !rlang::is_empty(list.files(path.pricequantity.panel, pattern = ticker)) ) {
 
     df.pricequantity.panel <- data.table::fread(paste0(path.pricequantity.panel,
                                                        list.files(paste0(path.pricequantity.panel), pattern = ticker)))
