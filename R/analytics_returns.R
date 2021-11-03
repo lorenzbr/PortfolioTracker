@@ -465,19 +465,24 @@ get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
 
     ## Select time period with TWR factors
     df.selected.period <- get_df_with_selected_time_period(df = df.twr.factors,
-                                                           nb_period = 12,
-                                                           period_type = "months")
+                                                           nb_period = nb_period,
+                                                           period_type = period_type)
 
     ## Multiply all TWR factors to get ttwror
-    ttwror <- prod(df.selected.period$twr_factor, na.rm = TRUE) - 1
-    ttwror
+    periods <- length(df.selected.period$twr_factor[!is.na(df.selected.period$twr_factor)])
 
-    return(ttwror)
+    ## Total period
+    # ttwror <- prod(df.selected.period$twr_factor, na.rm = TRUE) - 1
+    ## Annualized (meaning over a period of 365 trading days)
+    annualized.ttwror <- prod(df.selected.period$twr_factor, na.rm = TRUE)^(365/periods) - 1
 
   } else {
 
     message("TWR factors for portfolio are not available.")
+    annualized.ttwror <- NA
 
   }
+
+  return(annualized.ttwror)
 
 }
