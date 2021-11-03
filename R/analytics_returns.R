@@ -389,25 +389,30 @@ get_twr_factors <- function(path) {
     files <- paste0(path.complete.panel, files.complete.panels)
     list.dfs <- lapply(files, data.table::fread)
 
+    df.all <- do.call(rbind, list.dfs)
+
+
+    #### Get full time period as data frame
+
+    first.day <- min(df.all$date)
+    last.day <- max(df.all$date)
+
+    ## get daily full time period but remove saturday and sunday
+    full.time.period <- seq(first.day, last.day, by = "day")
+    mysysgetlocale <- Sys.getlocale('LC_TIME')
+    Sys.setlocale('LC_TIME', 'ENGLISH')
+    ## remove weekends
+    full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
+    Sys.setlocale('LC_TIME', mysysgetlocale)
+
+    df.full.time.period <- data.frame(date = full.time.period)
+
 
     ## for some dates no price information is available. Thus, I create a column indicating this
     ## I re-calculate the cumulative quantity of the investment because I take the full time period
     for (i in 1:length(list.dfs) ) {
 
       df <- list.dfs[[i]]
-
-      first.day <- min(df$date)
-      last.day <- max(df$date)
-
-      ## get daily full time period but remove saturday and sunday
-      full.time.period <- seq(first.day, last.day, by = "day")
-      mysysgetlocale <- Sys.getlocale('LC_TIME')
-      Sys.setlocale('LC_TIME', 'ENGLISH')
-      ## remove weekends
-      full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
-      Sys.setlocale('LC_TIME', mysysgetlocale)
-
-      df.full.time.period <- data.frame(date = full.time.period)
 
       df.new <- merge(df.full.time.period, df, by = "date", all.x = TRUE)
       df.new$ticker <- df$ticker[1]
@@ -426,37 +431,9 @@ get_twr_factors <- function(path) {
     df.all <- do.call(rbind, list.dfs)
 
 
-    # #### Get full time period as data frame
-    #
-    # first.day <- min(df.all$date)
-    # last.day <- max(df.all$date)
-    #
-    # ## get daily full time period but remove saturday and sunday
-    # full.time.period <- seq(first.day, last.day, by = "day")
-    # mysysgetlocale <- Sys.getlocale('LC_TIME')
-    # Sys.setlocale('LC_TIME', 'ENGLISH')
-    # ## remove weekends
-    # full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
-    # Sys.setlocale('LC_TIME', mysysgetlocale)
-    #
-    # df.full.time.period <- data.frame(date = full.time.period)
 
 
 
-    # df.full.time.period <- data.frame(date = unique(df.all$date))
-    #
-    # ## Remove days which do not have prices/values for all current investments
-    # ## to do:
-    # ##        1. panel which are current investments at time t (i.e. cum_quantity > 0)
-    # df.all$currently_invested[df.all$cum_quantity > 0] <- 1
-    # ## sale yes/no
-    #
-    # ## if at time t no sale and pre-period is currently invested = 1, this investment should still exist at time t (where no price is observed)
-    #
-    #
-    # # 1. merge full time period with df.all (before aggregate)
-    # df.all2 <- merge(df.full.time.period, df.all, by = "date")
-    # # 2. every day (for all tickers) with cum_quantity > 0 but price/value = 0 should be removed
 
 
 
@@ -475,24 +452,13 @@ get_twr_factors <- function(path) {
     ## this means that prices are not available for all current investments at time t
     df.all <- df.all[df.all$currently_invested == df.all$value_available, ]
 
-
     df.twr <- df.all
 
-    ##
-    # df.twr <- merge(df.full.time.period, df.all, by = "date", all.x = TRUE)
-
-    ##
     df.twr[is.na(df.twr)] <- 0
 
     ## Remove all periods with no portfolio value, no purchase and no sale value at the same time
     days.empty.portfolio <- df.twr$value == 0 & df.twr$purchase_value == 0 & df.twr$sale_value == 0
     df.twr <- df.twr[ !days.empty.portfolio, ]
-
-    ## potential to do:
-      ## 1. for some days no prices (i.e. no value information) are available
-      ## if value is zero and pre period purchase is zero, take value from last period
-      ## OR 2. remove all periods which have pre-period value and cash flow (purchase and sale value)
-      ## equal to zero, because holding period return cannot be computed (divide by zero)
 
     ## compute end value
     df.twr$end_value <- df.twr$value + df.twr$dividend_cum_value
