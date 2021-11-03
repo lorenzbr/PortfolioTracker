@@ -306,7 +306,7 @@ write_roi_by_period <- function(ticker, path) {
     ## file name
     file.roi.panel <- paste0("return_on_investment_daily_", ticker, "_from_", from, "_to_", to, ".csv")
 
-    ## store price quantity panel as csv
+    ## Store price quantity panel as csv
     data.table::fwrite(df.roi, paste0(path.returns.roi, file.roi.panel))
 
     message("Daily investment return for ", ticker, " successfully created!")
@@ -315,57 +315,26 @@ write_roi_by_period <- function(ticker, path) {
 
 }
 
-#' Get return on investment for specific period
+#' Get cumulative return on investment for specific period
 #'
-#' @usage get_roi_by_period(df.complete.panel, nb_period = NULL, period = "max")
+#' @usage get_roi_by_period(df.complete.panel, nb_period = NULL, period_type = "max")
 #' @param df.complete.panel A data.frame containing the complete panel.
 #' @param nb_period An integer indicating the number of months. Default is \emph{NULL}.
-#' @param period A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.
+#' @param period_type A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.
 #'
-#' @return df.roi.period A data.frame containing return on investment for a given period.
+#' @return df.roi.period A data.frame containing the cumulative return on investment for a given period.
 #'
 #' @export
-get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max") {
+get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period_type = "max") {
 
-  if (period == "months") {
-
-    first.date <- Sys.Date() - months(nb_period)
-
-    j <- 1
-    while ( is.na(first.date) && j < 10) {
-      first.date <- (Sys.Date() - j) - months(nb_period)
-      j = j + 1
-    }
-
-  } else if (period == "weeks") {
-
-    first.date <- Sys.Date() - lubridate::weeks(nb_period)
-
-    j <- 1
-    while ( is.na(first.date) && j < 10 ) {
-      first.date <- (Sys.Date() - j) - lubridate::weeks(nb_period)
-      j = j + 1
-    }
-
-  } else if (period == "days") {
-
-    first.date <- Sys.Date() - lubridate::days(nb_period)
-
-    j <- 1
-    while ( is.na(first.date) && j < 10) {
-      first.date <- (Sys.Date() - j) - lubridate::days(nb_period)
-      j = j + 1
-    }
-
-  } else if (period == "max") { df.complete.panel.period <- df.complete.panel }
-
-  if (period == "months" || period == "weeks" || period == "days") {
-    df.complete.panel.period <- df.complete.panel[df.complete.panel$date >= first.date, ]
-  }
+  df.complete.panel.period <- get_df_with_selected_time_period(df = df.complete.panel,
+                                                               nb_period = nb_period,
+                                                               period_type = period_type)
 
   if ( nrow(df.complete.panel.period) > 0) {
 
-    if (period == "months" || period == "weeks" || period == "days") {
+
+    if (period_type == "months" || period_type == "weeks" || period_type == "days") {
 
       index.first.period <- df.complete.panel.period$date == min(df.complete.panel.period$date)
 
@@ -380,6 +349,7 @@ get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period = "max
       df.complete.panel.period$dividend_cum_value <- cumsum(df.complete.panel.period$dividend_value)
 
     }
+
 
     df.complete.panel.period[is.na(df.complete.panel.period)] <- 0
     df.complete.panel.period <- df.complete.panel.period[df.complete.panel.period$cum_quantity != 0
@@ -477,15 +447,37 @@ get_twr_factors <- function(path) {
 
 #' Get true time-weighted rate of return (TTWROR) for portfolio
 #'
-#' @usage get_ttwror(path)
+#' @usage get_ttwror(path, nb_period = NULL, period_type = "max")
 #' @param path A single character string. Path where data are stored.
+#' @param nb_period An integer indicating the number of months. Default is \emph{NULL}.
+#' @param period_type A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.
+#'
+#' @return A numeric for the true time-weighted rate of return (TTWROR) for your portfolio
 #'
 #'  @export
-get_ttwror <- function(path) {
+get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
 
-  ## to do:
+  get_names(path)
 
-  # need to choose period: e.g. max, 3m, 1y, 2y, ...
-  # and then multiply all HPRs with each other
+  if ( file.exists(file.path(path.returns, file.returns.twr.daily)) ) {
+
+    df.twr.factors <- data.table::fread(file.path(path.returns, file.returns.twr.daily))
+
+    ## Select time period with TWR factors
+    df.selected.period <- get_df_with_selected_time_period(df = df.twr.factors,
+                                                           nb_period = 12,
+                                                           period_type = "months")
+
+    ## Multiply all TWR factors to get ttwror
+    ttwror <- prod(df.selected.period$twr_factor, na.rm = TRUE) - 1
+    ttwror
+
+    return(ttwror)
+
+  } else {
+
+    message("TWR factors for portfolio are not available.")
+
+  }
 
 }

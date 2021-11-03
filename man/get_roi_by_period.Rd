@@ -2,20 +2,20 @@
 % Please edit documentation in R/analytics_returns.R
 \name{get_roi_by_period}
 \alias{get_roi_by_period}
-\title{Get return on investment for specific period}
+\title{Get cumulative return on investment for specific period}
 \usage{
-get_roi_by_period(df.complete.panel, nb_period = NULL, period = "max")
+get_roi_by_period(df.complete.panel, nb_period = NULL, period_type = "max")
 }
 \arguments{
 \item{df.complete.panel}{A data.frame containing the complete panel.}
 
 \item{nb_period}{An integer indicating the number of months. Default is \emph{NULL}.}
 
-\item{period}{A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.}
+\item{period_type}{A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.}
 }
 \value{
-df.roi.period A data.frame containing return on investment for a given period.
+df.roi.period A data.frame containing the cumulative return on investment for a given period.
 }
 \description{
-Get return on investment for specific period
+Get cumulative return on investment for specific period
 }

@@ -4,12 +4,19 @@
 \alias{get_ttwror}
 \title{Get true time-weighted rate of return (TTWROR) for portfolio}
 \usage{
-get_ttwror(path)
+get_ttwror(path, nb_period = NULL, period_type = "max")
 }
 \arguments{
-\item{path}{A single character string. Path where data are stored.
+\item{path}{A single character string. Path where data are stored.}
 
- @export}
+\item{nb_period}{An integer indicating the number of months. Default is \emph{NULL}.}
+
+\item{period_type}{A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.}
+}
+\value{
+A numeric for the true time-weighted rate of return (TTWROR) for your portfolio
+
+ @export
 }
 \description{
 Get true time-weighted rate of return (TTWROR) for portfolio
