@@ -15,8 +15,6 @@ get_ttwror(path, nb_period = NULL, period_type = "max")
 }
 \value{
 A numeric for the true time-weighted rate of return (TTWROR) for your portfolio
-
- @export
 }
 \description{
 Get true time-weighted rate of return (TTWROR) for portfolio

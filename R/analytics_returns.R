@@ -454,7 +454,7 @@ get_twr_factors <- function(path) {
 #'
 #' @return A numeric for the true time-weighted rate of return (TTWROR) for your portfolio
 #'
-#'  @export
+#' @export
 get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
 
   get_names(path)
