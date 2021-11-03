@@ -389,38 +389,107 @@ get_twr_factors <- function(path) {
     files <- paste0(path.complete.panel, files.complete.panels)
     list.dfs <- lapply(files, data.table::fread)
 
+
+    ## for some dates no price information is available. Thus, I create a column indicating this
+    ## I re-calculate the cumulative quantity of the investment because I take the full time period
+    for (i in 1:length(list.dfs) ) {
+
+      df <- list.dfs[[i]]
+
+      first.day <- min(df$date)
+      last.day <- max(df$date)
+
+      ## get daily full time period but remove saturday and sunday
+      full.time.period <- seq(first.day, last.day, by = "day")
+      mysysgetlocale <- Sys.getlocale('LC_TIME')
+      Sys.setlocale('LC_TIME', 'ENGLISH')
+      ## remove weekends
+      full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
+      Sys.setlocale('LC_TIME', mysysgetlocale)
+
+      df.full.time.period <- data.frame(date = full.time.period)
+
+      df.new <- merge(df.full.time.period, df, by = "date", all.x = TRUE)
+      df.new$ticker <- df$ticker[1]
+      df.new[is.na(df.new)] <- 0
+
+      ## new cumulative sum of quantity (because time period is completed, also for dates without price information)
+      df.new$cum_quantity <- cumsum(df.new$quantity)
+      df.new$currently_invested <- ifelse(df.new$cum_quantity > 0, 1, 0)
+
+      df.new$value_available <- ifelse(df.new$value != 0, 1, 0)
+
+      list.dfs[[i]] <- df.new
+
+    }
+
     df.all <- do.call(rbind, list.dfs)
 
+
+    # #### Get full time period as data frame
+    #
+    # first.day <- min(df.all$date)
+    # last.day <- max(df.all$date)
+    #
+    # ## get daily full time period but remove saturday and sunday
+    # full.time.period <- seq(first.day, last.day, by = "day")
+    # mysysgetlocale <- Sys.getlocale('LC_TIME')
+    # Sys.setlocale('LC_TIME', 'ENGLISH')
+    # ## remove weekends
+    # full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
+    # Sys.setlocale('LC_TIME', mysysgetlocale)
+    #
+    # df.full.time.period <- data.frame(date = full.time.period)
+
+
+
+    # df.full.time.period <- data.frame(date = unique(df.all$date))
+    #
+    # ## Remove days which do not have prices/values for all current investments
+    # ## to do:
+    # ##        1. panel which are current investments at time t (i.e. cum_quantity > 0)
+    # df.all$currently_invested[df.all$cum_quantity > 0] <- 1
+    # ## sale yes/no
+    #
+    # ## if at time t no sale and pre-period is currently invested = 1, this investment should still exist at time t (where no price is observed)
+    #
+    #
+    # # 1. merge full time period with df.all (before aggregate)
+    # df.all2 <- merge(df.full.time.period, df.all, by = "date")
+    # # 2. every day (for all tickers) with cum_quantity > 0 but price/value = 0 should be removed
+
+
+
+
     df.all <- df.all[, c("date", "value", "purchase_value", "sale_value",
-                         "dividend_cum_value")]
+                         "dividend_value", "currently_invested", "value_available")]
 
     ## take sum by group "date" for value, purchase_value, sale_value and dividend_cum_value
     df.all <- data.table::setDT(df.all)[, lapply(.SD, sum, na.rm = TRUE), by = date]
 
-    first.day <- min(df.all$date)
-    last.day <- max(df.all$date)
+    ## re compute cumulated dividend payments
+    df.all <- df.all[order(df.all$date), ]
+    df.all$dividend_cum_value <- cumsum(df.all$dividend_value)
 
-    ## get daily full time period but remove saturday and sunday
-    full.time.period <- seq(first.day, last.day, by = "day")
-    mysysgetlocale <- Sys.getlocale('LC_TIME')
-    Sys.setlocale('LC_TIME', 'ENGLISH')
-    ## remove weekends
-    full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
-    Sys.setlocale('LC_TIME', mysysgetlocale)
+    ## remove all dates where currently invested is unequal value available
+    ## this means that prices are not available for all current investments at time t
+    df.all <- df.all[df.all$currently_invested == df.all$value_available, ]
 
-    df.twr <- data.frame(date = full.time.period)
 
-    df.twr <- merge(df.twr, df.all, by = "date", all.x = TRUE)
+    df.twr <- df.all
 
+    ##
+    # df.twr <- merge(df.full.time.period, df.all, by = "date", all.x = TRUE)
+
+    ##
     df.twr[is.na(df.twr)] <- 0
 
-    ## remove all periods with no portfolio value, no purchase and no sale value at the same time
+    ## Remove all periods with no portfolio value, no purchase and no sale value at the same time
     days.empty.portfolio <- df.twr$value == 0 & df.twr$purchase_value == 0 & df.twr$sale_value == 0
-
     df.twr <- df.twr[ !days.empty.portfolio, ]
 
     ## potential to do:
-      ## 1. for some days no prices (i.e. no value information) is available
+      ## 1. for some days no prices (i.e. no value information) are available
       ## if value is zero and pre period purchase is zero, take value from last period
       ## OR 2. remove all periods which have pre-period value and cash flow (purchase and sale value)
       ## equal to zero, because holding period return cannot be computed (divide by zero)
