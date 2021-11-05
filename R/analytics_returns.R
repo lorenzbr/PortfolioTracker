@@ -532,19 +532,20 @@ get_irr <- function(path, nb_period = NULL, period_type = "max") {
 
   get_names(path)
 
-  df.all <- get_complete_portfolio_panel(path)
+  df.complete.portfolio <- get_complete_portfolio_panel(path)
 
 
   if ( !is.null(df.all) ) {
 
-    df.all <- df.all[, c("date", "value", "purchase_value", "sale_value",
+    df.complete.portfolio <- df.complete.portfolio[, c("date", "value", "purchase_value", "sale_value",
                          "dividend_value", "currently_invested", "value_available")]
 
     ## Take sum by group "date" for value, purchase_value, sale_value and dividend_cum_value
-    df.all <- data.table::setDT(df.all)[, lapply(.SD, sum, na.rm = TRUE), by = date]
+    df.complete.portfolio <- data.table::setDT(df.complete.portfolio)[, lapply(.SD, sum, na.rm = TRUE),
+                                                                      by = date]
 
     ## Select time period with TWR factors
-    df.all <- get_df_with_selected_time_period(df = df.all,
+    df.all <- get_df_with_selected_time_period(df = df.complete.portfolio,
                                                            nb_period = nb_period,
                                                            period_type = period_type)
 
@@ -573,34 +574,50 @@ get_irr <- function(path, nb_period = NULL, period_type = "max") {
     ## Compute cash flow
     df.all$cash_flow <- df.all$sale_value + df.all$dividend_value - df.all$purchase_value
 
+    ## Aggregate cash flow on month level
+    ## If it gets too slow, compute IRR on year level
+    ## For now month level should be fine
+    df.all.by.month <- data.table::setDT(df.all)[, .(cash_flow = sum(cash_flow)),
+                              by = .(yr = lubridate::year(date), mon = months(date))]
+
+
+    ## Computation of IRR on monthly basis
+    irr_final <- jrvFinance::irr(df.all.by.month$cash_flow, cf.freq = 12, comp.freq = Inf)
+
+
+    #### Compute IRR manually
+    # df.all$period <- 1:nrow(df.all)
+
     ## Cash flows over the period
-    cash_flows <- df.all$cash_flow
+    ## Periods with zero cash flows do not need to be considered
+    # cash_flows <- df.all$cash_flow[df.all$cash_flow != 0]
 
     ## Get number of periods
-    periods <- length(cash_flows)
+    # periods <- df.all$period[df.all$cash_flow != 0]
+    # periods <- length(cash_flows)
 
-    ## Set threshold parameter
-    threshold <- 10
-
-    ## try different IRR
-    irr_seq <- seq(from = 0, 1, 0.01)
-
-    ## Initialize
-    irr_final <- NA
-
-    for(irr in irr_seq) {
-      npv <- 0
-      for (t in 1:periods) {
-        npv <- npv + cash_flows[t] / (1 + irr)^t
-      }
-      if ( !is.nan(npv)) {
-        if (abs(npv) < threshold) {
-          # print(npv)
-          irr_final <- irr
-          break
-        }
-      }
-    }
+    # ## Set threshold parameter (how much can the net present value deviate from its true value)
+    # threshold <- 1
+    #
+    # ## try different IRRs (from -100% to 10,000%)
+    # irr_seq <- seq(-1, 100, 0.000001)
+    #
+    # ## Initialize
+    # irr_final <- NA
+    #
+    # ## TO DO: make code faster
+    # for(r in irr_seq) {
+    #   npv <- cash_flows[1]
+    #   for ( i in 2:length(periods) ) {
+    #     npv <- npv + ( cash_flows[i] / (1 + r)^(periods[i] - 1) )
+    #   }
+    #   if ( !is.nan(npv) ) {
+    #     if (abs(npv) < threshold) {
+    #       irr_final <- r
+    #       break
+    #     }
+    #   }
+    # }
 
     if (is.na(irr_final)) {
       message("Cannot compute internal rate of return.")

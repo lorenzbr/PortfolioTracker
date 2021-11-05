@@ -22,7 +22,8 @@ Imports:
     stringr,
     tidyr,
     xts,
-    cryptowatchR
+    cryptowatchR,
+    jrvFinance
 Remotes: 
     lorenzbr/cryptowatchR@main
 License: GPL-3 + file LICENSE
