@@ -600,3 +600,78 @@ write_investment_value_panel <- function(ticker, path) {
   } else { message("No price-quantity panel available.") }
 
 }
+
+#' Get complete portfolio panel
+#'
+#' @usage get_complete_portfolio_panel(path)
+#' @param path A single character string. Path where data are stored.
+#'
+#' @return A data frame containing the complete portfolio panel
+#'
+#' @export
+#'
+get_complete_portfolio_panel <- function(path) {
+
+  get_names(path)
+
+  files.complete.panels <- list.files(path.complete.panel)
+
+  no.complete.panels <- rlang::is_empty(files.complete.panels)
+
+  if ( !no.complete.panels ) {
+
+    ## load all complete panels
+    files <- paste0(path.complete.panel, files.complete.panels)
+    list.dfs <- lapply(files, data.table::fread)
+
+
+    #### Get full time period for each ticker (i.e.) data frame in list and store back into list
+
+    df.all <- do.call(rbind, list.dfs)
+
+    first.day <- min(df.all$date)
+    last.day <- max(df.all$date)
+
+    ## get daily full time period but remove saturday and sunday
+    full.time.period <- seq(first.day, last.day, by = "day")
+    mysysgetlocale <- Sys.getlocale('LC_TIME')
+    Sys.setlocale('LC_TIME', 'ENGLISH')
+    ## remove weekends
+    full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
+    Sys.setlocale('LC_TIME', mysysgetlocale)
+
+    df.full.time.period <- data.frame(date = full.time.period)
+
+
+    ## for some dates no price information is available. Thus, I create a column indicating this
+    ## I re-calculate the cumulative quantity of the investment because I take the full time period
+    for (i in 1:length(list.dfs) ) {
+
+      df <- list.dfs[[i]]
+
+      df.new <- merge(df.full.time.period, df, by = "date", all.x = TRUE)
+      df.new$ticker <- df$ticker[1]
+      df.new[is.na(df.new)] <- 0
+
+      ## new cumulative sum of quantity (because time period is completed, also for dates without price information)
+      df.new$cum_quantity <- cumsum(df.new$quantity)
+      df.new$currently_invested <- ifelse(df.new$cum_quantity > 0, 1, 0)
+
+      df.new$value_available <- ifelse(df.new$value != 0, 1, 0)
+
+      list.dfs[[i]] <- df.new
+
+    }
+
+    df.all <- do.call(rbind, list.dfs)
+
+  } else {
+
+    df.all <- NULL
+    message("No complete panels to construct complete portfolio panel available.")
+
+  }
+
+  return(df.all)
+
+}

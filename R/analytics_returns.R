@@ -379,76 +379,71 @@ get_twr_factors <- function(path) {
 
   get_names(path)
 
-  files.complete.panels <- list.files(path.complete.panel)
+  df.all <- get_complete_portfolio_panel(path)
 
-  no.complete.panels <- rlang::is_empty(files.complete.panels)
+  # files.complete.panels <- list.files(path.complete.panel)
+  #
+  # no.complete.panels <- rlang::is_empty(files.complete.panels)
 
-  if ( !no.complete.panels ) {
+  if ( !is.null(df.all) ) {
 
-    ## load all complete panels
-    files <- paste0(path.complete.panel, files.complete.panels)
-    list.dfs <- lapply(files, data.table::fread)
-
-    df.all <- do.call(rbind, list.dfs)
-
-
-    #### Get full time period as data frame
-
-    first.day <- min(df.all$date)
-    last.day <- max(df.all$date)
-
-    ## get daily full time period but remove saturday and sunday
-    full.time.period <- seq(first.day, last.day, by = "day")
-    mysysgetlocale <- Sys.getlocale('LC_TIME')
-    Sys.setlocale('LC_TIME', 'ENGLISH')
-    ## remove weekends
-    full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
-    Sys.setlocale('LC_TIME', mysysgetlocale)
-
-    df.full.time.period <- data.frame(date = full.time.period)
-
-
-    ## for some dates no price information is available. Thus, I create a column indicating this
-    ## I re-calculate the cumulative quantity of the investment because I take the full time period
-    for (i in 1:length(list.dfs) ) {
-
-      df <- list.dfs[[i]]
-
-      df.new <- merge(df.full.time.period, df, by = "date", all.x = TRUE)
-      df.new$ticker <- df$ticker[1]
-      df.new[is.na(df.new)] <- 0
-
-      ## new cumulative sum of quantity (because time period is completed, also for dates without price information)
-      df.new$cum_quantity <- cumsum(df.new$quantity)
-      df.new$currently_invested <- ifelse(df.new$cum_quantity > 0, 1, 0)
-
-      df.new$value_available <- ifelse(df.new$value != 0, 1, 0)
-
-      list.dfs[[i]] <- df.new
-
-    }
-
-    df.all <- do.call(rbind, list.dfs)
-
-
-
-
-
-
-
-
+    # ## load all complete panels
+    # files <- paste0(path.complete.panel, files.complete.panels)
+    # list.dfs <- lapply(files, data.table::fread)
+    #
+    #
+    # #### Get full time period for each ticker (i.e.) data frame in list and store back into list
+    #
+    # df.all <- do.call(rbind, list.dfs)
+    #
+    # first.day <- min(df.all$date)
+    # last.day <- max(df.all$date)
+    #
+    # ## get daily full time period but remove saturday and sunday
+    # full.time.period <- seq(first.day, last.day, by = "day")
+    # mysysgetlocale <- Sys.getlocale('LC_TIME')
+    # Sys.setlocale('LC_TIME', 'ENGLISH')
+    # ## remove weekends
+    # full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
+    # Sys.setlocale('LC_TIME', mysysgetlocale)
+    #
+    # df.full.time.period <- data.frame(date = full.time.period)
+    #
+    #
+    # ## for some dates no price information is available. Thus, I create a column indicating this
+    # ## I re-calculate the cumulative quantity of the investment because I take the full time period
+    # for (i in 1:length(list.dfs) ) {
+    #
+    #   df <- list.dfs[[i]]
+    #
+    #   df.new <- merge(df.full.time.period, df, by = "date", all.x = TRUE)
+    #   df.new$ticker <- df$ticker[1]
+    #   df.new[is.na(df.new)] <- 0
+    #
+    #   ## new cumulative sum of quantity (because time period is completed, also for dates without price information)
+    #   df.new$cum_quantity <- cumsum(df.new$quantity)
+    #   df.new$currently_invested <- ifelse(df.new$cum_quantity > 0, 1, 0)
+    #
+    #   df.new$value_available <- ifelse(df.new$value != 0, 1, 0)
+    #
+    #   list.dfs[[i]] <- df.new
+    #
+    # }
+#
+#
+#     df.all <- do.call(rbind, list.dfs)
 
     df.all <- df.all[, c("date", "value", "purchase_value", "sale_value",
                          "dividend_value", "currently_invested", "value_available")]
 
-    ## take sum by group "date" for value, purchase_value, sale_value and dividend_cum_value
+    ## Take sum by group "date" for value, purchase_value, sale_value and dividend_cum_value
     df.all <- data.table::setDT(df.all)[, lapply(.SD, sum, na.rm = TRUE), by = date]
 
-    ## re compute cumulated dividend payments
+    ## Re-compute cumulated dividend payments
     df.all <- df.all[order(df.all$date), ]
     df.all$dividend_cum_value <- cumsum(df.all$dividend_value)
 
-    ## remove all dates where currently invested is unequal value available
+    ## Remove all dates where currently invested is unequal value available
     ## this means that prices are not available for all current investments at time t
     df.all <- df.all[df.all$currently_invested == df.all$value_available, ]
 
@@ -460,9 +455,9 @@ get_twr_factors <- function(path) {
     days.empty.portfolio <- df.twr$value == 0 & df.twr$purchase_value == 0 & df.twr$sale_value == 0
     df.twr <- df.twr[ !days.empty.portfolio, ]
 
-    ## compute end value
+    ## Compute end value
     df.twr$end_value <- df.twr$value + df.twr$dividend_cum_value
-    ## compute initial value
+    ## Compute initial value
     df.twr$initial_value <- data.table::shift(df.twr$value) + data.table::shift(df.twr$dividend_cum_value)
     ## compute cash flow
     df.twr$cash_flow <- df.twr$purchase_value - df.twr$sale_value
@@ -480,14 +475,14 @@ get_twr_factors <- function(path) {
 
 }
 
-#' Get true time-weighted rate of return (TTWROR) for portfolio
+#' Get true time-weighted rate of return (TTWROR) of total portfolio
 #'
 #' @usage get_ttwror(path, nb_period = NULL, period_type = "max")
 #' @param path A single character string. Path where data are stored.
 #' @param nb_period An integer indicating the number of months. Default is \emph{NULL}.
 #' @param period_type A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.
 #'
-#' @return A numeric for the true time-weighted rate of return (TTWROR) for your portfolio
+#' @return A numeric for the true time-weighted rate of return (TTWROR) of your portfolio
 #'
 #' @export
 get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
@@ -521,3 +516,104 @@ get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
   return(annualized.ttwror)
 
 }
+
+
+#' Get internal rate of return (IRR) of total portfolio
+#'
+#' @usage get_irr(path, nb_period = NULL, period_type = "max")
+#' @param path A single character string. Path where data are stored.
+#' @param nb_period An integer indicating the number of months. Default is \emph{NULL}.
+#' @param period_type A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.
+#'
+#' @return A numeric for the internal rate of return (IRR) of your portfolio
+#'
+#' @export
+get_irr <- function(path, nb_period = NULL, period_type = "max") {
+
+  get_names(path)
+
+  df.all <- get_complete_portfolio_panel(path)
+
+
+  if ( !is.null(df.all) ) {
+
+    df.all <- df.all[, c("date", "value", "purchase_value", "sale_value",
+                         "dividend_value", "currently_invested", "value_available")]
+
+    ## Take sum by group "date" for value, purchase_value, sale_value and dividend_cum_value
+    df.all <- data.table::setDT(df.all)[, lapply(.SD, sum, na.rm = TRUE), by = date]
+
+    ## Select time period with TWR factors
+    df.all <- get_df_with_selected_time_period(df = df.all,
+                                                           nb_period = nb_period,
+                                                           period_type = period_type)
+
+    ## Remove all dates where currently invested is unequal value available
+    ## this means that prices are not available for all current investments at time t
+    df.all <- df.all[df.all$currently_invested == df.all$value_available, ]
+
+    df.all[is.na(df.all)] <- 0
+
+    ## Remove all periods with no portfolio value, no purchase and no sale value at the same time
+    days.empty.portfolio <- df.all$value == 0 & df.all$purchase_value == 0 & df.all$sale_value == 0
+    df.all <- df.all[ !days.empty.portfolio, ]
+
+    ## In the first period, the investment would be hypothetically purchased
+    ## If something was indeed purchased, this would appear in the "value" column. So no need to
+    ## consider it twice
+    is.first.day <- df.all$date == min(df.all$date)
+    df.all$purchase_value[is.first.day] <- df.all$value[is.first.day]
+
+    ## In the last period, the investment would be hypothetically sold
+    ## If something was indeed sold on the last day, this would NOT appear in the "value" column.
+    ## So need to consider this as well.
+    is.last.day <- df.all$date == max(df.all$date)
+    df.all$sale_value[is.last.day] <- df.all$sale_value[is.last.day] + df.all$value[is.last.day]
+
+    ## Compute cash flow
+    df.all$cash_flow <- df.all$sale_value + df.all$dividend_value - df.all$purchase_value
+
+    ## Cash flows over the period
+    cash_flows <- df.all$cash_flow
+
+    ## Get number of periods
+    periods <- length(cash_flows)
+
+    ## Set threshold parameter
+    threshold <- 10
+
+    ## try different IRR
+    irr_seq <- seq(from = 0, 1, 0.01)
+
+    ## Initialize
+    irr_final <- NA
+
+    for(irr in irr_seq) {
+      npv <- 0
+      for (t in 1:periods) {
+        npv <- npv + cash_flows[t] / (1 + irr)^t
+      }
+      if ( !is.nan(npv)) {
+        if (abs(npv) < threshold) {
+          # print(npv)
+          irr_final <- irr
+          break
+        }
+      }
+    }
+
+    if (is.na(irr_final)) {
+      message("Cannot compute internal rate of return.")
+    }
+
+  } else {
+
+    message("Complete portfolio panel not available.")
+    irr_final <- NA
+
+  }
+
+  return(irr_final)
+
+}
+
