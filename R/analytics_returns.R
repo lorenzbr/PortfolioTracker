@@ -535,7 +535,7 @@ get_irr <- function(path, nb_period = NULL, period_type = "max") {
   df.complete.portfolio <- get_complete_portfolio_panel(path)
 
 
-  if ( !is.null(df.all) ) {
+  if ( !is.null(df.complete.portfolio) ) {
 
     df.complete.portfolio <- df.complete.portfolio[, c("date", "value", "purchase_value", "sale_value",
                          "dividend_value", "currently_invested", "value_available")]
