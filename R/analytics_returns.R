@@ -381,57 +381,7 @@ get_twr_factors <- function(path) {
 
   df.all <- get_complete_portfolio_panel(path)
 
-  # files.complete.panels <- list.files(path.complete.panel)
-  #
-  # no.complete.panels <- rlang::is_empty(files.complete.panels)
-
   if ( !is.null(df.all) ) {
-
-    # ## load all complete panels
-    # files <- paste0(path.complete.panel, files.complete.panels)
-    # list.dfs <- lapply(files, data.table::fread)
-    #
-    #
-    # #### Get full time period for each ticker (i.e.) data frame in list and store back into list
-    #
-    # df.all <- do.call(rbind, list.dfs)
-    #
-    # first.day <- min(df.all$date)
-    # last.day <- max(df.all$date)
-    #
-    # ## get daily full time period but remove saturday and sunday
-    # full.time.period <- seq(first.day, last.day, by = "day")
-    # mysysgetlocale <- Sys.getlocale('LC_TIME')
-    # Sys.setlocale('LC_TIME', 'ENGLISH')
-    # ## remove weekends
-    # full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
-    # Sys.setlocale('LC_TIME', mysysgetlocale)
-    #
-    # df.full.time.period <- data.frame(date = full.time.period)
-    #
-    #
-    # ## for some dates no price information is available. Thus, I create a column indicating this
-    # ## I re-calculate the cumulative quantity of the investment because I take the full time period
-    # for (i in 1:length(list.dfs) ) {
-    #
-    #   df <- list.dfs[[i]]
-    #
-    #   df.new <- merge(df.full.time.period, df, by = "date", all.x = TRUE)
-    #   df.new$ticker <- df$ticker[1]
-    #   df.new[is.na(df.new)] <- 0
-    #
-    #   ## new cumulative sum of quantity (because time period is completed, also for dates without price information)
-    #   df.new$cum_quantity <- cumsum(df.new$quantity)
-    #   df.new$currently_invested <- ifelse(df.new$cum_quantity > 0, 1, 0)
-    #
-    #   df.new$value_available <- ifelse(df.new$value != 0, 1, 0)
-    #
-    #   list.dfs[[i]] <- df.new
-    #
-    # }
-#
-#
-#     df.all <- do.call(rbind, list.dfs)
 
     df.all <- df.all[, c("date", "value", "purchase_value", "sale_value",
                          "dividend_value", "currently_invested", "value_available")]
@@ -537,63 +487,64 @@ get_irr <- function(path, nb_period = NULL, period_type = "max") {
 
   if ( !is.null(df.complete.portfolio) ) {
 
-    df.complete.portfolio <- df.complete.portfolio[, c("date", "value", "purchase_value", "sale_value",
-                         "dividend_value", "currently_invested", "value_available")]
+    df.complete.portfolio <- df.complete.portfolio[, c("date", "value", "purchase_value",
+                                                       "sale_value", "dividend_value",
+                                                       "currently_invested", "value_available")]
 
-    ## Take sum by group "date" for value, purchase_value, sale_value and dividend_cum_value
-    df.complete.portfolio <- data.table::setDT(df.complete.portfolio)[, lapply(.SD, sum, na.rm = TRUE),
+    ## Take sum by group "date" for value, purchase_value, sale_value and dividend_value
+    df.portfolio <- data.table::setDT(df.complete.portfolio)[, lapply(.SD, sum, na.rm = TRUE),
                                                                       by = date]
 
     ## Select time period with TWR factors
-    df.all <- get_df_with_selected_time_period(df = df.complete.portfolio,
+    df.portfolio <- get_df_with_selected_time_period(df = df.portfolio,
                                                            nb_period = nb_period,
                                                            period_type = period_type)
 
     ## Remove all dates where currently invested is unequal value available
     ## this means that prices are not available for all current investments at time t
-    df.all <- df.all[df.all$currently_invested == df.all$value_available, ]
+    df.portfolio <- df.portfolio[df.portfolio$currently_invested == df.portfolio$value_available, ]
 
-    df.all[is.na(df.all)] <- 0
+    df.portfolio[is.na(df.portfolio)] <- 0
 
     ## Remove all periods with no portfolio value, no purchase and no sale value at the same time
-    days.empty.portfolio <- df.all$value == 0 & df.all$purchase_value == 0 & df.all$sale_value == 0
-    df.all <- df.all[ !days.empty.portfolio, ]
+    days.empty.portfolio <- df.portfolio$value == 0 & df.portfolio$purchase_value == 0 & df.portfolio$sale_value == 0
+    df.portfolio <- df.portfolio[ !days.empty.portfolio, ]
 
     ## In the first period, the investment would be hypothetically purchased
     ## If something was indeed purchased, this would appear in the "value" column. So no need to
     ## consider it twice
-    is.first.day <- df.all$date == min(df.all$date)
-    df.all$purchase_value[is.first.day] <- df.all$value[is.first.day]
+    is.first.day <- df.portfolio$date == min(df.portfolio$date)
+    df.portfolio$purchase_value[is.first.day] <- df.portfolio$value[is.first.day]
 
     ## In the last period, the investment would be hypothetically sold
     ## If something was indeed sold on the last day, this would NOT appear in the "value" column.
     ## So need to consider this as well.
-    is.last.day <- df.all$date == max(df.all$date)
-    df.all$sale_value[is.last.day] <- df.all$sale_value[is.last.day] + df.all$value[is.last.day]
+    is.last.day <- df.portfolio$date == max(df.portfolio$date)
+    df.portfolio$sale_value[is.last.day] <- df.portfolio$sale_value[is.last.day] + df.portfolio$value[is.last.day]
 
     ## Compute cash flow
-    df.all$cash_flow <- df.all$sale_value + df.all$dividend_value - df.all$purchase_value
+    df.portfolio$cash_flow <- df.portfolio$sale_value + df.portfolio$dividend_value - df.portfolio$purchase_value
 
     ## Aggregate cash flow on month level
     ## If it gets too slow, compute IRR on year level
     ## For now month level should be fine
-    df.all.by.month <- data.table::setDT(df.all)[, .(cash_flow = sum(cash_flow)),
+    df.portfolio.by.month <- data.table::setDT(df.portfolio)[, .(cash_flow = sum(cash_flow)),
                               by = .(yr = lubridate::year(date), mon = months(date))]
 
 
     ## Computation of IRR on monthly basis
-    irr_final <- jrvFinance::irr(df.all.by.month$cash_flow, cf.freq = 12, comp.freq = Inf)
+    irr_final <- jrvFinance::irr(df.portfolio.by.month$cash_flow, cf.freq = 12, comp.freq = Inf)
 
 
     #### Compute IRR manually
-    # df.all$period <- 1:nrow(df.all)
+    # df.portfolio$period <- 1:nrow(df.portfolio)
 
     ## Cash flows over the period
     ## Periods with zero cash flows do not need to be considered
-    # cash_flows <- df.all$cash_flow[df.all$cash_flow != 0]
+    # cash_flows <- df.portfolio$cash_flow[df.portfolio$cash_flow != 0]
 
     ## Get number of periods
-    # periods <- df.all$period[df.all$cash_flow != 0]
+    # periods <- df.portfolio$period[df.portfolio$cash_flow != 0]
     # periods <- length(cash_flows)
 
     # ## Set threshold parameter (how much can the net present value deviate from its true value)

@@ -589,7 +589,7 @@ write_investment_value_panel <- function(ticker, path) {
       from <- min(df.panel$date)
       to <- max(df.panel$date)
 
-      file.panel <- paste0("investment_panel", ticker, "_from_", from, "_to_", to, ".csv")
+      file.panel <- paste0("investment_panel_", ticker, "_from_", from, "_to_", to, ".csv")
 
       data.table::fwrite(df.panel, paste0(path.value.panel, file.panel))
 

@@ -25,10 +25,21 @@ get_tickers_from_transactions <- function(df.transaction.history, path) {
 }
 
 
+#' Get data frame for specified time period
+#'
+#' @usage get_df_with_selected_time_period(df, nb_period = NULL, period_type = "max")
+#' @param df A data frame containing a panel.
+#' @param nb_period An integer indicating the number of months. Default is \emph{NULL}. Does not need to be specified for period_type \emph{max} and \emph{ytd}.
+#' @param period_type A single character string. Default \emph{max}. Possible values \emph{max}, \emph{ytd}, \emph{weeks} and \emph{months}.
+#'
+#' @return A data frame containing the original data frame only for the specified time period.
+#'
+#' @export
 get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type = "max") {
 
   ## Reason for while loop: if first.date does not exist (i.e. NA) go one more day into the past
   ## E.g. Feb 29 does not exist for all years
+  ## Holidays and weekend days may not exist either
   if (period_type == "months") {
 
     first.date <- Sys.Date() - months(nb_period)
@@ -59,6 +70,10 @@ get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type =
       j = j + 1
     }
 
+  } else if (period_type == "ytd") {
+
+    first.date <- as.Date(paste0("01-01-", lubridate::year(Sys.Date())), format = "%d-%m-%Y")
+
   } else if (period_type == "max") {
 
     df.selected.time.period <- df
@@ -66,7 +81,8 @@ get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type =
   }
 
 
-  if (period_type == "months" || period_type == "weeks" || period_type == "days") {
+  if (period_type == "months" || period_type == "weeks" || period_type == "days"
+      || period_type == "ytd") {
 
     df.selected.time.period <- df[df$date >= first.date, ]
 
