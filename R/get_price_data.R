@@ -133,7 +133,7 @@ update_latest_prices <- function(path) {
 
   get_names(path)
 
-  ## load file names for price data
+  ## load file names with price data
   filename.prices.raw.with.ticker <- list.files(path.prices.raw)
 
   ## only run code if filename.prices.raw.with.ticker is not empty
@@ -225,6 +225,7 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
 
   ## Check if specific exchange for ticker has been saved in file. Then, takes this one
   ticker.exchange.file.exists <- file.exists(file.path(path.tickers, file.ticker.exchange))
+  ticker.exchange.pair.exists <- FALSE
 
   if ( ticker.exchange.file.exists ) {
 
@@ -233,8 +234,12 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
     ## needed because using "ticker" produces same data frame
     ticker.current <- ticker
     df.ticker.exchange <- df.ticker.exchanges[df.ticker.exchanges$ticker == ticker.current, ]
+    ticker.exchange.pair.exists <- nrow(df.ticker.exchange) == 1
 
-    if ( nrow(df.ticker.exchange) == 1 ) { ticker.yahoo <- paste0(ticker, df.ticker.exchange$exchange) }
+    if ( ticker.exchange.pair.exists ) {
+      stock.exchange <- df.ticker.exchange$exchange
+      ticker.yahoo <- paste0(ticker, stock.exchange)
+      }
 
   }
 
@@ -304,23 +309,26 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
 
   if ( exists("ticker.prices") ) {
 
-    ## Store stock exchange and ticker in csv file
+    ## Store stock exchange and ticker in csv file if it not yet exists
     df.ticker.exchange <- data.frame(ticker = ticker, exchange = stock.exchange)
-    if ( file.exists(file.path(path.tickers, file.ticker.exchange)) ) {
+
+    if ( ticker.exchange.file.exists && !ticker.exchange.pair.exists ) {
+
       df.ticker.exchanges <- data.table::fread(file.path(path.tickers, file.ticker.exchange))
 
       df.ticker.exchanges <- rbind(df.ticker.exchanges, df.ticker.exchange)
+
       df.ticker.exchanges <- unique(df.ticker.exchanges)
 
       data.table::fwrite(df.ticker.exchanges, file = file.path(path.tickers, file.ticker.exchange))
 
-    } else {
+    } else if ( !ticker.exchange.file.exists ) {
 
       data.table::fwrite(df.ticker.exchange, file = file.path(path.tickers, file.ticker.exchange))
 
     }
 
-    ## convert to data frame
+    ## convert time series with prices to data frame
     df.ticker.prices <- data.frame(ticker.prices)
 
     ## change column names
