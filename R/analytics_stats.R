@@ -37,11 +37,11 @@ write_portfolio_stats <- function(path) {
     nb_periods <- c(1, 3, 6, 12, 36, 60, 120, 1, 1)
     period_types <- c(rep("months", 7), "ytd", "max")
 
-    df.stats <- data.frame(matrix(ncol = 7, nrow = 0,
+    df.stats <- data.frame(matrix(ncol = 9, nrow = 0,
                                   dimnames = list(NULL, c("time_period", "portfolio_value",
                                                           "amount_invested", "amount_sold",
                                                           "price_gains", "price_gains_relative",
-                                                          "dividends"))))
+                                                          "dividends", "irr", "ttwror"))))
 
     for (i in 1:length(nb_periods) ) {
 
@@ -51,23 +51,43 @@ write_portfolio_stats <- function(path) {
 
       time_period <- paste(nb_periods[i], period_types[i])
 
-      amount_invested <- sum(df.selected$purchase_value)
-      amount_sold <- sum(df.selected$sale_value)
+      first.date.target <- Sys.Date() - months(nb_periods[i])
+      first.date.actual <- min(df.selected$date)
 
-      is.first.day <- df.selected$date == min(df.selected$date)
-      is.last.day <- df.selected$date == max(df.selected$date)
+      ## If difference is very large, data for this period not available
+      if (difftime(first.date.actual, first.date.target) <= 30 ) {
 
-      invested.without.first.day <- sum(df.selected$purchase_value[2:nrow(df.selected)])
-      sold.without.first.day <- sum(df.selected$sale_value[2:nrow(df.selected)])
-      start.value <- df.selected$value[is.first.day] + invested.without.first.day
-      price_gains <- df.selected$value[is.last.day] + sold.without.first.day - start.value
+        amount_invested <- sum(df.selected$purchase_value)
+        amount_sold <- sum(df.selected$sale_value)
 
-      price_gains_relative <- price_gains / start.value
+        is.first.day <- df.selected$date == min(df.selected$date)
+        is.last.day <- df.selected$date == max(df.selected$date)
 
-      dividends <- sum(df.selected$dividend_value)
+        invested.without.first.day <- sum(df.selected$purchase_value[2:nrow(df.selected)])
+        sold.without.first.day <- sum(df.selected$sale_value[2:nrow(df.selected)])
+        start.value <- df.selected$value[is.first.day] + invested.without.first.day
+        price_gains <- df.selected$value[is.last.day] + sold.without.first.day - start.value
 
-      df.temp <- data.frame(time_period, portfolio_value, amount_invested, amount_sold,
-                            price_gains, price_gains_relative, dividends)
+        price_gains_relative <- price_gains / start.value
+
+        dividends <- sum(df.selected$dividend_value)
+
+        irr <- PortfolioTracker::get_irr(path, nb_period = nb_periods[i],
+                                         period_type = period_types[i]) * 100
+
+        ttwror <- PortfolioTracker::get_ttwror(path, nb_period = nb_periods[i],
+                                               period_type = period_types[i]) * 100
+
+        df.temp <- data.frame(time_period, portfolio_value, amount_invested, amount_sold,
+                              price_gains, price_gains_relative, dividends, irr, ttwror)
+
+      } else {
+
+        df.temp <- data.frame(time_period, portfolio_value = NA, amount_invested = NA,
+                              amount_sold = NA, price_gains = NA, price_gains_relative = NA,
+                              dividends = NA, irr = NA, ttwror = NA)
+
+      }
 
       df.stats <- rbind(df.stats, df.temp)
 
