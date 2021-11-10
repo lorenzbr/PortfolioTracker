@@ -413,7 +413,9 @@ get_twr_factors <- function(path) {
     df.twr$cash_flow <- df.twr$purchase_value - df.twr$sale_value
 
     ## compute daily holding period return
-    df.twr$twr_factor <- df.twr$end_value / (df.twr$initial_value + df.twr$cash_flow)
+    ## Cash flows occur just before the valuation (of end_value)
+    df.twr$twr_factor <- (df.twr$end_value - df.twr$cash_flow) / df.twr$initial_value
+    # df.twr$twr_factor <- df.twr$end_value / (df.twr$initial_value + df.twr$cash_flow)
 
     data.table::fwrite(df.twr, paste0(path.returns, file.returns.twr.daily))
 
@@ -448,13 +450,14 @@ get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
                                                            nb_period = nb_period,
                                                            period_type = period_type)
 
-    ## Multiply all TWR factors to get ttwror
+    ## Get number of periods
     periods <- length(df.selected.period$twr_factor[!is.na(df.selected.period$twr_factor)])
 
+    ## Multiply all TWR factors to get ttwror
     ## Total period
     # ttwror <- prod(df.selected.period$twr_factor, na.rm = TRUE) - 1
     ## Annualized (meaning over a period of 365 trading days)
-    annualized.ttwror <- prod(df.selected.period$twr_factor, na.rm = TRUE)^(365/periods) - 1
+    annualized.ttwror <- prod(df.selected.period$twr_factor, na.rm = TRUE)^(365.25 / periods) - 1
 
   } else {
 
