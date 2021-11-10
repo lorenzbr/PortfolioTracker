@@ -367,15 +367,15 @@ get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period_type =
 
 }
 
-#' Get TWR factors on daily basis for portfolio
+#' Write TWR factors on daily basis for portfolio
 #'
-#' Get the true-weighted return factors on a daily basis for the entire portfolio
+#' Write the true-weighted return factors on a daily basis for the entire portfolio
 #'
-#' @usage get_twr_factors(path)
+#' @usage write_twr_factors(path)
 #' @param path A single character string. Path where data are stored.
 #'
 #' @export
-get_twr_factors <- function(path) {
+write_twr_factors <- function(path) {
 
   get_names(path)
 
@@ -449,6 +449,10 @@ get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
     df.selected.period <- get_df_with_selected_time_period(df = df.twr.factors,
                                                            nb_period = nb_period,
                                                            period_type = period_type)
+
+    ## Remove focal periods succeeding periods where value is zero (because for the subsequent focal period
+    ## has no reasonable initial value)
+    df.selected.period <- df.selected.period[data.table::shift(df.selected.period$value) != 0, ]
 
     ## Get number of periods
     periods <- length(df.selected.period$twr_factor[!is.na(df.selected.period$twr_factor)])
