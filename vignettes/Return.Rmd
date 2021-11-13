@@ -1,0 +1,22 @@
+---
+title: "Return"
+description: >
+  Documentation and explanation of financial metrics
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Return}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Returns
+
+* TTWROR: True time weighted rate of return
+* IRR: Internal rate of return
