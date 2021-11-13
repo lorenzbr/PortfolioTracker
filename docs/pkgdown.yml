@@ -3,5 +3,6 @@ pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   PortfolioTracker: PortfolioTracker.html
-last_built: 2021-11-12T21:33Z
+  Return: Return.html
+last_built: 2021-11-13T19:34Z
 
