@@ -20,3 +20,6 @@ Returns
 
 * TTWROR: True time weighted rate of return
 * IRR: Internal rate of return
+
+* Annualized return
+* Annual return
