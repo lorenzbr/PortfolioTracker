@@ -222,7 +222,6 @@ update_latest_prices <- function(path) {
 get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "Xetra",
                                   stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU")) {
 
-
   ## Check if specific exchange for ticker has been saved in file. Then, takes this one
   ticker.exchange.file.exists <- file.exists(file.path(path.tickers, file.ticker.exchange))
   ticker.exchange.pair.exists <- FALSE

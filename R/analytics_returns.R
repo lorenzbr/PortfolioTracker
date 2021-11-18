@@ -290,6 +290,8 @@ write_roi_by_period_all <- function(path) {
 #' @export
 write_roi_by_period <- function(ticker, path) {
 
+  path.complete.panel
+
   get_names(path)
 
   if ( !rlang::is_empty(list.files(paste0(path.complete.panel), pattern = ticker)) ) {
@@ -297,7 +299,7 @@ write_roi_by_period <- function(ticker, path) {
     df.complete.panel <- data.table::fread(paste0(path.complete.panel,
                                               list.files(paste0(path.complete.panel), pattern = ticker)))
 
-    df.roi <- get_roi_by_period(df.complete.panel, nb_period = NULL, period = "max")
+    df.roi <- get_roi_by_period(df.complete.panel, nb_period = NULL, period_type = "max")
 
     ## start and end date
     from <- min(df.roi$date)
@@ -485,7 +487,10 @@ get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
 #' @return A numeric for the internal rate of return (IRR) of your portfolio
 #'
 #' @export
+#' @import data.table
 get_irr <- function(path, nb_period = NULL, period_type = "max") {
+
+  cash_flow <- NULL
 
   get_names(path)
 
@@ -535,8 +540,8 @@ get_irr <- function(path, nb_period = NULL, period_type = "max") {
     ## Aggregate cash flow on month level
     ## If it gets too slow, compute IRR on year level
     ## For now month level should be fine
-    df.portfolio.by.month <- data.table::setDT(df.portfolio)[, .(cash_flow = sum(cash_flow)),
-                              by = .(yr = lubridate::year(date), mon = months(date))]
+    df.portfolio.by.month <- data.table::setDT(df.portfolio)[, list(cash_flow = sum(cash_flow)),
+                              by = list(yr = lubridate::year(date), mon = months(date))]
 
 
     ## Computation of IRR on monthly basis
@@ -577,13 +582,16 @@ get_irr <- function(path, nb_period = NULL, period_type = "max") {
     #   }
     # }
 
-    if (is.na(irr_final)) {
+    if ( is.na(irr_final )) {
+
       message("Cannot compute internal rate of return.")
+
     }
 
   } else {
 
     message("Complete portfolio panel not available.")
+
     irr_final <- NA
 
   }
@@ -591,4 +599,3 @@ get_irr <- function(path, nb_period = NULL, period_type = "max") {
   return(irr_final)
 
 }
-

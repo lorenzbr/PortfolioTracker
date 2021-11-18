@@ -4,6 +4,7 @@
 #' @param path A single character string. Path where data are stored.
 #'
 #' @export
+#' @import data.table
 write_portfolio_stats <- function(path) {
 
   get_names(path)
