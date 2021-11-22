@@ -2,7 +2,7 @@
 % Please edit documentation in R/analytics_returns.R
 \name{write_roi_by_period_all}
 \alias{write_roi_by_period_all}
-\title{Write cumulative daily investment returns to a csv file}
+\title{Write cumulative daily investment returns for all tickers to a csv file}
 \usage{
 write_roi_by_period_all(path)
 }
@@ -10,5 +10,5 @@ write_roi_by_period_all(path)
 \item{path}{A single character string. Path where data are stored.}
 }
 \description{
-Write cumulative daily investment returns to a csv file
+Write cumulative daily investment returns for all tickers to a csv file
 }

@@ -7,9 +7,11 @@
 #' @export
 init_isin_ticker <- function(path, file = "isin_ticker.csv"){
 
-  if(!(file.exists(paste0(path, file)))){
-    df.isin.ticker.init <- data.frame(matrix(NA, nrow = 0, ncol = 2, dimnames = list(NULL, c("isin", "ticker"))))
-    data.table::fwrite(df.isin.ticker.init, paste0(path, file))
+  if ( !(file.exists(file.path(path, file))) ) {
+    df.isin.ticker.init <- data.frame(matrix(NA, nrow = 0, ncol = 2,
+                                             dimnames = list(NULL, c("isin",
+                                                                     "ticker"))))
+    data.table::fwrite(df.isin.ticker.init, file.path(path, file))
   }
 
 } ## end of function init_isin_ticker
@@ -31,7 +33,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
   init_isin_ticker(path.tickers, file.ticker)
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
+  df.isin.ticker <- data.table::fread(file.path(path.tickers, file.ticker))
 
   ## identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
   new.isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
@@ -50,7 +52,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
 
           df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
 
-          data.table::fwrite(df.isin.ticker.new, paste0(path.tickers, file.ticker), append = TRUE)
+          data.table::fwrite(df.isin.ticker.new, file.path(path.tickers, file.ticker), append = TRUE)
 
           print(paste("Ticker was missing.", ticker, "added."))
 
@@ -160,7 +162,7 @@ add_ticker_manually <- function(df.isin.ticker.new, path.tickers, file.ticker = 
   init_isin_ticker(path.tickers, file.ticker)
 
   ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-  df.isin.ticker <- data.table::fread(paste0(path.tickers, file.ticker))
+  df.isin.ticker <- data.table::fread(file.path(path.tickers, file.ticker))
 
   ## identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
   new.isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
@@ -175,7 +177,7 @@ add_ticker_manually <- function(df.isin.ticker.new, path.tickers, file.ticker = 
 
         df.isin.ticker.add <- df.isin.ticker.new[grepl(isin, df.isin.ticker.new$isin), ]
 
-        data.table::fwrite(df.isin.ticker.add, paste0(path.tickers, file.ticker), append = TRUE)
+        data.table::fwrite(df.isin.ticker.add, file.path(path.tickers, file.ticker), append = TRUE)
 
         message("Ticker was missing. ", df.isin.ticker.add$ticker, " added.")
 

@@ -18,11 +18,12 @@ write_portfolio_stats <- function(path) {
                                                        "currently_invested", "value_available")]
 
     ## Take sum by group "date" for value, purchase_value, sale_value and dividend_value
-    df.portfolio <- data.table::setDT(df.complete.portfolio)[, lapply(.SD, sum, na.rm = TRUE),
+    df.portfolio <- data.table::setDT(df.complete.portfolio)[, lapply(.SD, sum,
+                                                                      na.rm = TRUE),
                                                                       by = date]
 
     ## Remove all dates where currently invested is unequal value available
-    ## this means that prices are not available for all current investments at time t
+    ## This means that prices are not available for all current investments at time t
     df.portfolio <- df.portfolio[df.portfolio$currently_invested == df.portfolio$value_available, ]
 
     df.portfolio[is.na(df.portfolio)] <- 0
@@ -42,7 +43,10 @@ write_portfolio_stats <- function(path) {
                                   dimnames = list(NULL, c("time_period", "portfolio_value",
                                                           "amount_invested", "amount_sold",
                                                           "price_gains", "price_gains_relative",
-                                                          "dividends", "irr", "ttwror"))))
+                                                          "dividends", "irr", "ttwror")
+                                                  )
+                                  )
+                           )
 
     for (i in 1:length(nb_periods) ) {
 
@@ -73,10 +77,10 @@ write_portfolio_stats <- function(path) {
 
         dividends <- sum(df.selected$dividend_value)
 
-        irr <- PortfolioTracker::get_irr(path, nb_period = nb_periods[i],
+        irr <- PortfolioTracker::get_portfolio_irr(path, nb_period = nb_periods[i],
                                          period_type = period_types[i]) * 100
 
-        ttwror <- PortfolioTracker::get_ttwror(path, nb_period = nb_periods[i],
+        ttwror <- PortfolioTracker::get_portfolio_ttwror(path, nb_period = nb_periods[i],
                                                period_type = period_types[i]) * 100
 
         df.temp <- data.frame(time_period, portfolio_value, amount_invested, amount_sold,

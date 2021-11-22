@@ -75,7 +75,7 @@ update_prices_based_on_transactions <- function(df.transactions, path) {
       if ( transaction.date < earliest.date || nrow(df.prices.same.ticker) == 0 ) {
 
         ## check whether such a file exists already, then no need to download again
-        if ( !file.exists(paste0(path.prices.raw, filename.data.raw.prices)) ) {
+        if ( !file.exists(file.path(path.prices.raw, filename.data.raw.prices)) ) {
 
           ## get price data from Yahoo Finance
           df.ticker.prices <- get_prices_from_yahoo(ticker, from = transaction.date, to = today)
@@ -88,7 +88,7 @@ update_prices_based_on_transactions <- function(df.transactions, path) {
           filename.data.raw.prices <- paste0("prices_ticker_", ticker, "_from_", from, "_to_", to, ".csv")
 
           ## store as csv in raw price data
-          data.table::fwrite(df.ticker.prices, paste0(path.prices.raw, filename.data.raw.prices))
+          data.table::fwrite(df.ticker.prices, file.path(path.prices.raw, filename.data.raw.prices))
 
           if ( today != Sys.Date() ) {
 
@@ -184,7 +184,7 @@ update_latest_prices <- function(path) {
             filename.prices.raw <- paste0("prices_ticker_", ticker, "_from_", from, "_to_", to, ".csv")
 
             ## store as csv in raw financial data
-            data.table::fwrite(df.updated.prices, paste0(path.prices.raw, filename.prices.raw))
+            data.table::fwrite(df.updated.prices, file.path(path.prices.raw, filename.prices.raw))
 
             print(paste("Prices for", ticker, "from", from, "to", to, "successfully downloaded."))
 
@@ -319,11 +319,11 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
 
       df.ticker.exchanges <- unique(df.ticker.exchanges)
 
-      data.table::fwrite(df.ticker.exchanges, file = file.path(path.tickers, file.ticker.exchange))
+      data.table::fwrite(df.ticker.exchanges, file.path(path.tickers, file.ticker.exchange))
 
     } else if ( !ticker.exchange.file.exists ) {
 
-      data.table::fwrite(df.ticker.exchange, file = file.path(path.tickers, file.ticker.exchange))
+      data.table::fwrite(df.ticker.exchange, file.path(path.tickers, file.ticker.exchange))
 
     }
 

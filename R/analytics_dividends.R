@@ -18,7 +18,7 @@ write_dividend_history <- function(df.transaction.history, path) {
     df.dividend.history$transaction_value <- abs(df.dividend.history$transaction_value)
 
     ## write dividend history
-    data.table::fwrite(df.dividend.history, paste0(path.dividends, file.dividend.history))
+    data.table::fwrite(df.dividend.history, file.path(path.dividends, file.dividend.history))
 
   } else {
 
@@ -63,7 +63,7 @@ write_dividend_by_yr <- function(path) {
       df.dividend.history.sum.yr <- as.data.frame(df.dividend.history.sum.yr)
       df.dividend.history.sum.yr$transaction_value[is.na(df.dividend.history.sum.yr$transaction_value)] <- 0
 
-      data.table::fwrite(df.dividend.history.sum.yr, paste0(path.dividends, file.dividend.year))
+      data.table::fwrite(df.dividend.history.sum.yr, file.path(path.dividends, file.dividend.year))
 
     }
 
@@ -113,7 +113,7 @@ write_dividend_by_month <- function(path) {
       df.dividend.history.sum.month <- as.data.frame(df.dividend.history.sum.month)
       df.dividend.history.sum.month$transaction_value[is.na(df.dividend.history.sum.month$transaction_value)] <- 0
 
-      data.table::fwrite(df.dividend.history.sum.month, paste0(path.dividends, file.dividend.month))
+      data.table::fwrite(df.dividend.history.sum.month, file.path(path.dividends, file.dividend.month))
 
     }
 

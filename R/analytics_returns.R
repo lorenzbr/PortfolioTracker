@@ -1,3 +1,128 @@
+#' Write IRRs for all tickers to csv files
+#'
+#' @usage write_investment_irr_all(path)
+#' @param path A single character string. Path where data are stored.
+#'
+#' @export
+write_investment_irr_all <- function(path) {
+
+  #### TO DO: use apply functions rather than two for loops
+  ####        or simply do everything in one data frame and use group by
+
+  cash_flow <- NULL
+
+  get_names(path)
+
+  files.complete.panels <- list.files(path.complete.panel)
+
+  no.complete.panels <- rlang::is_empty(files.complete.panels)
+
+  if ( !no.complete.panels ) {
+
+    ## Load all complete panels
+    files <- file.path(path.complete.panel, files.complete.panels)
+    list.dfs <- lapply(files, data.table::fread)
+
+    panel.name <- "complete_panel"
+
+    col.names <- c("ticker", "time_period", "ytd", "1y", "3y", "5y", "10y", "max")
+    df.irr <- data.frame(matrix(ncol = 8, nrow = 0, dimnames = list(NULL, col.names)))
+
+    ## Could also do mapply and do.call (if necessary)
+    ## For loop over all investments
+    for ( i in 1:length(list.dfs) ) {
+
+      ticker <- stringr::str_match(files[i], paste0(panel.name, "_(.*?)_from"))[, 2]
+      df.panel <- list.dfs[[i]]
+
+      ## Select time period to compute IRR
+      nb_periods <- c(1, 3, 6, 12, 36, 60, 120, 1, 1)
+      period_types <- c(rep("months", 7), "ytd", "max")
+
+      for ( t in 1:length(nb_periods) ) {
+
+        df.selected <- get_df_with_selected_time_period(df = df.panel,
+                                                        nb_period = nb_periods[t],
+                                                        period_type = period_types[t])
+
+        if ( nrow(df.selected) > 0 ) {
+
+          time_period <- paste(nb_periods[t], period_types[t])
+
+          first.date.target <- Sys.Date() - months(nb_periods[t])
+          first.date.actual <- min(df.selected$date)
+
+
+          ## If difference is very large, data for this period not available
+          if ( difftime(first.date.actual, first.date.target) <= 30 ) {
+
+            ## Remove all periods with no portfolio value, no purchase and no sale value at the same time
+            days.empty.portfolio <- df.selected$value == 0 & df.selected$purchase_value == 0 & df.selected$sale_value == 0
+            df.selected <- df.selected[ !days.empty.portfolio, ]
+
+            ## In the first period, the investment would be hypothetically purchased
+            ## If something was indeed purchased, this would appear in the "value" column. So no need to
+            ## consider it twice
+            is.first.day <- df.selected$date == min(df.selected$date)
+            df.selected$purchase_value[is.first.day] <- df.selected$value[is.first.day]
+
+            ## In the last period, the investment would be hypothetically sold
+            ## If something was indeed sold on the last day, this would NOT appear in the "value" column.
+            ## So need to consider this as well.
+            is.last.day <- df.selected$date == max(df.selected$date)
+            df.selected$sale_value[is.last.day] <- df.selected$sale_value[is.last.day] + df.selected$value[is.last.day]
+
+            ## Compute cash flow
+            df.selected$cash_flow <- df.selected$sale_value + df.selected$dividend_value - df.selected$purchase_value
+
+            ## Aggregate cash flow on month level
+            ## If it gets too slow, compute IRR on year level
+            ## For now month level should be fine
+            df.selected.by.month <- data.table::setDT(df.selected)[, list(cash_flow = sum(cash_flow)),
+                                                                     by = list(yr = lubridate::year(date), mon = months(date))]
+
+
+            ## Computation of IRR on monthly basis
+            irr <- jrvFinance::irr(df.selected.by.month$cash_flow, cf.freq = 12, comp.freq = Inf)
+
+            df.temp <- data.frame(ticker = ticker, time_period, irr)
+
+          } else {
+
+            df.temp <- data.frame(ticker = ticker, time_period, irr = NA)
+
+          }
+
+          df.irr <- rbind(df.irr, df.temp)
+
+        } ## If statement: if selected time period is non-empty
+
+      } ## For loop over all periods
+
+    } ## For loop over all investments
+
+    ## Long to wide
+    data.table::setDT(df.irr)
+    df.irr <- data.table::dcast(df.irr, ticker ~ time_period,
+                                value.var = "irr")
+    data.table::setDF(df.irr)
+    names(df.irr)[names(df.irr) == "1 max"] <- "max"
+    names(df.irr)[names(df.irr) == "1 ytd"] <- "ytd"
+    names(df.irr)[names(df.irr) == "12 months"] <- "1y"
+    names(df.irr)[names(df.irr) == "36 months"] <- "3y"
+    names(df.irr)[names(df.irr) == "60 months"] <- "5y"
+    names(df.irr)[names(df.irr) == "120 months"] <- "10y"
+
+    data.table::fwrite(df.irr, file.path(path.returns, file.returns.irr))
+
+  } else {
+
+    message("No complete panels to calculate IRRs.")
+
+  }
+
+}
+
 #' Write returns for all tickers to csv files
 #'
 #' @usage write_returns(path)
@@ -14,7 +139,7 @@ write_returns <- function(path) {
 
   if ( !no.price.panels ) {
 
-    files <- paste0(path.price.panel, files.price.panels)
+    files <- file.path(path.price.panel, files.price.panels)
     list.dfs <- lapply(files, data.table::fread)
 
     # last.year <- lubridate::year(Sys.Date()) - 1
@@ -23,8 +148,8 @@ write_returns <- function(path) {
     df.monthly <- data.frame(matrix(nrow = 0, ncol = 1, dimnames = list(NULL, "date")))
     df.annual <- data.frame(matrix(nrow = 0, ncol = 1, dimnames = list(NULL, "date")))
 
-    ## could also do mapply and do.call (if necessary)
-    for (i in 1:length(list.dfs)) {
+    ## Could also do mapply and do.call (if necessary)
+    for ( i in 1:length(list.dfs) ) {
 
       ticker <- stringr::str_match(files[i], "price_panel_(.*?)_from")[, 2]
       df.price.panel <- list.dfs[[i]]
@@ -47,9 +172,9 @@ write_returns <- function(path) {
 
     }
 
-    data.table::fwrite(df.daily, paste0(path.returns, file.returns.daily))
-    data.table::fwrite(df.monthly, paste0(path.returns, file.returns.monthly))
-    data.table::fwrite(df.annual, paste0(path.returns, file.returns.annual))
+    data.table::fwrite(df.daily, file.path(path.returns, file.returns.daily))
+    data.table::fwrite(df.monthly, file.path(path.returns, file.returns.monthly))
+    data.table::fwrite(df.annual, file.path(path.returns, file.returns.annual))
 
   } else {
 
@@ -59,12 +184,12 @@ write_returns <- function(path) {
 
 }
 
-#' Get returns
+#' Get all returns (daily, monthly, annual) for ticker
 #'
 #' @usage get_returns_all(df, ticker)
-#' @param df A data.frame containing date and prices.
+#' @param df A data frame containing date and prices.
 #' @param ticker A single character string containing the ticker.
-#' @return df.allreturns A data.frame containing daily, monthly and annual returns.
+#' @return A data frame containing daily, monthly and annual returns.
 #'
 #' @export
 get_returns_all <- function(df, ticker) {
@@ -110,7 +235,7 @@ write_annualized_returns <- function(path) {
 
   file.name <- list.files(path.returns, pattern = returns.period.file)
 
-  df.returns <- data.table::fread(paste0(path.returns, file.name))
+  df.returns <- data.table::fread(file.path(path.returns, file.name))
 
   names(df.returns) <- gsub(paste0("\\.", returns.period), "", names(df.returns))
 
@@ -123,7 +248,7 @@ write_annualized_returns <- function(path) {
 
   annualize.return.periods <- c(1, 3, 5, 10)
 
-  for (annualize.return.period in annualize.return.periods) {
+  for ( annualize.return.period in annualize.return.periods ) {
 
     xts.returns.Xy <- xts.returns.max[paste0(Sys.Date() - lubridate::years(annualize.return.period), "/")]
 
@@ -175,7 +300,7 @@ write_annualized_returns <- function(path) {
 
     df.annualized <- df.annualized[, names(df.annualized) != "age_yrs" & names(df.annualized) != "date"]
 
-    data.table::fwrite(df.annualized, paste0(path.returns, file.returns.annualized))
+    data.table::fwrite(df.annualized, file.path(path.returns, file.returns.annualized))
 
   }
 
@@ -201,7 +326,7 @@ write_portfolio_return <- function(path) {
 
   file.name <- list.files(path.returns, pattern = returns.period.file)
 
-  df.returns <- data.table::fread(paste0(path.returns, file.name))
+  df.returns <- data.table::fread(file.path(path.returns, file.name))
 
   names(df.returns) <- gsub(paste0("\\.", returns.period), "", names(df.returns))
 
@@ -218,7 +343,7 @@ write_portfolio_return <- function(path) {
 
   if (!no.pricequantity.panels) {
 
-    files <- paste0(path.pricequantity.panel, files.pricequantity.panels)
+    files <- file.path(path.pricequantity.panel, files.pricequantity.panels)
     list.dfs <- lapply(files, data.table::fread)
 
   }
@@ -248,7 +373,7 @@ write_portfolio_return <- function(path) {
   xts.weight <- xts.weight[, names(xts.weight) != "date"]
   storage.mode(xts.weight) <- "numeric"
 
-  ## get daily portfolio returns
+  ## Get daily portfolio returns
   xts.portfolio <- PerformanceAnalytics::Return.portfolio(xts.returns.max, xts.weight)
 
   df.portfolio.daily <- data.frame(xts.portfolio)
@@ -257,11 +382,11 @@ write_portfolio_return <- function(path) {
   names(df.portfolio.daily)[2] <- "portfolio_returns"
   row.names(df.portfolio.daily) <- 1:nrow(df.portfolio.daily)
 
-  data.table::fwrite(df.portfolio.daily, paste0(path.returns, file.return.portfolio.daily))
+  data.table::fwrite(df.portfolio.daily, file.path(path.returns, file.return.portfolio.daily))
 
 }
 
-#' Write cumulative daily investment returns to a csv file
+#' Write cumulative daily investment returns for all tickers to a csv file
 #'
 #' @usage write_roi_by_period_all(path)
 #' @param path A single character string. Path where data are stored.
@@ -271,12 +396,13 @@ write_roi_by_period_all <- function(path) {
 
   get_names(path)
 
-  df.transaction.history <- data.table::fread(paste0(path.transactions, file.transactions))
+  df.transaction.history <- data.table::fread(file.path(path.transactions,
+                                                        file.transactions))
 
-  ## get tickers from history of transactions
+  ## Get tickers from history of transactions
   tickers <- get_tickers_from_transactions(df.transaction.history, path)
 
-  ## write cumulative daily investment return for all tickers
+  ## Write cumulative daily investment return for all tickers
   output <- mapply(write_roi_by_period, tickers, MoreArgs = list(path))
 
 }
@@ -290,14 +416,13 @@ write_roi_by_period_all <- function(path) {
 #' @export
 write_roi_by_period <- function(ticker, path) {
 
-  path.complete.panel
-
   get_names(path)
 
-  if ( !rlang::is_empty(list.files(paste0(path.complete.panel), pattern = ticker)) ) {
+  if ( !rlang::is_empty(list.files(path.complete.panel, pattern = ticker)) ) {
 
-    df.complete.panel <- data.table::fread(paste0(path.complete.panel,
-                                              list.files(paste0(path.complete.panel), pattern = ticker)))
+    df.complete.panel <- data.table::fread(file.path(path.complete.panel,
+                                              list.files(path.complete.panel,
+                                                         pattern = ticker)))
 
     df.roi <- get_roi_by_period(df.complete.panel, nb_period = NULL, period_type = "max")
 
@@ -309,7 +434,7 @@ write_roi_by_period <- function(ticker, path) {
     file.roi.panel <- paste0("return_on_investment_daily_", ticker, "_from_", from, "_to_", to, ".csv")
 
     ## Store price quantity panel as csv
-    data.table::fwrite(df.roi, paste0(path.returns.roi, file.roi.panel))
+    data.table::fwrite(df.roi, file.path(path.returns.roi, file.roi.panel))
 
     message("Daily investment return for ", ticker, " successfully created!")
 
@@ -324,7 +449,7 @@ write_roi_by_period <- function(ticker, path) {
 #' @param nb_period An integer indicating the number of months. Default is \emph{NULL}.
 #' @param period_type A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.
 #'
-#' @return df.roi.period A data.frame containing the cumulative return on investment for a given period.
+#' @return A data frame containing the cumulative return on investment for a given period.
 #'
 #' @export
 get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period_type = "max") {
@@ -373,11 +498,11 @@ get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period_type =
 #'
 #' Write the true-weighted return factors on a daily basis for the entire portfolio
 #'
-#' @usage write_twr_factors(path)
+#' @usage write_portfolio_twr_factors(path)
 #' @param path A single character string. Path where data are stored.
 #'
 #' @export
-write_twr_factors <- function(path) {
+write_portfolio_twr_factors <- function(path) {
 
   get_names(path)
 
@@ -419,7 +544,7 @@ write_twr_factors <- function(path) {
     df.twr$twr_factor <- (df.twr$end_value - df.twr$cash_flow) / df.twr$initial_value
     # df.twr$twr_factor <- df.twr$end_value / (df.twr$initial_value + df.twr$cash_flow)
 
-    data.table::fwrite(df.twr, paste0(path.returns, file.returns.twr.daily))
+    data.table::fwrite(df.twr, file.path(path.returns, file.returns.twr.daily))
 
   } else {
 
@@ -431,7 +556,7 @@ write_twr_factors <- function(path) {
 
 #' Get true time-weighted rate of return (TTWROR) of total portfolio
 #'
-#' @usage get_ttwror(path, nb_period = NULL, period_type = "max")
+#' @usage get_portfolio_ttwror(path, nb_period = NULL, period_type = "max")
 #' @param path A single character string. Path where data are stored.
 #' @param nb_period An integer indicating the number of months. Default is \emph{NULL}.
 #' @param period_type A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.
@@ -439,7 +564,7 @@ write_twr_factors <- function(path) {
 #' @return A numeric for the true time-weighted rate of return (TTWROR) of your portfolio
 #'
 #' @export
-get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
+get_portfolio_ttwror <- function(path, nb_period = NULL, period_type = "max") {
 
   get_names(path)
 
@@ -479,7 +604,7 @@ get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
 
 #' Get internal rate of return (IRR) of total portfolio
 #'
-#' @usage get_irr(path, nb_period = NULL, period_type = "max")
+#' @usage get_portfolio_irr(path, nb_period = NULL, period_type = "max")
 #' @param path A single character string. Path where data are stored.
 #' @param nb_period An integer indicating the number of months. Default is \emph{NULL}.
 #' @param period_type A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.
@@ -488,7 +613,7 @@ get_ttwror <- function(path, nb_period = NULL, period_type = "max") {
 #'
 #' @export
 #' @import data.table
-get_irr <- function(path, nb_period = NULL, period_type = "max") {
+get_portfolio_irr <- function(path, nb_period = NULL, period_type = "max") {
 
   cash_flow <- NULL
 
@@ -504,10 +629,11 @@ get_irr <- function(path, nb_period = NULL, period_type = "max") {
                                                        "currently_invested", "value_available")]
 
     ## Take sum by group "date" for value, purchase_value, sale_value and dividend_value
+    ## Group date means: the values for all individual investments are aggregted (summed)
     df.portfolio <- data.table::setDT(df.complete.portfolio)[, lapply(.SD, sum, na.rm = TRUE),
                                                                       by = date]
 
-    ## Select time period with TWR factors
+    ## Select time period for portfolio panel
     df.portfolio <- get_df_with_selected_time_period(df = df.portfolio,
                                                            nb_period = nb_period,
                                                            period_type = period_type)

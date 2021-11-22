@@ -91,7 +91,7 @@ write_default_target_shares <- function(df.target.shares, path) {
 
     if ( all( c("isin", "target_share") %in% names(df.target.shares) )) {
 
-    data.table::fwrite(df.target.shares, paste0(path.rebalance, file.target.shares))
+    data.table::fwrite(df.target.shares, file.path(path.rebalance, file.target.shares))
 
     }
 

@@ -2,18 +2,18 @@
 % Please edit documentation in R/analytics_returns.R
 \name{get_returns_all}
 \alias{get_returns_all}
-\title{Get returns}
+\title{Get all returns (daily, monthly, annual) for ticker}
 \usage{
 get_returns_all(df, ticker)
 }
 \arguments{
-\item{df}{A data.frame containing date and prices.}
+\item{df}{A data frame containing date and prices.}
 
 \item{ticker}{A single character string containing the ticker.}
 }
 \value{
-df.allreturns A data.frame containing daily, monthly and annual returns.
+A data frame containing daily, monthly and annual returns.
 }
 \description{
-Get returns
+Get all returns (daily, monthly, annual) for ticker
 }

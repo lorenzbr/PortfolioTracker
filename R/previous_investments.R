@@ -11,7 +11,7 @@ write_previous_investments <- function(path) {
   ## load price quantity panels if exists
   if ( !rlang::is_empty(list.files(path.pricequantity.panel)) ) {
 
-    files <- paste0(path.pricequantity.panel, list.files(path.pricequantity.panel))
+    files <- file.path(path.pricequantity.panel, list.files(path.pricequantity.panel))
     list.dfs <- lapply(files, data.table::fread)
 
     transaction.history.exists <- file.exists(file.path(path.transactions, file.transactions))
@@ -95,7 +95,7 @@ write_previous_investments <- function(path) {
 
         }
 
-        data.table::fwrite(df, paste0(path.data, file.previous))
+        data.table::fwrite(df, file.path(path.data, file.previous))
 
       }
 

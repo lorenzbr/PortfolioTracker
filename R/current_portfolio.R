@@ -11,7 +11,7 @@ write_current_portfolio <- function(path) {
   ## load price quantity panels if exists
   if ( !rlang::is_empty(list.files(path.pricequantity.panel)) ) {
 
-    files <- paste0(path.pricequantity.panel, list.files(path.pricequantity.panel))
+    files <- file.path(path.pricequantity.panel, list.files(path.pricequantity.panel))
     list.dfs <- lapply(files, data.table::fread)
 
     transaction.history.exists <- file.exists(file.path(path.transactions, file.transactions))
@@ -56,7 +56,7 @@ write_current_portfolio <- function(path) {
       ## compute weight of each investment in total portfolio value
       df.current$weight <- df.current$value / total.portfolio.value
 
-      data.table::fwrite(df.current, paste0(path.data, file.current))
+      data.table::fwrite(df.current, file.path(path.data, file.current))
 
     }
 

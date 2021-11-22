@@ -26,7 +26,8 @@ if (getRversion() >= "2.15.1") {
                            "file.target.shares",
                            "file.stats", "file.returns.daily", "file.returns.monthly",
                            "file.returns.annual", "file.returns.annualized",
-                           "file.return.portfolio.daily", "file.returns.twr.daily"
+                           "file.return.portfolio.daily", "file.returns.twr.daily",
+                           "file.returns.irr"
                            )
                          )
 
