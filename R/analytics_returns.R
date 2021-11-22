@@ -25,8 +25,9 @@ write_investment_irr_all <- function(path) {
 
     panel.name <- "complete_panel"
 
-    col.names <- c("ticker", "time_period", "ytd", "1y", "3y", "5y", "10y", "max")
-    df.irr <- data.frame(matrix(ncol = 8, nrow = 0, dimnames = list(NULL, col.names)))
+    col.names <- c("ticker", "time_period", "irr")
+    df.irr <- data.frame(matrix(ncol = length(col.names), nrow = 0,
+                                dimnames = list(NULL, col.names)))
 
     ## Could also do mapply and do.call (if necessary)
     ## For loop over all investments
@@ -105,9 +106,14 @@ write_investment_irr_all <- function(path) {
     data.table::setDT(df.irr)
     df.irr <- data.table::dcast(df.irr, ticker ~ time_period,
                                 value.var = "irr")
+
     data.table::setDF(df.irr)
+
     names(df.irr)[names(df.irr) == "1 max"] <- "max"
     names(df.irr)[names(df.irr) == "1 ytd"] <- "ytd"
+    names(df.irr)[names(df.irr) == "1 months"] <- "1m"
+    names(df.irr)[names(df.irr) == "3 months"] <- "3m"
+    names(df.irr)[names(df.irr) == "6 months"] <- "6m"
     names(df.irr)[names(df.irr) == "12 months"] <- "1y"
     names(df.irr)[names(df.irr) == "36 months"] <- "3y"
     names(df.irr)[names(df.irr) == "60 months"] <- "5y"
