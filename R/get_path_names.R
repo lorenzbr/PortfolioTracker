@@ -6,6 +6,8 @@
 #' @export
 get_path_names <- function(path) {
 
+  before <- Sys.time()
+
   ## Solution from https://github.com/josephguillaume/hydromad/issues/73
   pos <- 1
   envir <- as.environment(pos)
@@ -21,7 +23,7 @@ get_path_names <- function(path) {
                                 "path.rebalance",
                                 "path.returns",
                                 "path.returns.roi",
-                                "path.fiat",
+                                "path.cash",
                                 "path.crypto",
                                 "path.value.panel",
                                 "path.complete.panel"
@@ -37,8 +39,8 @@ get_path_names <- function(path) {
                                  "rebalance",
                                  "returns",
                                  "returns/roi",
-                                 "currencies/fiat",
-                                 "currencies/crypto",
+                                 "cash",
+                                 "crypto",
                                  "value_panel",
                                  "complete_panel"
                                  )
@@ -49,5 +51,8 @@ get_path_names <- function(path) {
     assign(df[i, 1], file.path(path, "data", df[i, 2]), envir = envir)
 
   }
+
+  after <- Sys.time()
+  after - before
 
 }

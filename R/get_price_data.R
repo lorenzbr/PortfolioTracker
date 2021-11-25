@@ -102,7 +102,7 @@ update_prices_based_on_transactions <- function(df.transactions, path) {
           print(paste("Prices for", ticker, "from", transaction.date, "to", today, "already downloaded.", " File",
                       filename.data.raw.prices, "exists already."))
 
-        } ## end of else if condition which checks whether file already exists
+        } ## End of else if condition which checks whether file already exists
 
       } else { message("Prices based on older transaction already exist.") }
       ## end of if else statement: transaction.date older than any other or no transactions exist
@@ -143,13 +143,16 @@ update_latest_prices <- function(path) {
     df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
 
     ## identify last date
-    df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename, "to_(.*?).csv")[, 2]
+    df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename,
+                                                        "to_(.*?).csv")[, 2]
 
     ## identify tickers
-    df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename, "ticker_(.*?)_from")[, 2]
+    df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename,
+                                                     "ticker_(.*?)_from")[, 2]
 
     ## keep latest date for each ticker
-    df.files.price.data <- stats::aggregate(last_date ~ ticker, data = df.files.price.data, max)
+    df.files.price.data <- stats::aggregate(last_date ~ ticker,
+                                            data = df.files.price.data, max)
 
     ## get date of today
     today <- Sys.Date()
@@ -264,8 +267,8 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
 
   ## Get prices from Yahoo API
   try({
-    suppressWarnings( ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
-                                                            auto.assign = FALSE, warnings = FALSE) )
+    ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+                                          auto.assign = FALSE, warnings = FALSE)
   })
 
 
@@ -279,8 +282,8 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
       ticker.yahoo <- paste0(ticker, stock.exchange)
       iter.stock.exchanges <- iter.stock.exchanges + 1
       try({
-        suppressWarnings( ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
-                                                                auto.assign = FALSE, warnings = FALSE) )
+        ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+                                              auto.assign = FALSE, warnings = FALSE)
       })
     }
 
@@ -294,8 +297,8 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
         ticker.yahoo <- paste0(ticker, stock.exchange)
         iter.stock.exchanges <- iter.stock.exchanges + 1
         try({
-          suppressWarnings( ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
-                                                                  auto.assign = FALSE, warnings = FALSE) )
+          ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+                                                auto.assign = FALSE, warnings = FALSE)
         })
       }
 

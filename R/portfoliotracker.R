@@ -16,7 +16,7 @@ if (getRversion() >= "2.15.1") {
                            "path.complete.panel",
                            "path.pricequantity.panel", "path.dividends",
                            "path.transactions", "path.rebalance", "path.returns",
-                           "path.returns.roi", "path.fiat", "path.crypto",
+                           "path.returns.roi", "path.cash", "path.crypto",
                            "path.value.panel",
                            "file.transactions", "file.current",
                            "file.previous",
