@@ -26,7 +26,7 @@ init_isin_ticker <- function(path, file = "isin_ticker.csv"){
 #' @export
 update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.csv"){
 
-  ## Variable isins is a vector with isins for which tickers are needed
+  ## Variable isins is a vector containing ISINs for which tickers are needed
   isins <- unique(isins)
   isins <- isins[!grepl("^$", isins)]
 

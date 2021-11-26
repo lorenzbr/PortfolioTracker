@@ -249,30 +249,30 @@ write_annualized_returns <- function(path) {
 
   xts.returns.max <- xts::as.xts(df.returns)
 
-  df.annualized <- data.frame(matrix(nrow = length(names(xts.returns.max)), ncol = 0,
+  df.annualized.years <- data.frame(matrix(nrow = length(names(xts.returns.max)), ncol = 0,
                                      dimnames = list(names(xts.returns.max), NULL)))
 
+  ## Annualized returns for 1, 3, 5 and 10 years
   annualize.return.periods <- c(1, 3, 5, 10)
 
   for ( annualize.return.period in annualize.return.periods ) {
 
+    ## Select period
     xts.returns.Xy <- xts.returns.max[paste0(Sys.Date() - lubridate::years(annualize.return.period), "/")]
 
-    ## compute annualized return if prices exist for X years
+    ## Compute annualized return if prices exist for X years
 
-    annualized.returns.Xy <- PerformanceAnalytics::Return.annualized(xts.returns.Xy)
+    df.temp <- get_annualized_returns(xts.returns.Xy)
 
-    df.temp <- as.data.frame(t(annualized.returns.Xy))
     names(df.temp) <- paste0(annualize.return.period, "y")
 
-    df.annualized <- cbind(df.annualized, df.temp)
+    df.annualized.years <- cbind(df.annualized.years, df.temp)
 
   }
 
-  annualized.returns.max <- PerformanceAnalytics::Return.annualized(xts.returns.max)
-  df.temp <- as.data.frame(t(annualized.returns.max))
-  names(df.temp) <- "max"
-  df.annualized <- cbind(df.annualized, df.temp)
+  df.annualized.max <- get_annualized_returns(xts.returns.max)
+  names(df.annualized.max) <- "max"
+  df.annualized <- cbind(df.annualized.years, df.annualized.max)
 
   col.names <- names(df.annualized)
   df.annualized$ticker <- rownames(df.annualized)

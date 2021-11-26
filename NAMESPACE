@@ -2,6 +2,8 @@
 
 export(add_ticker_manually)
 export(create_portfoliotracker_dir)
+export(get_annualized_return)
+export(get_annualized_returns)
 export(get_complete_portfolio_panel)
 export(get_df_with_selected_time_period)
 export(get_dividends_max)
