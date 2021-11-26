@@ -18,13 +18,16 @@ init_isin_ticker <- function(path, file = "isin_ticker.csv"){
 
 #' Update ISIN-ticker table
 #'
-#' @usage update_ticker_isin(isins, path.tickers, file.ticker = "isin_ticker.csv")
+#' @usage update_ticker_isin(isins, path.tickers, file.ticker = "isin_ticker.csv",
+#'                    external.search = TRUE)
 #' @param isins A single character or vector of strings. ISINs.
 #' @param path.tickers A single character string. Folder where ISIN-ticker table is stored.
 #' @param file.ticker A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)
+#' @param external.search Logical if TRUE, the function searches external sources to find the ticker.
 #'
 #' @export
-update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.csv"){
+update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.csv",
+                               external.search = TRUE){
 
   ## Variable isins is a vector containing ISINs for which tickers are needed
   isins <- unique(isins)
@@ -52,7 +55,9 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
         df.isin.ticker.database <- as.data.frame(df.isin.ticker.database)
         ticker <- df.isin.ticker.database$ticker[df.isin.ticker.database$isin == isin]
 
-        if ( length(ticker) == 0 ) ticker <- get_ticker_from_xetra(isin)
+        if ( length(ticker) == 0 && external.search ) ticker <- get_ticker_from_xetra(isin)
+
+
 
         if ( ticker != "" ) {
 
@@ -66,7 +71,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
 
         } else {
 
-          message("Ticker not found on Xetra website! Please add manually!")
+          message("Ticker not found! Please add manually!")
 
         }
 

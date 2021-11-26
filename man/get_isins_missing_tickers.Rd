@@ -10,7 +10,7 @@ get_isins_missing_tickers(path)
 \item{path}{A single character string. Directory of your data.}
 }
 \value{
-df.isins.missing.tickers A data frame with ISINS for which a ticker was not found.
+A data frame with ISINS for which a ticker was not found.
 }
 \description{
 Get ISINs with missing tickers

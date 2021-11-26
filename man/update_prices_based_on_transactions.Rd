@@ -4,12 +4,14 @@
 \alias{update_prices_based_on_transactions}
 \title{Update and store prices as csv based on new financial transactions}
 \usage{
-update_prices_based_on_transactions(df.transactions, path)
+update_prices_based_on_transactions(df.transactions, path, external.search = TRUE)
 }
 \arguments{
-\item{df.transactions}{A data.frame. Results from [BankStatementParser::get_transactions()]}
+\item{df.transactions}{A data frame. Results from [BankStatementParser::get_transactions()]}
 
 \item{path}{A single character string. Path where data are stored.}
+
+\item{external.search}{Logical if TRUE, the function searches external sources to find the ticker.}
 }
 \description{
 Update and store prices as csv based on new financial transactions

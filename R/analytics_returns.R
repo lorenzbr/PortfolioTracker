@@ -380,6 +380,7 @@ write_portfolio_return <- function(path) {
   storage.mode(xts.weight) <- "numeric"
 
   ## Get daily portfolio returns
+  ## Super slow: find other solution for this: Use slim version of this function
   xts.portfolio <- PerformanceAnalytics::Return.portfolio(xts.returns.max, xts.weight)
 
   df.portfolio.daily <- data.frame(xts.portfolio)
