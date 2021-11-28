@@ -51,7 +51,8 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
       try({
 
         ##  WiP, better to include function argument with whatever data is collected
-        df.isin.ticker.database <- data.table::fread("inst/extdata/isin_ticker_name_list_xetra_june2017.csv")
+        df.isin.ticker.database <- data.table::fread(system.file("extdata", "isin_ticker_name_list_xetra_june2017.csv",
+                                                                 package = "PortfolioTracker"))
         df.isin.ticker.database <- as.data.frame(df.isin.ticker.database)
         ticker <- df.isin.ticker.database$ticker[df.isin.ticker.database$isin == isin]
 

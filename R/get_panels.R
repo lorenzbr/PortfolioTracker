@@ -137,7 +137,7 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
 
         data.table::fwrite(df.quantity.panel, file.path(path.quantity.panel, file.quantity.panel))
 
-        message("Quantity panel for ", ticker, " successfully created!")
+        # message("Quantity panel for ", ticker, " successfully created!")
 
     } else { message("Transaction dates contain NA. Please check transaction with ticker ", ticker, "!") }
 
@@ -196,7 +196,7 @@ write_price_panels <- function(df.transactions, path) {
 
         data.table::fwrite(df.price.panel, file.path(path.price.panel, filename.price.panel))
 
-        message("Price panel for ", ticker, " successfully created.")
+        # message("Price panel for ", ticker, " successfully created.")
 
       } else { message("No price data for ticker ", ticker, " available.") }
 
@@ -270,7 +270,7 @@ write_price_quantity_panel <- function(ticker, path) {
       ## store price quantity panel as csv
       data.table::fwrite(df.pricequantity.panel, file.path(path.pricequantity.panel, file.pricequantity.panel))
 
-      message("Price-quantity panel for ", ticker, " successfully created!")
+      # message("Price-quantity panel for ", ticker, " successfully created!")
 
     } else { message("No quantity panel for ticker ", ticker, " available.") }
 
@@ -296,7 +296,7 @@ write_value_panel <- function(transaction.type, ticker, df.transaction.history, 
 
   df.transaction.history.ticker <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_type == transaction.type, ]
 
-  if (nrow(df.transaction.history.ticker) > 0) {
+  if ( nrow(df.transaction.history.ticker) > 0 ) {
 
     df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "transaction_value")]
     df.transaction.history.ticker.keep <- df.transaction.history.ticker
@@ -343,7 +343,7 @@ write_value_panel <- function(transaction.type, ticker, df.transaction.history, 
 
       data.table::fwrite(df.panel, file.path(path.value.panel, file.value.panel))
 
-      message(transaction.type, "-value panel for ticker ", ticker, " successfully created!")
+      # message(transaction.type, "-value panel for ticker ", ticker, " successfully created!")
 
     } else { message("Transaction dates of ticker ", ticker, " contain NA. Please check!") }
 
@@ -503,7 +503,7 @@ write_complete_panel <- function(ticker, path) {
       ## store price quantity panel as csv
       data.table::fwrite(df.panel, file.path(path.complete.panel, file.panel))
 
-      message("Complete panel for ", ticker, " successfully created!")
+      # message("Complete panel for ", ticker, " successfully created!")
 
     } else { message("No transaction value panels for ticker ", ticker, " available.") }
 
@@ -600,7 +600,7 @@ write_investment_value_panel <- function(ticker, path) {
 
       data.table::fwrite(df.panel, file.path(path.value.panel, file.panel))
 
-      message("Investment-value panel for ", ticker, " successfully created!")
+      # message("Investment-value panel for ", ticker, " successfully created!")
 
     } else { message("No transaction value panels available.") }
 
