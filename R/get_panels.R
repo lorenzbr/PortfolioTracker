@@ -97,11 +97,9 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
         today <- Sys.Date()
         ## daily sequence from earliest transaction date until today
         dates <- seq(earliest.transaction.date, today, by = 1)
-        mysysgetlocale <- Sys.getlocale('LC_TIME')
-        Sys.setlocale('LC_TIME', 'ENGLISH')
-        ## remove weekends
-        dates <- dates[!weekdays(dates) %in% c('Saturday', 'Sunday')]
-        Sys.setlocale('LC_TIME', mysysgetlocale)
+
+        ## Remove weekends (1 is Sunday, 7 is Saturday)
+        dates <- dates[lubridate::wday(dates) != 1 & lubridate::wday(dates) != 7]
 
         df.quantity.panel <- data.frame(date = dates)
         data.table::setDT(df.quantity.panel)
@@ -313,15 +311,14 @@ write_value_panel <- function(transaction.type, ticker, df.transaction.history, 
 
       df.transaction.history.ticker.first <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_date == earliest.date, ]
 
-      ## create panel with date and value for ticker from transaction date until today (remove Saturday and Sunday)
+      ## Create panel with date and value for ticker from transaction date until today (remove Saturday and Sunday)
       today <- Sys.Date()
-      ## daily sequence from earliest transaction date until today
+      ## Daily sequence from earliest transaction date until today
       dates <- seq(earliest.date, today, by = 1)
-      mysysgetlocale <- Sys.getlocale('LC_TIME')
-      Sys.setlocale('LC_TIME', 'ENGLISH')
-      ## remove weekends
-      dates <- dates[!weekdays(dates) %in% c('Saturday', 'Sunday')]
-      Sys.setlocale('LC_TIME', mysysgetlocale)
+
+      ## Remove weekends (1 is Sunday, 7 is Saturday)
+      dates <- dates[lubridate::wday(dates) != 1 & lubridate::wday(dates) != 7]
+
       df.panel <- data.frame(date = dates)
 
       data.table::setDT(df.panel)
@@ -643,11 +640,10 @@ get_complete_portfolio_panel <- function(path) {
 
     ## Get daily full time period but remove saturday and sunday
     full.time.period <- seq(first.day, last.day, by = "day")
-    mysysgetlocale <- Sys.getlocale('LC_TIME')
-    Sys.setlocale('LC_TIME', 'ENGLISH')
-    ## Remove weekends
-    full.time.period <- full.time.period[!weekdays(full.time.period) %in% c('Saturday', 'Sunday')]
-    Sys.setlocale('LC_TIME', mysysgetlocale)
+
+    ## Remove weekends (1 is Sunday, 7 is Saturday)
+    full.time.period <- full.time.period[lubridate::wday(full.time.period) != 1
+                                         & lubridate::wday(full.time.period) != 7]
 
     df.full.time.period <- data.frame(date = full.time.period)
 
