@@ -7,7 +7,7 @@
 #' @export
 init_isin_ticker <- function(path, file = "isin_ticker.csv"){
 
-  if ( !(file.exists(file.path(path, file))) ) {
+  if ( !file.exists(file.path(path, file)) ) {
     col.names <- c("isin", "ticker")
     df.isin.ticker.init <- data.frame(matrix(NA, nrow = 0, ncol = length(col.names),
                                              dimnames = list(NULL, col.names)))
@@ -31,6 +31,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
 
   ## Variable isins is a vector containing ISINs for which tickers are needed
   isins <- unique(isins)
+  ## Remove empty entries
   isins <- isins[!grepl("^$", isins)]
 
   ## Create csv if not exists

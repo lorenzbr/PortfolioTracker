@@ -11,14 +11,16 @@ update_prices_based_on_transactions <- function(df.transactions, path,
 
   get_names(path)
 
-  ## To get prices, only purchases transactions make sense
+  ## To get prices, only purchase transactions make sense
   df.transactions <- df.transactions[df.transactions$transaction_type == "Purchase", ]
 
-  ## unique ISINs
+  ## Unique ISINs
   isins <- unique(df.transactions$isin)
 
   ## Update ISIN-ticker table
-  update_ticker_isin(isins, path.tickers, external.search)
+  update_ticker_isin(isins = isins,
+                     path.tickers= path.tickers,
+                     external.search = external.search)
 
   isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
