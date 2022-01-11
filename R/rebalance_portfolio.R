@@ -35,7 +35,7 @@ rebalance_portfolio <- function(df, df.target.shares, money.to.invest, step.size
   df <- df[,c("isin", "value")]
 
   ## do not consider the following ISINs
-  df <- df[!(df$isin %in% exclude.from.rebalancing),]
+  df <- df[!(df$isin %in% exclude.from.rebalancing), ]
 
   ## actual shares
   df$actual_share <- df$value / sum(df$value)
