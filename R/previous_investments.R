@@ -8,7 +8,7 @@ write_previous_investments <- function(path) {
 
   get_names(path)
 
-  ## load price quantity panels if exists
+  ## Load price quantity panels if exists
   if ( !rlang::is_empty(list.files(path.pricequantity.panel)) ) {
 
     files <- file.path(path.pricequantity.panel, list.files(path.pricequantity.panel))
@@ -17,37 +17,37 @@ write_previous_investments <- function(path) {
     transaction.history.exists <- file.exists(file.path(path.transactions, file.transactions))
     isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-    if (isin.ticker.exists && transaction.history.exists) {
+    if ( isin.ticker.exists && transaction.history.exists ) {
 
-      ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
+      ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
       df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-      ## keep ISIN and name
+      ## Keep ISIN and name
       df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
 
       df.ticker.investmentnames <- unique(df.transaction.history[, c("isin", "name")])
 
-      ## add tickers
+      ## Add tickers
       df.ticker.investmentnames <- merge(df.ticker.investmentnames, df.isin.ticker, by = "isin")
       df.ticker.investmentnames <- unique(df.ticker.investmentnames[, c("ticker", "name")])
 
-      ## all price-quantity panels in one data frame
+      ## All price-quantity panels in one data frame
       df.all <- do.call(rbind, list.dfs)
 
-      ## keep latest date for each ticker
+      ## Keep latest date for each ticker
       df.previous <- stats::aggregate(date ~ ticker, data = df.all, max)
 
-      ## add details
+      ## Add details
       df.previous <- merge(df.all, df.previous, by = c("ticker", "date"))
 
       ## TO DO: KEEP INVESTMENTS WHICH HAVE AT LEAST ONE SALES TRANSACTION (USE TRANSACTION HISTORY TO IDENTIFY THOSE)
 
-      ## keep investments with quantity equal to zero
+      ## Keep investments with quantity equal to zero
       df.previous <- df.previous[df.previous$cum_quantity == 0, ]
 
       df.previous <- unique(df.previous)
 
-      ## add name and ISIN
+      ## Add name and ISIN
       df.previous <- merge(df.previous, df.ticker.investmentnames, by = "ticker")
       df.previous <- merge(df.previous, df.isin.ticker, by = "ticker")
 
@@ -60,16 +60,18 @@ write_previous_investments <- function(path) {
       isins.both <- intersect(isins.sold, isins.purchase)
       previous.isins <- intersect(previous.isins, isins.both)
 
-      if(length(previous.isins) > 0) {
+      if ( length(previous.isins) > 0 ) {
 
-        ## keep all transactions from ISINS which have both Purchase and Sale transactions
+        ## Keep all transactions from ISINS which have both Purchase and Sale transactions
         df.investments.sold <- unique(df.transaction.history[df.transaction.history$isin %in% isins.both, ])
 
-        df <- data.frame(matrix(nrow = 0, ncol = 7, dimnames = list(NULL, c("isin", "name", "investment", "income",
-                                                        "return_absolute", "return_percent", "quantity"))))
+        col_names <- c("isin", "name", "investment", "income", "return_absolute",
+                       "return_percent", "quantity")
+        df <- data.frame(matrix(nrow = 0, ncol = length(col_names),
+                                dimnames = list(NULL, col_names)))
 
-        ## for each sold ISIN
-        for (i in 1:length(previous.isins)) {
+        ## For each sold ISIN
+        for ( i in 1:length(previous.isins) ) {
 
           previous.isin <- previous.isins[i]
           df.sold.isin <- df.investments.sold[df.investments.sold$isin == previous.isin, ]
@@ -88,7 +90,8 @@ write_previous_investments <- function(path) {
                                                 | df.sold.isin$transaction_type == "Sale - Part"])
 
 
-          df.temp <- data.frame(isin = previous.isin, name, investment, income, return_absolute = return.abs,
+          df.temp <- data.frame(isin = previous.isin, name, investment,
+                                income, return_absolute = return.abs,
                                 return_percent = return.perc, quantity = quantity.sold)
 
           df <- rbind(df, df.temp)
@@ -97,10 +100,19 @@ write_previous_investments <- function(path) {
 
         data.table::fwrite(df, file.path(path.data, file.previous))
 
+      } else {
+
+        ## If no previous ISINs: delete file (if it exists)
+        unlink(file.path(path.data, file.previous))
+
       }
 
     }
 
-  } else { message("No price quantity panels available.") }
+  } else {
+
+    message("No price quantity panels available.")
+
+  }
 
 }
