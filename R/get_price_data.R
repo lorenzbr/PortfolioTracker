@@ -108,35 +108,35 @@ update_prices_based_on_transactions <- function(df.transactions, path,
 
           if ( today != Sys.Date() ) {
 
-            print(paste("Older transaction: Price update for", ticker, "from",
-                        transaction.date, "to",
-                        today, "successfully downloaded."))
+            # print(paste("Older transaction: Price update for", ticker, "from",
+            #             transaction.date, "to",
+            #             today, "successfully downloaded."))
 
           } else {
 
-            print(paste("Prices for", ticker, "from", transaction.date,
-                               "to", today, "successfully downloaded."))
+            # print(paste("Prices for", ticker, "from", transaction.date,
+            #                    "to", today, "successfully downloaded."))
 
           }
 
         } else {
 
-          print(paste("Prices for", ticker, "from", transaction.date, "to",
-                      today, "already downloaded.", " File",
-                      filename.data.raw.prices, "exists already."))
+          # print(paste("Prices for", ticker, "from", transaction.date, "to",
+          #             today, "already downloaded.", " File",
+          #             filename.data.raw.prices, "exists already."))
 
         } ## End of else if condition which checks whether file already exists
 
       } else {
 
-        message("Prices based on older transaction already exist.")
+        # message("Prices based on older transaction already exist.")
 
       }
       ## End of if else statement: transaction.date older than any other or no transactions exist
 
       }, error = function(cond){
 
-        message(paste0("No prices for ticker '", ticker, "' available."))
+        # message(paste0("No prices for ticker '", ticker, "' available."))
         message("Original message:")
         message(cond)
 
@@ -216,25 +216,37 @@ update_latest_prices <- function(path) {
             ## store as csv in raw financial data
             data.table::fwrite(df.updated.prices, file.path(path.prices.raw, filename.prices.raw))
 
-            print(paste("Prices for", ticker, "from", from, "to", to, "successfully downloaded."))
+            # print(paste("Prices for", ticker, "from", from, "to", to, "successfully downloaded."))
 
-          } else { print(paste("No recent prices for", ticker, "available")) }
+          } else {
 
-        } else { print(paste("Prices for ticker", ticker, "up to date.")) }
+            # print(paste("No recent prices for", ticker, "available"))
 
-        }, error = function(e) { skip_to_next <- TRUE })
+          }
 
-        if (skip_to_next) { next }
+        } else {
+
+          # print(paste("Prices for ticker", ticker, "up to date."))
+
+        }
+
+        }, error = function(e) { skip_to_next <- TRUE } )
+
+        if ( skip_to_next ) { next }
 
       }
 
     } else {
 
-      print("Everything up to date!")
+      # print("Everything up to date!")
 
     }
 
-  } else { print("No prices available for update.") }
+  } else {
+
+    # print("No prices available for update.")
+
+  }
 
 }
 
@@ -378,13 +390,13 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
     ## remove entries with prices equal to NA
     df.ticker.prices <- df.ticker.prices[!(is.na(df.ticker.prices$adjusted)), ]
 
-    message("Prices for ticker ", ticker.yahoo, " found.")
+    # message("Prices for ticker ", ticker.yahoo, " found.")
 
     return(df.ticker.prices)
 
   } else {
 
-    message("Prices for ticker ", ticker, " not found!")
+    # message("Prices for ticker ", ticker, " not found!")
 
     return(NULL)
 

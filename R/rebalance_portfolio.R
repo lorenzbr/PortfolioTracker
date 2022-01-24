@@ -103,7 +103,7 @@ write_default_target_shares <- function(df.target.shares, path) {
 
     } else {
 
-      message("Input has to be of type data.frame. ")
+      # message("Input has to be of type data.frame. ")
 
   }
 

@@ -111,7 +111,7 @@ write_previous_investments <- function(path) {
 
   } else {
 
-    message("No price quantity panels available.")
+    # message("No price quantity panels available.")
 
   }
 

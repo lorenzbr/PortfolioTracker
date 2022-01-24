@@ -74,7 +74,7 @@ write_current_portfolio <- function(path) {
 
   } else {
 
-    message("No price quantity panels available.")
+    # message("No price quantity panels available.")
 
   }
 

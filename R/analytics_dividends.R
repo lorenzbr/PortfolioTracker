@@ -22,7 +22,7 @@ write_dividend_history <- function(df.transaction.history, path) {
 
   } else {
 
-    message("No dividend transactions available.")
+    # message("No dividend transactions available.")
 
   }
 

@@ -131,17 +131,32 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
         from <- min(df.quantity.panel$date)
         to <- max(df.quantity.panel$date)
 
-        file.quantity.panel <- paste0("quantity_panel_", ticker, "_from_", from, "_to_", to, ".csv")
+        file.quantity.panel <- paste0("quantity_panel_", ticker, "_from_", from,
+                                      "_to_", to, ".csv")
 
-        data.table::fwrite(df.quantity.panel, file.path(path.quantity.panel, file.quantity.panel))
+        data.table::fwrite(df.quantity.panel, file.path(path.quantity.panel,
+                                                        file.quantity.panel))
 
         # message("Quantity panel for ", ticker, " successfully created!")
 
-    } else { message("Transaction dates contain NA. Please check transaction with ticker ", ticker, "!") }
+      } else {
 
-    } else { message("Negative quantity for ", ticker, ". Creating quantity panel not possible.") }
+        # message("Transaction dates contain NA. Please check transaction with ticker ",
+        #         ticker, "!")
 
-  } else { message("No purchases or sale transactions for ticker ", ticker, " available.") }
+      }
+
+    } else {
+
+      # message("Negative quantity for ", ticker, ". Creating quantity panel not possible.")
+
+    }
+
+  } else {
+
+    # message("No purchases or sale transactions for ticker ", ticker, " available.")
+
+  }
 
 }
 
@@ -196,11 +211,19 @@ write_price_panels <- function(df.transactions, path) {
 
         # message("Price panel for ", ticker, " successfully created.")
 
-      } else { message("No price data for ticker ", ticker, " available.") }
+      } else {
+
+        # message("No price data for ticker ", ticker, " available.")
+
+      }
 
     }
 
-  } else { message("No tickers to create price panels available.") }
+  } else {
+
+    # message("No tickers to create price panels available.")
+
+  }
 
 }
 
@@ -270,9 +293,17 @@ write_price_quantity_panel <- function(ticker, path) {
 
       # message("Price-quantity panel for ", ticker, " successfully created!")
 
-    } else { message("No quantity panel for ticker ", ticker, " available.") }
+    } else {
 
-  } else { message("No price panel for ticker ", ticker, " available.") }
+      # message("No quantity panel for ticker ", ticker, " available.")
+
+    }
+
+  } else {
+
+    # message("No price panel for ticker ", ticker, " available.")
+
+  }
 
 }
 
@@ -342,9 +373,17 @@ write_value_panel <- function(transaction.type, ticker, df.transaction.history, 
 
       # message(transaction.type, "-value panel for ticker ", ticker, " successfully created!")
 
-    } else { message("Transaction dates of ticker ", ticker, " contain NA. Please check!") }
+    } else {
 
-  } else { message("No ", tolower(transaction.type), " transactions for ticker ", ticker, " available.") }
+      # message("Transaction dates of ticker ", ticker, " contain NA. Please check!")
+
+    }
+
+  } else {
+
+    # message("No ", tolower(transaction.type), " transactions for ticker ", ticker, " available.")
+
+  }
 
 }
 
@@ -502,9 +541,17 @@ write_complete_panel <- function(ticker, path) {
 
       # message("Complete panel for ", ticker, " successfully created!")
 
-    } else { message("No transaction value panels for ticker ", ticker, " available.") }
+    } else {
 
-  } else { message("No price-quantity panel for ticker ", ticker, " available.") }
+      # message("No transaction value panels for ticker ", ticker, " available.")
+
+    }
+
+  } else {
+
+    # message("No price-quantity panel for ticker ", ticker, " available.")
+
+  }
 
 }
 
@@ -599,9 +646,17 @@ write_investment_value_panel <- function(ticker, path) {
 
       # message("Investment-value panel for ", ticker, " successfully created!")
 
-    } else { message("No transaction value panels available.") }
+    } else {
 
-  } else { message("No price-quantity panel available.") }
+      # message("No transaction value panels available.")
+
+    }
+
+  } else {
+
+    # message("No price-quantity panel available.")
+
+  }
 
 }
 
@@ -673,7 +728,7 @@ get_complete_portfolio_panel <- function(path) {
   } else {
 
     df.all <- NULL
-    message("No complete panels to construct complete portfolio panel available.")
+    # message("No complete panels to construct complete portfolio panel available.")
 
   }
 

@@ -69,11 +69,11 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
                                                            file.ticker),
                              append = TRUE)
 
-          print(paste("Ticker was missing.", ticker, "added."))
+          # print(paste("Ticker was missing.", ticker, "added."))
 
         } else {
 
-          message("Ticker not found! Please add manually!")
+          # message("Ticker not found! Please add manually!")
 
         }
 
@@ -83,7 +83,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
 
   } else {
 
-    print("New transactions, but ticker already available.")
+    # print("New transactions, but ticker already available.")
 
   }
 
@@ -150,11 +150,11 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = ""){
       url2 <- rvest::html_attr(html.output.ol, 'href')
     }
 
-    if ( is.na(url2) ) message(paste("URL for", isin, "not found! Please add ticker manually."))
+    # if ( is.na(url2) ) message(paste("URL for", isin, "not found! Please add ticker manually."))
 
   } else {
 
-    stop(paste("URL for", isin, "not found! Please add ticker manually."))
+    stop( paste("URL for", isin, "not found! Please add ticker manually.") )
 
   }
 
@@ -216,7 +216,7 @@ add_ticker_manually <- function(df.isin.ticker.new, path.tickers,
         data.table::fwrite(df.isin.ticker.add,
                            file.path(path.tickers, file.ticker), append = TRUE)
 
-        message("Ticker was missing. ", df.isin.ticker.add$ticker, " added.")
+        # message("Ticker was missing. ", df.isin.ticker.add$ticker, " added.")
 
       })
 
@@ -224,7 +224,7 @@ add_ticker_manually <- function(df.isin.ticker.new, path.tickers,
 
   } else {
 
-    message("Ticker already available.")
+    # message("Ticker already available.")
 
   } ## End of if statement ISIN not in table is empty
 

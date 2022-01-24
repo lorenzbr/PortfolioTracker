@@ -123,7 +123,7 @@ write_investment_irr_all <- function(path) {
 
   } else {
 
-    message("No complete panels to calculate IRRs.")
+    # message("No complete panels to calculate IRRs.")
 
   }
 
@@ -184,7 +184,7 @@ write_returns <- function(path) {
 
   } else {
 
-    message("No price panels to calculate annual returns.")
+    # message("No price panels to calculate annual returns.")
 
   }
 
@@ -443,9 +443,13 @@ write_roi_by_period <- function(ticker, path) {
     ## Store price quantity panel as csv
     data.table::fwrite(df.roi, file.path(path.returns.roi, file.roi.panel))
 
-    message("Daily investment return for ", ticker, " successfully created!")
+    # message("Daily investment return for ", ticker, " successfully created!")
 
-  } else { message("No complete panel available for ", ticker, ".") }
+  } else {
+
+    # message("No complete panel available for ", ticker, ".")
+
+  }
 
 }
 
@@ -555,7 +559,7 @@ write_portfolio_twr_factors <- function(path) {
 
   } else {
 
-    message("No complete panels to compute TWR factors available.")
+    # message("No complete panels to compute TWR factors available.")
 
   }
 
@@ -599,7 +603,7 @@ get_portfolio_ttwror <- function(path, nb_period = NULL, period_type = "max") {
 
   } else {
 
-    message("TWR factors for portfolio are not available.")
+    # message("TWR factors for portfolio are not available.")
     annualized.ttwror <- NA
 
   }
@@ -717,13 +721,13 @@ get_portfolio_irr <- function(path, nb_period = NULL, period_type = "max") {
 
     if ( is.na(irr_final )) {
 
-      message("Cannot compute internal rate of return.")
+      # message("Cannot compute internal rate of return.")
 
     }
 
   } else {
 
-    message("Complete portfolio panel not available.")
+    # message("Complete portfolio panel not available.")
 
     irr_final <- NA
 

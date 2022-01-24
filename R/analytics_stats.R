@@ -102,7 +102,7 @@ write_portfolio_stats <- function(path) {
 
   } else {
 
-    message("Complete portfolio panel not available!")
+    # message("Complete portfolio panel not available!")
 
   }
 
