@@ -2,10 +2,11 @@
 % Please edit documentation in R/get_price_data.R
 \name{get_prices_from_yahoo}
 \alias{get_prices_from_yahoo}
-\title{Get price data from Yahoo Finance}
+\title{Get prices from the Yahoo Finance API}
 \usage{
 get_prices_from_yahoo(ticker, from, to, preferred.stock.exchange = "Xetra",
-                          stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"))
+                          stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
+                          method = "simple")
 }
 \arguments{
 \item{ticker}{A single character string. Ticker symbol.}
@@ -17,7 +18,9 @@ get_prices_from_yahoo(ticker, from, to, preferred.stock.exchange = "Xetra",
 \item{preferred.stock.exchange}{A single character string. Stock exchange (default is empty string)}
 
 \item{stock.exchanges}{A vector of single character strings. Possible stock exchanges to get price data.}
+
+\item{method}{A single character string (default: \emph{simple}). The method how to get prices from Yahoo. Use the R package \emph{quantmod} or a \emph{simple} solution.}
 }
 \description{
-Get price data from Yahoo Finance
+Get prices from the Yahoo Finance API
 }

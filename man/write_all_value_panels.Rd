@@ -7,7 +7,7 @@
 write_all_value_panels(df.transaction.history, path)
 }
 \arguments{
-\item{df.transaction.history}{A data.frame containing the full history of transactions.}
+\item{df.transaction.history}{A data frame containing the full history of transactions.}
 
 \item{path}{A single character string containing the directory of the project.}
 }

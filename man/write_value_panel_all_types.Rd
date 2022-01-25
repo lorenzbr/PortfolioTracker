@@ -9,7 +9,7 @@ write_value_panel_all_types(ticker, df.transaction.history, path)
 \arguments{
 \item{ticker}{A single character string containing the ticker symbol.}
 
-\item{df.transaction.history}{A data.frame containing the full history of transactions.}
+\item{df.transaction.history}{A data frame containing the full history of transactions.}
 
 \item{path}{A single character string containing the directory of the project.}
 }

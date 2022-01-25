@@ -74,7 +74,9 @@ update_prices_based_on_transactions <- function(df.transactions, path,
         earliest.date <- unique(df.prices.same.ticker$first_date)
 
         ## If new transaction is older than earliest date updated "to" date
-        if ( transaction.date < earliest.date && !(is.na(earliest.date)) ) today <- earliest.date - 1
+        if ( transaction.date < earliest.date && !(is.na(earliest.date)) ) {
+          today <- earliest.date - 1
+        }
 
       }
 
@@ -94,11 +96,11 @@ update_prices_based_on_transactions <- function(df.transactions, path,
                                                     from = transaction.date,
                                                     to = today)
 
-          ## start and end date
+          ## Start and end date
           from <- min(df.ticker.prices$date)
           to <- max(df.ticker.prices$date)
 
-          ## file name for the data
+          ## File name for the data
           filename.data.raw.prices <- paste0("prices_ticker_", ticker, "_from_",
                                              from, "_to_", to, ".csv")
 
@@ -166,28 +168,28 @@ update_latest_prices <- function(path) {
   ## Only run code if filename.prices.raw.with.ticker is not empty
   if ( length(filename.prices.raw.with.ticker) > 0 ) {
 
-    ## create data frame
+    ## Create data frame
     df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
 
-    ## identify last date
+    ## Identify last date
     df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename,
                                                         "to_(.*?).csv")[, 2]
 
-    ## identify tickers
+    ## Identify tickers
     df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename,
                                                      "ticker_(.*?)_from")[, 2]
 
-    ## keep latest date for each ticker
+    ## Keep latest date for each ticker
     df.files.price.data <- stats::aggregate(last_date ~ ticker,
                                             data = df.files.price.data, max)
 
-    ## get date of today
+    ## Get date of today
     today <- Sys.Date()
 
-    ## keep only tickers which are not up to date
+    ## Keep only tickers which are not up to date
     df.files.price.data <- df.files.price.data[df.files.price.data$last_date < today, ]
 
-    ## if at least one ticker is not up to date
+    ## If at least one ticker is not up to date
     if ( nrow(df.files.price.data) > 0 ) {
 
       for ( i in 1:nrow(df.files.price.data) ) {
@@ -199,10 +201,11 @@ update_latest_prices <- function(path) {
         from <- as.Date(df.files.price.data$last_date[i]) + 1
         ticker <- df.files.price.data$ticker[i]
 
-        if (today > from) {
+        if ( today > from ) {
 
           ## get price data for ticker
-          df.updated.prices <- get_prices_from_yahoo(ticker, from = from, to = today)
+          df.updated.prices <- get_prices_from_yahoo(ticker, from = from,
+                                                     to = today)
 
           if ( !is.null(df.updated.prices) ) {
 
@@ -211,12 +214,15 @@ update_latest_prices <- function(path) {
             to <- max(df.updated.prices$date)
 
             ## file name for the data
-            filename.prices.raw <- paste0("prices_ticker_", ticker, "_from_", from, "_to_", to, ".csv")
+            filename.prices.raw <- paste0("prices_ticker_", ticker, "_from_",
+                                          from, "_to_", to, ".csv")
 
             ## store as csv in raw financial data
-            data.table::fwrite(df.updated.prices, file.path(path.prices.raw, filename.prices.raw))
+            data.table::fwrite(df.updated.prices, file.path(path.prices.raw,
+                                                            filename.prices.raw))
 
-            # print(paste("Prices for", ticker, "from", from, "to", to, "successfully downloaded."))
+            # print(paste("Prices for", ticker, "from", from, "to", to,
+            #             "successfully downloaded."))
 
           } else {
 
@@ -250,22 +256,27 @@ update_latest_prices <- function(path) {
 
 }
 
-#' Get price data from Yahoo Finance
+#' Get prices from the Yahoo Finance API
 #'
 #' @usage get_prices_from_yahoo(ticker, from, to, preferred.stock.exchange = "Xetra",
-#'                           stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"))
+#'                           stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
+#'                           method = "simple")
 #' @param ticker A single character string. Ticker symbol.
 #' @param from A single character string. Start date.
 #' @param to A single character string. End date.
 #' @param preferred.stock.exchange A single character string. Stock exchange (default is empty string)
 #' @param stock.exchanges A vector of single character strings. Possible stock exchanges to get price data.
+#' @param method A single character string (default: \emph{simple}). The method how to get prices from Yahoo. Use the R package \emph{quantmod} or a \emph{simple} solution.
 #'
 #' @export
 get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "Xetra",
-                                  stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU")) {
+                                  stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
+                                  method = "simple") {
 
   ## Check if specific exchange for ticker has been saved in file. Then, takes this one
   ticker.exchange.file.exists <- file.exists(file.path(path.tickers, file.ticker.exchange))
+
+  ## Initiate: ticker exchange pair does not exists (in the following this will be checked)
   ticker.exchange.pair.exists <- FALSE
 
   if ( ticker.exchange.file.exists ) {
@@ -280,7 +291,7 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
     if ( ticker.exchange.pair.exists ) {
       stock.exchange <- df.ticker.exchange$exchange
       ticker.yahoo <- paste0(ticker, stock.exchange)
-      }
+    }
 
   }
 
@@ -288,15 +299,15 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
   if ( !exists("ticker.yahoo") ) {
 
     ## produce final ticker for Yahoo Finance
-    if (preferred.stock.exchange == "Xetra") {
+    if ( preferred.stock.exchange == "Xetra" ) {
       stock.exchange <- ".DE"
-    } else if (preferred.stock.exchange == "Frankfurt") {
+    } else if ( preferred.stock.exchange == "Frankfurt" ) {
       stock.exchange <- ".F"
-    } else if (preferred.stock.exchange == "Stuttgart") {
+    } else if ( preferred.stock.exchange == "Stuttgart" ) {
       stock.exchange <- ".SG"
-    } else if (preferred.stock.exchange == "Muenchen") {
+    } else if ( preferred.stock.exchange == "Muenchen" ) {
       stock.exchange <- ".MU"
-    } else if (preferred.stock.exchange == "Duesseldorf") {
+    } else if ( preferred.stock.exchange == "Duesseldorf" ) {
       stock.exchange <- ".DU"
     }
 
@@ -306,8 +317,12 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
 
   ## Get prices from Yahoo API
   try({
-    ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+    if ( method == "quantmod") {
+      ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
                                           auto.assign = FALSE, warnings = FALSE)
+    } else if ( method == "simple" ) {
+      ticker.prices <- get_prices_simple(ticker.yahoo, from = from, to = to)
+    }
   })
 
 
@@ -321,8 +336,12 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
       ticker.yahoo <- paste0(ticker, stock.exchange)
       iter.stock.exchanges <- iter.stock.exchanges + 1
       try({
-        ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
-                                              auto.assign = FALSE, warnings = FALSE)
+        if ( method == "quantmod") {
+          ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+                                                auto.assign = FALSE, warnings = FALSE)
+        } else if ( method == "simple" ) {
+          ticker.prices <- get_prices_simple(ticker.yahoo, from = from, to = to)
+        }
       })
     }
 
@@ -336,8 +355,12 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
         ticker.yahoo <- paste0(ticker, stock.exchange)
         iter.stock.exchanges <- iter.stock.exchanges + 1
         try({
-          ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
-                                                auto.assign = FALSE, warnings = FALSE)
+          if ( method == "quantmod") {
+            ticker.prices <- quantmod::getSymbols(ticker.yahoo, from = from, to = to,
+                                                  auto.assign = FALSE, warnings = FALSE)
+          } else if ( method == "simple" ) {
+            ticker.prices <- get_prices_simple(ticker.yahoo, from = from, to = to)
+          }
         })
       }
 
@@ -369,37 +392,75 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred.stock.exchange = "
 
     }
 
-    ## convert time series with prices to data frame
-    df.ticker.prices <- data.frame(ticker.prices)
 
-    ## change column names
-    names(df.ticker.prices) <- gsub(paste0(ticker.yahoo, "\\."), "", names(df.ticker.prices))
+    if ( method == "quantmod") {
+      ## Convert time series with prices to data frame
+      df.ticker.prices <- data.frame(ticker.prices)
+      ## Change column names
+      names(df.ticker.prices) <- gsub(paste0(ticker.yahoo, "\\."), "", names(df.ticker.prices))
+      ## Create date variable based on row names
+      df.ticker.prices$date <- rownames(df.ticker.prices)
+      ## New index for row names
+      rownames(df.ticker.prices) <- 1:nrow(df.ticker.prices)
+    } else if ( method == "simple" ) {
+      df.ticker.prices <- data.frame(ticker.prices)
+      names(df.ticker.prices)[grepl("Adj", names(df.ticker.prices))] <- "Adjusted"
+      ## Columns of data frame need to have same order as quantmod method
+      df.ticker.prices <- df.ticker.prices[, c("Open", "High", "Low", "Close",
+                                               "Volume", "Adjusted", "Date")]
+    }
 
-    ## column names to lower case
+    ## Column names to lower case
     names(df.ticker.prices) <- tolower(names(df.ticker.prices))
 
-    ## create date variable based on row names
-    df.ticker.prices$date <- rownames(df.ticker.prices)
-
-    ## new index for row names
-    rownames(df.ticker.prices) <- 1:nrow(df.ticker.prices)
-
-    ##  convert dates to date format
+    ## Convert dates to date format
     df.ticker.prices$date <- as.Date(df.ticker.prices$date)
 
-    ## remove entries with prices equal to NA
-    df.ticker.prices <- df.ticker.prices[!(is.na(df.ticker.prices$adjusted)), ]
+    ## Remove entries with prices equal to NA or null
+    df.ticker.prices <- df.ticker.prices[!is.na(df.ticker.prices$adjusted), ]
+    df.ticker.prices <- df.ticker.prices[!is.null(df.ticker.prices$adjusted), ]
+    df.ticker.prices <- df.ticker.prices[df.ticker.prices$adjusted != "NA", ]
+    df.ticker.prices <- df.ticker.prices[df.ticker.prices$adjusted != "null", ]
 
-    # message("Prices for ticker ", ticker.yahoo, " found.")
+    # message("Prices for ticker ", ticker.yahoo, " found!")
 
     return(df.ticker.prices)
 
-  } else {
+  } else if ( !exists("ticker.prices") ) {
 
     # message("Prices for ticker ", ticker, " not found!")
 
     return(NULL)
 
   }
+
+}
+
+#' Get prices from the Yahoo Finance API fast and simple
+#'
+#' @usage get_prices_simple(ticker, from, to)
+#' @param ticker A single character string. Ticker symbol.
+#' @param from A single character string. Start date.
+#' @param to A single character string. End date.
+#'
+#' @return A data frame containing dates, prices (open, high, low, close, adjusted) and volume.
+#'
+#' @export
+get_prices_simple <- function(ticker, from, to) {
+
+  ## See https://www.datasciencecentral.com/getting-historical-data-from-yahoo-
+  ##      finance-in-r/
+  url <- paste0("https://query1.finance.yahoo.com/v7/finance/download/",
+                ticker,
+                "?period1=",
+                as.integer(as.POSIXct(from)),
+                "&period2=",
+                as.integer(as.POSIXct(to)),
+                "&interval=1d&events=history")
+
+  df <- data.table::fread(url)
+  # df <- read.csv(url)
+
+  return(df)
 
 }

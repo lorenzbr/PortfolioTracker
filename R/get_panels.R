@@ -1,7 +1,7 @@
 #' Write full history of quantities for all tickers as csv
 #'
 #' @usage write_quantity_panels(df.transaction.history, path)
-#' @param df.transaction.history A data.frame containing the full history of transactions.
+#' @param df.transaction.history A data frame containing the full history of transactions.
 #' @param path A single character string. Directory of your data.
 #'
 #' @export
@@ -13,28 +13,30 @@ write_quantity_panels <- function(df.transaction.history, path) {
   df.transaction.history <- as.data.frame(df.transaction.history)
 
   ## convert transaction date into date type
-  df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date, "%d-%m-%Y")
+  df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date,
+                                                     "%d-%m-%Y")
 
   isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-  if (isin.ticker.exists) {
+  if ( isin.ticker.exists ) {
 
     ## get table that converts ISIN to ticker
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
     df.isin.ticker <- df.isin.ticker[df.isin.ticker$ticker != "", ]
 
-    ## add ticker to transaction data
-    df.transactions.with.tickers <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+    ## Add ticker to transaction data
+    df.transactions.with.tickers <- merge(df.transaction.history, df.isin.ticker,
+                                          by = "isin")
 
-    ## all tickers
+    ## All tickers
     tickers <- unique(df.transactions.with.tickers$ticker)
 
-    ## delete all files in folder
+    ## Delete all files in folder
     if ( !rlang::is_empty(list.files(path.quantity.panel)) ) {
       file.remove(file.path(path.quantity.panel, list.files(path.quantity.panel)))
     }
 
-    ## create quantity panels for all tickers
+    ## Create quantity panels for all tickers
     output <- mapply(write_quantity_panel, tickers,
                      MoreArgs = list(df.transactions.with.tickers, path.quantity.panel))
 
@@ -55,13 +57,15 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
 
   df.transactions.with.tickers <- as.data.frame(df.transactions.with.tickers)
 
-  df.transactions.with.tickers$transaction_date <- as.Date(df.transactions.with.tickers$transaction_date, "%d-%m-%Y")
+  df.transactions.with.tickers$transaction_date <- as.Date(df.transactions.with.tickers$transaction_date,
+                                                           "%d-%m-%Y")
 
   ## get transactions only for ticker
   df.transaction.history.ticker <- df.transactions.with.tickers[df.transactions.with.tickers$ticker == ticker, ]
 
   ## only sale and purchase transaction types are required to create quantity panels
-  df.transaction.history.ticker <- df.transaction.history.ticker[grepl("^Sale$|^Purchase$", df.transaction.history.ticker$transaction_type), ]
+  df.transaction.history.ticker <- df.transaction.history.ticker[grepl("^Sale$|^Purchase$",
+                                                                       df.transaction.history.ticker$transaction_type), ]
 
   if ( nrow(df.transaction.history.ticker) > 0 ) {
 
@@ -72,7 +76,8 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
     df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "quantity")]
 
     ## if several transactions per day, aggregate by transaction_date
-    df.transaction.history.ticker <- stats::aggregate(quantity ~ transaction_date, df.transaction.history.ticker, sum)
+    df.transaction.history.ticker <- stats::aggregate(quantity ~ transaction_date,
+                                                      df.transaction.history.ticker, sum)
 
     ## take cumulative sum of transactions to get quantity over time
     df.transaction.history.ticker.keep <- df.transaction.history.ticker
@@ -80,22 +85,22 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
     df.transaction.history.ticker$cum_quantity <- cumsum(df.transaction.history.ticker$quantity)
     df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "cum_quantity")]
 
-    ## if negative cumulative quantity exists, stop function because this must be an error (short selling not included)
+    ## If negative cumulative quantity exists, stop function because this must be an error (short selling not included)
     if ( min(df.transaction.history.ticker$cum_quantity) >= 0 ) {
 
-      ## if transaction date is unequal NA
+      ## If transaction date is unequal NA
       if ( all(!is.na(df.transaction.history.ticker$transaction_date)) ) {
 
-        ## earliest transaction_date
+        ## Earliest transaction_date
         earliest.transaction.date <- min(df.transaction.history.ticker$transaction_date)
         earliest.transaction.date <- as.Date(earliest.transaction.date, "%d-%m-%Y")
 
-        ## first transaction for each ticker (to get panel of quantity for each ticker)
+        ## First transaction for each ticker (to get panel of quantity for each ticker)
         df.transaction.history.ticker.first <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_date == earliest.transaction.date, ]
 
-        ## create panel with date and quantity for ticker from first transaction date until today (remove Saturday and Sunday)
+        ## Create panel with date and quantity for ticker from first transaction date until today (remove Saturday and Sunday)
         today <- Sys.Date()
-        ## daily sequence from earliest transaction date until today
+        ## Daily sequence from earliest transaction date until today
         dates <- seq(earliest.transaction.date, today, by = 1)
 
         ## Remove weekends (1 is Sunday, 7 is Saturday)
@@ -173,18 +178,18 @@ write_price_panels <- function(df.transactions, path) {
 
   get_names(path)
 
-  ## get tickers from history of transactions
+  ## Get tickers from history of transactions
   tickers <- get_tickers_from_transactions(df.transactions, path)
 
-  ## delete all files in folder
+  ## Delete all files in folder
   if ( !rlang::is_empty(list.files(path.price.panel)) ) {
     file.remove(file.path(path.price.panel, list.files(path.price.panel)))
   }
 
-  ## list all files with prices
-  if (!rlang::is_empty(tickers)) {
+  ## List all files with prices
+  if ( !rlang::is_empty(tickers) ) {
 
-    for (i in 1:length(tickers)) {
+    for ( i in 1:length(tickers) ) {
 
       ticker <- tickers[i]
 
@@ -194,18 +199,19 @@ write_price_panels <- function(df.transactions, path) {
                                                              pattern = ticker))
         df.prices.files$filenames <- as.character(df.prices.files$filenames)
 
-        ## load all files containing prices for ticker
+        ## Load all files containing prices for ticker
         list.price.data <- lapply(df.prices.files$filenames,
                                                function(x) data.table::fread(file.path(path.prices.raw, x)))
         df.price.panel <- do.call(rbind, list.price.data)
 
-        ## select randomly one row per day
+        ## Select randomly one row per day
         df.price.panel <- df.price.panel %>% dplyr::group_by(.data$date) %>% dplyr::sample_n(size = 1)
 
         from <- min(df.price.panel$date)
         to <- max(df.price.panel$date)
 
-        filename.price.panel <- paste0("price_panel_", ticker, "_from_", from, "_to_", to, ".csv")
+        filename.price.panel <- paste0("price_panel_", ticker, "_from_",
+                                       from, "_to_", to, ".csv")
 
         data.table::fwrite(df.price.panel, file.path(path.price.panel, filename.price.panel))
 
@@ -238,15 +244,16 @@ write_price_quantity_panels <- function(df.transactions, path) {
 
   get_names(path)
 
-  ## get tickers from history of transactions
+  ## Get tickers from history of transactions
   tickers <- get_tickers_from_transactions(df.transactions, path)
 
-  ## delete all files in folder
+  ## Delete all files in folder
   if ( !rlang::is_empty(list.files(path.pricequantity.panel)) ) {
-    file.remove(file.path(path.pricequantity.panel, list.files(path.pricequantity.panel)))
+    file.remove(file.path(path.pricequantity.panel,
+                          list.files(path.pricequantity.panel)))
   }
 
-  ## write price-quantity panels
+  ## Write price-quantity panels
   output <- mapply(write_price_quantity_panel, tickers, MoreArgs = list(path))
 
 }
@@ -262,34 +269,37 @@ write_price_quantity_panel <- function(ticker, path) {
 
   get_names(path)
 
-  ## load price panel
+  ## Load price panel
   if ( !rlang::is_empty(list.files(path.price.panel, pattern = ticker)) ) {
 
     df.price.panel <- data.table::fread(file.path(path.price.panel,
                                               list.files(path.price.panel,
                                                          pattern = ticker)))
 
-    ## load quantity panel
+    ## Load quantity panel
     if ( !rlang::is_empty(list.files(path.quantity.panel, pattern = ticker)) ) {
 
       df.quantity.panel <- data.table::fread(file.path(path.quantity.panel,
                                                    list.files(path.quantity.panel,
                                                               pattern = ticker)))
 
-      df.pricequantity.panel <- merge(df.price.panel, df.quantity.panel, by = "date")
+      df.pricequantity.panel <- merge(df.price.panel, df.quantity.panel,
+                                      by = "date")
 
-      ## get value of investment in each period
+      ## Get value of investment in each period
       df.pricequantity.panel$value <- df.pricequantity.panel$adjusted * df.pricequantity.panel$cum_quantity
 
-      ## start and end date
+      ## Start and end date
       from <- min(df.pricequantity.panel$date)
       to <- max(df.pricequantity.panel$date)
 
-      ## file name
-      file.pricequantity.panel <- paste0("pricequantity_panel_", ticker, "_from_", from, "_to_", to, ".csv")
+      ## Create file name
+      file.pricequantity.panel <- paste0("pricequantity_panel_", ticker,
+                                         "_from_", from, "_to_", to, ".csv")
 
-      ## store price quantity panel as csv
-      data.table::fwrite(df.pricequantity.panel, file.path(path.pricequantity.panel, file.pricequantity.panel))
+      ## Store price quantity panel as csv
+      data.table::fwrite(df.pricequantity.panel,
+                         file.path(path.pricequantity.panel, file.pricequantity.panel))
 
       # message("Price-quantity panel for ", ticker, " successfully created!")
 
@@ -332,12 +342,13 @@ write_value_panel <- function(transaction.type, ticker, df.transaction.history, 
     df.transaction.history.ticker <- df.transaction.history.ticker[order(df.transaction.history.ticker$transaction_date), ]
     df.transaction.history.ticker$cum_value <- cumsum(df.transaction.history.ticker$transaction_value)
     df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "cum_value")]
-    names(df.transaction.history.ticker)[names(df.transaction.history.ticker) == "cum_value"] <- paste0(tolower(transaction.type), "_cum_value")
+    names(df.transaction.history.ticker)[names(df.transaction.history.ticker) == "cum_value"] <- paste0(tolower(transaction.type),
+                                                                                                        "_cum_value")
 
-    ## if transaction date is unequal NA
+    ## If transaction date is unequal NA
     if ( all(!is.na(df.transaction.history.ticker$transaction_date)) ) {
 
-      ## earliest transaction_date
+      ## Earliest transaction_date
       earliest.date <- min(df.transaction.history.ticker$transaction_date)
 
       df.transaction.history.ticker.first <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_date == earliest.date, ]
@@ -359,29 +370,35 @@ write_value_panel <- function(transaction.type, ticker, df.transaction.history, 
       DT.panel <- df.transaction.history.ticker[df.panel, roll = TRUE]
       df.panel <- data.table::setDF(DT.panel)
 
-      df.panel <- merge(df.panel, df.transaction.history.ticker.keep, by = "transaction_date", all.x = TRUE)
+      df.panel <- merge(df.panel, df.transaction.history.ticker.keep,
+                        by = "transaction_date", all.x = TRUE)
       df.panel$transaction_value[is.na(df.panel$transaction_value)] <- 0
       names(df.panel)[names(df.panel) == "transaction_date"] <- "date"
-      names(df.panel)[names(df.panel) == "transaction_value"] <- paste0(tolower(transaction.type), "_value")
+      names(df.panel)[names(df.panel) == "transaction_value"] <- paste0(tolower(transaction.type),
+                                                                        "_value")
 
       from <- min(df.panel$date)
       to <- max(df.panel$date)
 
-      file.value.panel <- paste0(tolower(transaction.type), "value_panel_", ticker, "_from_", from, "_to_", to, ".csv")
+      file.value.panel <- paste0(tolower(transaction.type), "value_panel_",
+                                 ticker, "_from_", from, "_to_", to, ".csv")
 
       data.table::fwrite(df.panel, file.path(path.value.panel, file.value.panel))
 
-      # message(transaction.type, "-value panel for ticker ", ticker, " successfully created!")
+      # message(transaction.type, "-value panel for ticker ", ticker,
+      #         " successfully created!")
 
     } else {
 
-      # message("Transaction dates of ticker ", ticker, " contain NA. Please check!")
+      # message("Transaction dates of ticker ", ticker,
+      #         " contain NA. Please check!")
 
     }
 
   } else {
 
-    # message("No ", tolower(transaction.type), " transactions for ticker ", ticker, " available.")
+    # message("No ", tolower(transaction.type), " transactions for ticker ",
+    #         ticker, " available.")
 
   }
 
@@ -391,7 +408,7 @@ write_value_panel <- function(transaction.type, ticker, df.transaction.history, 
 #'
 #' @usage write_value_panel_all_types(ticker, df.transaction.history, path)
 #' @param ticker A single character string containing the ticker symbol.
-#' @param df.transaction.history A data.frame containing the full history of transactions.
+#' @param df.transaction.history A data frame containing the full history of transactions.
 #' @param path A single character string containing the directory of the project.
 #'
 #' @export
@@ -399,14 +416,18 @@ write_value_panel_all_types <- function(ticker, df.transaction.history, path) {
 
   transaction.types <- c("Purchase", "Sale", "Dividend")
 
-  mapply(write_value_panel, transaction.types, MoreArgs = list(ticker, df.transaction.history, path))
+  # for(transaction.type in transaction.types) {
+  #   write_value_panel(transaction.type, ticker, df.transaction.history, path)
+  # }
+  mapply(write_value_panel, transaction.types,
+         MoreArgs = list(ticker, df.transaction.history, path))
 
 }
 
 #' Write all value panels for purchase, dividend and sales transactions for all tickers
 #'
 #' @usage write_all_value_panels(df.transaction.history, path)
-#' @param df.transaction.history A data.frame containing the full history of transactions.
+#' @param df.transaction.history A data frame containing the full history of transactions.
 #' @param path A single character string containing the directory of the project.
 #'
 #' @export
@@ -416,31 +437,37 @@ write_all_value_panels <- function(df.transaction.history, path) {
 
   df.transaction.history <- as.data.frame(df.transaction.history)
 
-  ## convert transaction date into date type
-  df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date, "%d-%m-%Y")
+  ## Convert transaction date into date type
+  df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date,
+                                                     "%d-%m-%Y")
 
   isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-  if (isin.ticker.exists) {
+  if ( isin.ticker.exists ) {
 
-    ## get table that converts ISIN to ticker
+    ## Get table that converts ISIN to ticker
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-    ## add ticker to transaction data if not yet exists
-    if( !any( names(df.transaction.history) == "ticker") ) df.transaction.history <- merge(df.transaction.history,
-                                                                                           df.isin.ticker, by = "isin")
+    ## Add ticker to transaction data if not yet exists
+    if( !any( names(df.transaction.history) == "ticker") ) {
+      df.transaction.history <- merge(df.transaction.history,
+                                      df.isin.ticker, by = "isin")
+    }
 
-    ## all tickers
+    ## All tickers
     tickers <- unique(df.transaction.history$ticker)
 
-    ## delete all files in folder
+    ## Delete all files in folder
     if ( !rlang::is_empty(list.files(path.value.panel)) ) {
       file.remove(file.path(path.value.panel, list.files(path.value.panel)))
     }
 
-    ## mapply causes error with $ operator: intermediate solution
-    for(ticker in tickers) { write_value_panel_all_types(ticker, df.transaction.history, path) }
-    # mapply(write_value_panel_all_types, tickers, MoreArgs = list(path, df.transaction.history))
+    # for( ticker in tickers ) {
+    #   write_value_panel_all_types(ticker, df.transaction.history, path)
+    # }
+
+    mapply(write_value_panel_all_types, tickers,
+           MoreArgs = list(df.transaction.history, path))
 
   }
 
@@ -456,17 +483,18 @@ write_complete_panels <- function(path) {
 
   get_names(path)
 
-  df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
+  df.transaction.history <- data.table::fread(file.path(path.transactions,
+                                                        file.transactions))
 
-  ## get tickers from history of transactions
+  ## Get tickers from history of transactions
   tickers <- get_tickers_from_transactions(df.transaction.history, path)
 
-  ## delete all files in folder
+  ## Delete all files in folder
   if ( !rlang::is_empty(list.files(path.complete.panel)) ) {
     file.remove(file.path(path.complete.panel, list.files(path.complete.panel)))
   }
 
-  ## write complete panels for all tickers
+  ## Write complete panels for all tickers
   output <- mapply(write_complete_panel, tickers, MoreArgs = list(path))
 
 }
@@ -488,10 +516,11 @@ write_complete_panel <- function(ticker, path) {
                                                        list.files(path.pricequantity.panel,
                                                                   pattern = ticker)))
 
+
     df.pricequantity.panel <- df.pricequantity.panel[, c("date", "adjusted", "value",
                                                          "cum_quantity", "quantity")]
 
-    ## load value panels
+    ## Load value panels
     if ( !rlang::is_empty(list.files(path.value.panel, pattern = ticker)) ) {
 
       ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
@@ -499,13 +528,23 @@ write_complete_panel <- function(ticker, path) {
       purchase.exist <- grepl("^purchase", ticker.value.panels)
       sale.exist <- grepl("^sale", ticker.value.panels)
       dividend.exist <- grepl("^dividend", ticker.value.panels)
-      if (any(purchase.exist)) df.purchasevalue.panel <- data.table::fread(file.path(path.value.panel, ticker.value.panels[purchase.exist]))
-      if (any(sale.exist)) df.salevalue.panel <- data.table::fread(file.path(path.value.panel, ticker.value.panels[sale.exist]))
-      if (any(dividend.exist)) df.dividendvalue.panel <- data.table::fread(file.path(path.value.panel, ticker.value.panels[dividend.exist]))
+      if ( any(purchase.exist) ) {
+        df.purchasevalue.panel <- data.table::fread(file.path(path.value.panel,
+                                                              ticker.value.panels[purchase.exist]))
+      }
+      if ( any(sale.exist) ) {
+        df.salevalue.panel <- data.table::fread(file.path(path.value.panel,
+                                                          ticker.value.panels[sale.exist]))
+      }
+      if ( any(dividend.exist) ) {
+        df.dividendvalue.panel <- data.table::fread(file.path(path.value.panel,
+                                                              ticker.value.panels[dividend.exist]))
+      }
 
       if ( exists("df.purchasevalue.panel") ) {
 
-        df.panel <- merge(df.pricequantity.panel, df.purchasevalue.panel, by = "date", all = TRUE)
+        df.panel <- merge(df.pricequantity.panel, df.purchasevalue.panel,
+                          by = "date", all = TRUE)
 
         if ( exists("df.salevalue.panel") ) {
           df.panel <- merge(df.panel, df.salevalue.panel, by = "date", all = TRUE)
@@ -515,7 +554,8 @@ write_complete_panel <- function(ticker, path) {
         }
 
         if ( exists("df.dividendvalue.panel") ) {
-          df.panel <- merge(df.panel, df.dividendvalue.panel, by = "date", all = TRUE)
+          df.panel <- merge(df.panel, df.dividendvalue.panel,
+                            by = "date", all = TRUE)
         } else {
           df.panel$dividend_cum_value <- 0
           df.panel$dividend_value <- 0
@@ -524,19 +564,22 @@ write_complete_panel <- function(ticker, path) {
       }
 
       df.panel[is.na(df.panel)] <- 0
-      df.panel <- df.panel[df.panel$cum_quantity != 0 | df.panel$sale_value != 0 | df.panel$dividend_value != 0, ]
+      df.panel <- df.panel[df.panel$cum_quantity != 0
+                           | df.panel$sale_value != 0
+                           | df.panel$dividend_value != 0, ]
 
-      ## add ticker (makes it a bit easier when using lapply to read all panels)
+      ## Add ticker (makes it a bit easier when using lapply to read all panels)
       df.panel$ticker <- ticker
 
-      ## start and end date
+      ## Start and end date
       from <- min(df.panel$date)
       to <- max(df.panel$date)
 
-      ## file name
-      file.panel <- paste0("complete_panel_", ticker, "_from_", from, "_to_", to, ".csv")
+      ## File name
+      file.panel <- paste0("complete_panel_", ticker, "_from_", from, "_to_",
+                           to, ".csv")
 
-      ## store price quantity panel as csv
+      ## Store price quantity panel as csv
       data.table::fwrite(df.panel, file.path(path.complete.panel, file.panel))
 
       # message("Complete panel for ", ticker, " successfully created!")
@@ -565,13 +608,17 @@ write_investment_value_panels <- function(path) {
 
   get_names(path)
 
-  df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
+  df.transaction.history <- data.table::fread(file.path(path.transactions,
+                                                        file.transactions))
 
-  ## get tickers from history of transactions
+  ## Get tickers from history of transactions
   tickers <- get_tickers_from_transactions(df.transaction.history, path)
 
-  ## write complete panels for all tickers
-  output <- mapply(write_investment_value_panel, tickers, MoreArgs = list(path))
+  ## Write complete panels for all tickers
+  mapply(write_investment_value_panel, tickers, MoreArgs = list(path))
+  # for ( ticker in tickers ) {
+  #   write_investment_value_panel(ticker, path)
+  # }
 
 }
 
@@ -597,7 +644,7 @@ write_investment_value_panel <- function(ticker, path) {
     df.pricequantity.panel <- df.pricequantity.panel[, c("date", "adjusted",
                                                          "value", "quantity")]
 
-    ## load value panels
+    ## Load value panels
     if ( !rlang::is_empty(list.files(path.value.panel, pattern = ticker)) ) {
 
       ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
@@ -606,13 +653,23 @@ write_investment_value_panel <- function(ticker, path) {
       sale.exist <- grepl("^sale", ticker.value.panels)
       dividend.exist <- grepl("^dividend", ticker.value.panels)
 
-      if (any(purchase.exist)) df.purchasevalue.panel <- data.table::fread(file.path(path.value.panel, ticker.value.panels[purchase.exist]))
-      if (any(sale.exist)) df.salevalue.panel <- data.table::fread(file.path(path.value.panel, ticker.value.panels[sale.exist]))
-      if (any(dividend.exist)) df.dividendvalue.panel <- data.table::fread(file.path(path.value.panel, ticker.value.panels[dividend.exist]))
+      if ( any(purchase.exist) ) {
+        df.purchasevalue.panel <- data.table::fread(file.path(path.value.panel,
+                                                              ticker.value.panels[purchase.exist]))
+      }
+      if ( any(sale.exist) ) {
+        df.salevalue.panel <- data.table::fread(file.path(path.value.panel,
+                                                          ticker.value.panels[sale.exist]))
+      }
+      if ( any(dividend.exist) ) {
+        df.dividendvalue.panel <- data.table::fread(file.path(path.value.panel,
+                                                              ticker.value.panels[dividend.exist]))
+      }
 
       if ( exists("df.purchasevalue.panel") ) {
 
-        df.panel <- merge(df.pricequantity.panel, df.purchasevalue.panel, by = "date", all = TRUE)
+        df.panel <- merge(df.pricequantity.panel, df.purchasevalue.panel,
+                          by = "date", all = TRUE)
 
         if ( exists("df.salevalue.panel") ) {
           df.panel <- merge(df.panel, df.salevalue.panel, by = "date", all = TRUE)
@@ -640,7 +697,8 @@ write_investment_value_panel <- function(ticker, path) {
       from <- min(df.panel$date)
       to <- max(df.panel$date)
 
-      file.panel <- paste0("investment_panel_", ticker, "_from_", from, "_to_", to, ".csv")
+      file.panel <- paste0("investment_panel_", ticker, "_from_", from, "_to_",
+                           to, ".csv")
 
       data.table::fwrite(df.panel, file.path(path.value.panel, file.panel))
 
@@ -668,7 +726,6 @@ write_investment_value_panel <- function(ticker, path) {
 #' @return A data frame containing the complete portfolio panel
 #'
 #' @export
-#'
 get_complete_portfolio_panel <- function(path) {
 
   get_names(path)
@@ -705,7 +762,7 @@ get_complete_portfolio_panel <- function(path) {
 
     ## For some dates no price information is available. Thus, I create a column indicating this
     ## I re-calculate the cumulative quantity of the investment because I take the full time period
-    for (i in 1:length(list.dfs) ) {
+    for ( i in 1:length(list.dfs) ) {
 
       df <- list.dfs[[i]]
 
