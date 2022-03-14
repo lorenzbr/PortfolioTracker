@@ -108,15 +108,15 @@ get_ticker_from_investing <- function(isin, preferred.stock.exchange = ""){
   html.output.text <- rvest::html_text(html.output.div)
   html.output.text.selected <- html.output.text[grepl(preferred.stock.exchange,
                                                       html.output.text)]
-  if( rlang::is_empty(html.output.text.selected) ) {
+  if ( length(html.output.text.selected) == 0 ) {
     ## if preferred stock exchange does not exist, select random one
     html.output.text.selected <- html.output.text[sample(length(html.output.text), 1)]
   }
   html.output.text.selected <- gsub("\t", "", html.output.text.selected)
   html.output.text.selected <- gsub("^(\n)+|(\n)+$", "", html.output.text.selected)
 
-  if ( !(rlang::is_empty(html.output.text.selected)) ) {
-    ticker <- strsplit(html.output.text.selected,"\n")[[1]][1]
+  if ( length(html.output.text.selected) > 0 ) {
+    ticker <- strsplit(html.output.text.selected, "\n")[[1]][1]
     if ( preferred.stock.exchange == "Xetra"
          && grepl(preferred.stock.exchange, html.output.text.selected) ) {
       ticker <- paste0(ticker, ".DE")}
@@ -143,7 +143,7 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = ""){
   html.output.ol <- rvest::html_nodes(html.output, 'ol.list')
   url2 <- rvest::html_attr(html.output.ol, 'href')
 
-  if ( !(rlang::is_empty(url2)) ) {
+  if ( length(url2) > 0 ) {
 
     if ( is.na(url2) ) {
       html.output.ol <- rvest::html_nodes(html.output.ol, "a")
@@ -201,13 +201,13 @@ add_ticker_manually <- function(df.isin.ticker.new, path.tickers,
   df.isin.ticker <- data.table::fread(file.path(path.tickers, file.ticker))
 
   ## identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
-  new.isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
+  new_isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
 
-  if ( !rlang::is_empty(new.isins) ) {
+  if ( length(new_isins) > 0 ) {
 
-    for ( i in 1:length(new.isins) ) {
+    for ( i in 1:length(new_isins) ) {
 
-      isin <- new.isins[i]
+      isin <- new_isins[i]
 
       try({
 

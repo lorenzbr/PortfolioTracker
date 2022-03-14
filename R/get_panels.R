@@ -32,9 +32,8 @@ write_quantity_panels <- function(df.transaction.history, path) {
     tickers <- unique(df.transactions.with.tickers$ticker)
 
     ## Delete all files in folder
-    if ( !rlang::is_empty(list.files(path.quantity.panel)) ) {
+    if ( length(list.files(path.quantity.panel)) > 0 )
       file.remove(file.path(path.quantity.panel, list.files(path.quantity.panel)))
-    }
 
     ## Create quantity panels for all tickers
     output <- mapply(write_quantity_panel, tickers,
@@ -182,18 +181,18 @@ write_price_panels <- function(df.transactions, path) {
   tickers <- get_tickers_from_transactions(df.transactions, path)
 
   ## Delete all files in folder
-  if ( !rlang::is_empty(list.files(path.price.panel)) ) {
+  if ( length(list.files(path.price.panel)) > 0 ) {
     file.remove(file.path(path.price.panel, list.files(path.price.panel)))
   }
 
   ## List all files with prices
-  if ( !rlang::is_empty(tickers) ) {
+  if ( length(tickers) > 0 ) {
 
     for ( i in 1:length(tickers) ) {
 
       ticker <- tickers[i]
 
-      if ( !rlang::is_empty(list.files(path.prices.raw, pattern = ticker)) ) {
+      if ( length(list.files(path.prices.raw, pattern = ticker)) > 0 ) {
 
         df.prices.files <- data.frame(filenames = list.files(path.prices.raw,
                                                              pattern = ticker))
@@ -248,7 +247,7 @@ write_price_quantity_panels <- function(df.transactions, path) {
   tickers <- get_tickers_from_transactions(df.transactions, path)
 
   ## Delete all files in folder
-  if ( !rlang::is_empty(list.files(path.pricequantity.panel)) ) {
+  if ( length(list.files(path.pricequantity.panel)) > 0 ) {
     file.remove(file.path(path.pricequantity.panel,
                           list.files(path.pricequantity.panel)))
   }
@@ -270,14 +269,14 @@ write_price_quantity_panel <- function(ticker, path) {
   get_names(path)
 
   ## Load price panel
-  if ( !rlang::is_empty(list.files(path.price.panel, pattern = ticker)) ) {
+  if ( length(list.files(path.price.panel, pattern = ticker)) > 0 ) {
 
     df.price.panel <- data.table::fread(file.path(path.price.panel,
                                               list.files(path.price.panel,
                                                          pattern = ticker)))
 
     ## Load quantity panel
-    if ( !rlang::is_empty(list.files(path.quantity.panel, pattern = ticker)) ) {
+    if ( length(list.files(path.quantity.panel, pattern = ticker)) > 0 ) {
 
       df.quantity.panel <- data.table::fread(file.path(path.quantity.panel,
                                                    list.files(path.quantity.panel,
@@ -449,7 +448,7 @@ write_all_value_panels <- function(df.transaction.history, path) {
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
     ## Add ticker to transaction data if not yet exists
-    if( !any( names(df.transaction.history) == "ticker") ) {
+    if( !any(names(df.transaction.history) == "ticker") ) {
       df.transaction.history <- merge(df.transaction.history,
                                       df.isin.ticker, by = "isin")
     }
@@ -458,10 +457,11 @@ write_all_value_panels <- function(df.transaction.history, path) {
     tickers <- unique(df.transaction.history$ticker)
 
     ## Delete all files in folder
-    if ( !rlang::is_empty(list.files(path.value.panel)) ) {
+    if ( length(list.files(path.value.panel)) > 0 ) {
       file.remove(file.path(path.value.panel, list.files(path.value.panel)))
     }
 
+    ## For loop over all tickers
     # for( ticker in tickers ) {
     #   write_value_panel_all_types(ticker, df.transaction.history, path)
     # }
@@ -490,7 +490,7 @@ write_complete_panels <- function(path) {
   tickers <- get_tickers_from_transactions(df.transaction.history, path)
 
   ## Delete all files in folder
-  if ( !rlang::is_empty(list.files(path.complete.panel)) ) {
+  if ( length(list.files(path.complete.panel)) > 0 ) {
     file.remove(file.path(path.complete.panel, list.files(path.complete.panel)))
   }
 
@@ -510,7 +510,7 @@ write_complete_panel <- function(ticker, path) {
 
   get_names(path)
 
-  if ( !rlang::is_empty(list.files(path.pricequantity.panel, pattern = ticker)) ) {
+  if ( length(list.files(path.pricequantity.panel, pattern = ticker)) > 0 ) {
 
     df.pricequantity.panel <- data.table::fread(file.path(path.pricequantity.panel,
                                                        list.files(path.pricequantity.panel,
@@ -521,25 +521,25 @@ write_complete_panel <- function(ticker, path) {
                                                          "cum_quantity", "quantity")]
 
     ## Load value panels
-    if ( !rlang::is_empty(list.files(path.value.panel, pattern = ticker)) ) {
+    if ( length(list.files(path.value.panel, pattern = ticker)) > 0 ) {
 
       ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
 
       purchase.exist <- grepl("^purchase", ticker.value.panels)
       sale.exist <- grepl("^sale", ticker.value.panels)
       dividend.exist <- grepl("^dividend", ticker.value.panels)
-      if ( any(purchase.exist) ) {
+
+      if ( any(purchase.exist) )
         df.purchasevalue.panel <- data.table::fread(file.path(path.value.panel,
                                                               ticker.value.panels[purchase.exist]))
-      }
-      if ( any(sale.exist) ) {
+
+      if ( any(sale.exist) )
         df.salevalue.panel <- data.table::fread(file.path(path.value.panel,
                                                           ticker.value.panels[sale.exist]))
-      }
-      if ( any(dividend.exist) ) {
+
+      if ( any(dividend.exist) )
         df.dividendvalue.panel <- data.table::fread(file.path(path.value.panel,
                                                               ticker.value.panels[dividend.exist]))
-      }
 
       if ( exists("df.purchasevalue.panel") ) {
 
@@ -635,7 +635,7 @@ write_investment_value_panel <- function(ticker, path) {
 
   get_names(path)
 
-  if ( !rlang::is_empty(list.files(path.pricequantity.panel, pattern = ticker)) ) {
+  if ( length(list.files(path.pricequantity.panel, pattern = ticker)) > 0 ) {
 
     df.pricequantity.panel <- data.table::fread(file.path(path.pricequantity.panel,
                                                       list.files(path.pricequantity.panel,
@@ -645,7 +645,7 @@ write_investment_value_panel <- function(ticker, path) {
                                                          "value", "quantity")]
 
     ## Load value panels
-    if ( !rlang::is_empty(list.files(path.value.panel, pattern = ticker)) ) {
+    if ( length(list.files(path.value.panel, pattern = ticker)) > 0 ) {
 
       ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
 
@@ -653,18 +653,17 @@ write_investment_value_panel <- function(ticker, path) {
       sale.exist <- grepl("^sale", ticker.value.panels)
       dividend.exist <- grepl("^dividend", ticker.value.panels)
 
-      if ( any(purchase.exist) ) {
+      if ( any(purchase.exist) )
         df.purchasevalue.panel <- data.table::fread(file.path(path.value.panel,
                                                               ticker.value.panels[purchase.exist]))
-      }
-      if ( any(sale.exist) ) {
+
+      if ( any(sale.exist) )
         df.salevalue.panel <- data.table::fread(file.path(path.value.panel,
                                                           ticker.value.panels[sale.exist]))
-      }
-      if ( any(dividend.exist) ) {
+
+      if ( any(dividend.exist) )
         df.dividendvalue.panel <- data.table::fread(file.path(path.value.panel,
                                                               ticker.value.panels[dividend.exist]))
-      }
 
       if ( exists("df.purchasevalue.panel") ) {
 
@@ -732,7 +731,7 @@ get_complete_portfolio_panel <- function(path) {
 
   files.complete.panels <- list.files(path.complete.panel)
 
-  no.complete.panels <- rlang::is_empty(files.complete.panels)
+  no.complete.panels <- length(files.complete.panels) == 0
 
   if ( !no.complete.panels ) {
 

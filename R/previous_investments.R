@@ -9,7 +9,7 @@ write_previous_investments <- function(path) {
   get_names(path)
 
   ## Load price quantity panels if exists
-  if ( !rlang::is_empty(list.files(path.pricequantity.panel)) ) {
+  if ( length(list.files(path.pricequantity.panel)) > 0 ) {
 
     files <- file.path(path.pricequantity.panel, list.files(path.pricequantity.panel))
     list.dfs <- lapply(files, data.table::fread)

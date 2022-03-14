@@ -15,7 +15,7 @@ write_investment_irr_all <- function(path) {
 
   files.complete.panels <- list.files(path.complete.panel)
 
-  no.complete.panels <- rlang::is_empty(files.complete.panels)
+  no.complete.panels <- length(files.complete.panels) == 0
 
   if ( !no.complete.panels ) {
 
@@ -84,7 +84,8 @@ write_investment_irr_all <- function(path) {
 
 
             ## Computation of IRR on monthly basis
-            irr <- jrvFinance::irr(df.selected.by.month$cash_flow, cf.freq = 12, comp.freq = Inf)
+            irr <- jrvFinance::irr(df.selected.by.month$cash_flow, cf.freq = 12,
+                                   comp.freq = Inf)
 
             df.temp <- data.frame(ticker = ticker, time_period, irr)
 
@@ -104,8 +105,7 @@ write_investment_irr_all <- function(path) {
 
     ## Long to wide
     data.table::setDT(df.irr)
-    df.irr <- data.table::dcast(df.irr, ticker ~ time_period,
-                                value.var = "irr")
+    df.irr <- data.table::dcast(df.irr, ticker ~ time_period, value.var = "irr")
 
     data.table::setDF(df.irr)
 
@@ -141,7 +141,7 @@ write_returns <- function(path) {
 
   files.price.panels <- list.files(path.price.panel)
 
-  no.price.panels <- rlang::is_empty(files.price.panels)
+  no.price.panels <- length(files.price.panels) == 0
 
   if ( !no.price.panels ) {
 
@@ -345,7 +345,7 @@ write_portfolio_return <- function(path) {
 
   files.pricequantity.panels <- list.files(path.pricequantity.panel)
 
-  no.pricequantity.panels <- rlang::is_empty(files.pricequantity.panels)
+  no.pricequantity.panels <- length(files.pricequantity.panels) == 0
 
   if (!no.pricequantity.panels) {
 
@@ -425,7 +425,7 @@ write_roi_by_period <- function(ticker, path) {
 
   get_names(path)
 
-  if ( !rlang::is_empty(list.files(path.complete.panel, pattern = ticker)) ) {
+  if ( length(list.files(path.complete.panel, pattern = ticker)) > 0 ) {
 
     df.complete.panel <- data.table::fread(file.path(path.complete.panel,
                                               list.files(path.complete.panel,
@@ -541,7 +541,7 @@ write_portfolio_twr_factors <- function(path) {
 
     ## Remove all periods with no portfolio value, no purchase and no sale value at the same time
     days.empty.portfolio <- df.twr$value == 0 & df.twr$purchase_value == 0 & df.twr$sale_value == 0
-    df.twr <- df.twr[ !days.empty.portfolio, ]
+    df.twr <- df.twr[!days.empty.portfolio, ]
 
     ## Compute end value
     df.twr$end_value <- df.twr$value + df.twr$dividend_cum_value

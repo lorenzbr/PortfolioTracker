@@ -78,8 +78,8 @@ get_annualized_return <- function(R, scale = 252) {
 #' @export
 get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type = "max") {
 
-  ## Reason for while loop: if first.date does not exist (i.e. NA) go one more day into the past
-  ## E.g. Feb 29 does not exist for all years
+  ## Reason for while loop: if first.date does not exist (i.e., NA) go one more day into the past
+  ## E.g., Feb 29 does not exist for all years
   ## Holidays and weekend days may not exist either
   if (period_type == "months") {
 
@@ -106,14 +106,15 @@ get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type =
     first.date <- Sys.Date() - lubridate::days(nb_period)
 
     j <- 1
-    while ( is.na(first.date) && j < 10) {
+    while (is.na(first.date) && j < 10) {
       first.date <- (Sys.Date() - j) - lubridate::days(nb_period)
       j = j + 1
     }
 
   } else if (period_type == "ytd") {
 
-    first.date <- as.Date(paste0("01-01-", lubridate::year(Sys.Date())), format = "%d-%m-%Y")
+    first.date <- as.Date(paste0("01-01-", lubridate::year(Sys.Date())),
+                          format = "%d-%m-%Y")
 
   } else if (period_type == "max") {
 
