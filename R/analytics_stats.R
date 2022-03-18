@@ -7,22 +7,23 @@
 #' @import data.table
 write_portfolio_stats <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   df.complete.portfolio <- get_complete_portfolio_panel(path)
 
   if ( !is.null(df.complete.portfolio) ) {
 
-    df.complete.portfolio <- df.complete.portfolio[, c("date", "value", "purchase_value",
-                                                       "sale_value", "dividend_value",
-                                                       "currently_invested", "value_available")]
+    col_names_portfolio <- c("date", "value", "purchase_value", "sale_value",
+                             "dividend_value", "currently_invested", "value_available")
+
+    df.complete.portfolio <- df.complete.portfolio[, col_names_portfolio]
 
     ## Take sum by group "date" for value, purchase_value, sale_value and dividend_value
     df.portfolio <- data.table::setDT(df.complete.portfolio)[, lapply(.SD, sum,
                                                                       na.rm = TRUE),
                                                                       by = date]
 
-    ## Remove all dates where currently invested is unequal value available
+    ## Remove all dates where currently_invested is unequal value_available
     ## This means that prices are not available for all current investments at time t
     df.portfolio <- df.portfolio[df.portfolio$currently_invested == df.portfolio$value_available, ]
 
@@ -39,14 +40,10 @@ write_portfolio_stats <- function(path) {
     nb_periods <- c(1, 3, 6, 12, 36, 60, 120, 1, 1)
     period_types <- c(rep("months", 7), "ytd", "max")
 
-    df.stats <- data.frame(matrix(ncol = 9, nrow = 0,
-                                  dimnames = list(NULL, c("time_period", "portfolio_value",
-                                                          "amount_invested", "amount_sold",
-                                                          "price_gains", "price_gains_relative",
-                                                          "dividends", "irr", "ttwror")
-                                                  )
-                                  )
-                           )
+    col_names_stats <- c("time_period", "portfolio_value", "amount_invested", "amount_sold",
+                   "price_gains", "price_gains_relative", "dividends", "irr", "ttwror")
+
+    df.stats <- data.frame(matrix(ncol = 9, nrow = 0, dimnames = list(NULL, col_names_stats)))
 
     for (i in 1:length(nb_periods) ) {
 
@@ -60,7 +57,7 @@ write_portfolio_stats <- function(path) {
       first.date.actual <- min(df.selected$date)
 
       ## If difference is very large, data for this period not available
-      if (difftime(first.date.actual, first.date.target) <= 30 ) {
+      if ( difftime(first.date.actual, first.date.target) <= 30 ) {
 
         amount_invested <- sum(df.selected$purchase_value)
         amount_sold <- sum(df.selected$sale_value)
@@ -77,10 +74,10 @@ write_portfolio_stats <- function(path) {
 
         dividends <- sum(df.selected$dividend_value)
 
-        irr <- PortfolioTracker::get_portfolio_irr(path, nb_period = nb_periods[i],
+        irr <- get_portfolio_irr(path, nb_period = nb_periods[i],
                                          period_type = period_types[i]) * 100
 
-        ttwror <- PortfolioTracker::get_portfolio_ttwror(path, nb_period = nb_periods[i],
+        ttwror <- get_portfolio_ttwror(path, nb_period = nb_periods[i],
                                                period_type = period_types[i]) * 100
 
         df.temp <- data.frame(time_period, portfolio_value, amount_invested, amount_sold,
@@ -117,14 +114,14 @@ write_portfolio_stats <- function(path) {
 #' @export
 get_dividends_max <- function(path, file.dividend.history = "dividends_fullhistory.csv") {
 
-  get_names(path)
+  get_user_names(path)
 
   if ( file.exists(file.path(path.dividends, file.dividend.history)) ) {
 
     ## Load dividend history
     df.dividend.history <- data.table::fread(file.path(path.dividends, file.dividend.history))
 
-    ## compute max dividends
+    ## Compute max dividends
     dividends.max <- sum(df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Dividend"])
     dividends.storno.max <- sum(df.dividend.history$transaction_value[df.dividend.history$transaction_type == "Storno - Dividend"])
     dividends.max <- dividends.max - dividends.storno.max

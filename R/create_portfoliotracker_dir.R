@@ -1,43 +1,63 @@
-#' Create directory for PortfolioTracker
+#' Create main directory for the Portfolio Tracker
 #'
-#' @usage create_portfoliotracker_dir(path)
+#' @usage create_main_dir(path)
 #' @param path A single character string. Path where data are stored.
-#' @return create_portfoliotracker_dir returns a list with path names for data storage
+#' @return Returns a list with path names for data storage
 #'
 #' @export
-create_portfoliotracker_dir <- function(path) {
+create_main_dir <- function(path) {
 
-  path.data <- file.path(path, "/data/")
-  path.tickers <- file.path(path, "/data/tickers/")
-  path.prices.raw <- file.path(path, "/data/prices_raw/")
-  path.quantity.panel <- file.path(path, "/data/quantity_panel/")
-  path.price.panel <- file.path(path, "/data/price_panel/")
-  path.pricequantity.panel <- file.path(path, "/data/price_quantity_panel/")
-  path.dividends <- file.path(path, "/data/dividends/")
-  path.transactions <- file.path(path, "/data/transactions/")
-  path.rebalance <- file.path(path, "/data/rebalance/")
-  path.returns <- file.path(path, "/data/returns/")
-  path.returns.roi <- file.path(path.returns, "/roi/")
-  path.cash <- file.path(path, "/data/cash/")
-  path.crypto <- file.path(path, "/data/crypto")
-  path.value.panel <- file.path(path, "/data/value_panel/")
-  path.complete.panel <- file.path(path, "/data/complete_panel/")
+  path.root <- file.path(path, "data")
+  path.user.credentials <- file.path(path.root, "user_credentials")
+  path.user.data <- file.path(path.root, "user_data")
+  path.database <- file.path(path.root, "database")
+  path.db.prices <- file.path(path.database, "prices")
 
-  ## create folders for tickers and prices (if not yet exists)
-  if (!dir.exists(path.data)) dir.create(path.data, recursive = TRUE)
-  if (!dir.exists(path.tickers)) dir.create(path.tickers, recursive = TRUE)
-  if (!dir.exists(path.prices.raw)) dir.create(path.prices.raw, recursive = TRUE)
-  if (!dir.exists(path.quantity.panel)) dir.create(path.quantity.panel, recursive = TRUE)
-  if (!dir.exists(path.price.panel)) dir.create(path.price.panel, recursive = TRUE)
-  if (!dir.exists(path.pricequantity.panel)) dir.create(path.pricequantity.panel, recursive = TRUE)
-  if (!dir.exists(path.dividends)) dir.create(path.dividends, recursive = TRUE)
-  if (!dir.exists(path.transactions)) dir.create(path.transactions, recursive = TRUE)
-  if (!dir.exists(path.rebalance)) dir.create(path.rebalance, recursive = TRUE)
-  if (!dir.exists(path.returns)) dir.create(path.returns, recursive = TRUE)
-  if (!dir.exists(path.returns.roi)) dir.create(path.returns.roi, recursive = TRUE)
-  if (!dir.exists(path.cash)) dir.create(path.cash, recursive = TRUE)
-  if (!dir.exists(path.crypto)) dir.create(path.crypto, recursive = TRUE)
-  if (!dir.exists(path.value.panel)) dir.create(path.value.panel, recursive = TRUE)
-  if (!dir.exists(path.complete.panel)) dir.create(path.complete.panel, recursive = TRUE)
+  ## Create folders for tickers and prices (if not yet exists)
+  folders <- c(path.root, path.user.credentials, path.user.data, path.database)
+  for (folder in folders)
+    if (!dir.exists(folder)) dir.create(folder, recursive = TRUE)
+
+}
+
+#' Create directory for user
+#'
+#' @usage create_user_dir(path, portfolio_name = "my_portfolio")
+#' @param path A single character string. Path where user data are stored.
+#' @param portfolio_name A single character string indicating the name of the
+#' portfolio. Currently the default is \emph{my_portfolio}.
+#' @return Returns a list with path names for user-specific data storage
+#'
+#' @export
+create_user_dir <- function(path, portfolio_name = "my_portfolio") {
+
+  ## Name of user's portfolio
+  ## Currently the name is fixed to "my_portfolio" (currently cannot be seen in UI)
+
+  path <- file.path(path, portfolio_name)
+
+  path.data <- path
+  path.tickers <- file.path(path, "tickers")
+  path.prices.raw <- file.path(path, "prices_raw")
+  path.quantity.panel <- file.path(path, "quantity_panel")
+  path.price.panel <- file.path(path, "price_panel")
+  path.pricequantity.panel <- file.path(path, "price_quantity_panel")
+  path.dividends <- file.path(path, "dividends")
+  path.transactions <- file.path(path, "transactions")
+  path.rebalance <- file.path(path, "rebalance")
+  path.returns <- file.path(path, "returns")
+  path.returns.roi <- file.path(path.returns, "roi")
+  path.cash <- file.path(path, "cash/")
+  path.crypto <- file.path(path, "crypto")
+  path.value.panel <- file.path(path, "value_panel")
+  path.complete.panel <- file.path(path, "complete_panel")
+
+  ## Create folders for tickers and prices (if not yet exists)
+  folders <- c(path.data, path.tickers, path.prices.raw, path.quantity.panel,
+               path.price.panel, path.pricequantity.panel, path.dividends,
+               path.transactions, path.rebalance, path.returns, path.returns.roi,
+               path.cash, path.crypto, path.value.panel, path.complete.panel)
+  for (folder in folders)
+    if (!dir.exists(folder)) dir.create(folder, recursive = TRUE)
 
 }

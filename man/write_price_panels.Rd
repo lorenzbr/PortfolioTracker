@@ -2,15 +2,15 @@
 % Please edit documentation in R/get_panels.R
 \name{write_price_panels}
 \alias{write_price_panels}
-\title{Write full history of prices for all tickers as csv}
+\title{Write price panels for all tickers to csv files}
 \usage{
 write_price_panels(df.transactions, path)
 }
 \arguments{
-\item{df.transactions}{A data.frame containing transaction history.}
+\item{df.transactions}{A data frame containing transaction history.}
 
 \item{path}{A single character string containing the directory of the project.}
 }
 \description{
-Write full history of prices for all tickers as csv
+Write price panels for all tickers to csv files
 }

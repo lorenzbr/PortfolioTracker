@@ -8,7 +8,7 @@
 #' @importFrom rlang .data
 write_current_portfolio <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   ## Load price quantity panels if exists
   if ( length(list.files(path.pricequantity.panel)) > 0 ) {

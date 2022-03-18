@@ -1,10 +1,41 @@
-#' Get path names for PortfolioTracker
+#' Get path names for main directory
 #'
-#' @usage get_path_names(path)
+#' @usage get_db_path_names(path)
 #' @param path A single character string. Path where data are stored.
 #'
 #' @export
-get_path_names <- function(path) {
+get_db_path_names <- function(path) {
+
+  ## Solution from https://github.com/josephguillaume/hydromad/issues/73
+  pos <- 1
+  envir <- as.environment(pos)
+
+  var_name <- c("path.root",
+                "path.user.credentials",
+                "path.user.data",
+                "path.database",
+                "path.db.prices"
+  )
+
+  file_name <- c("data",
+                 "user_credentials",
+                 "user_data",
+                 "database",
+                 "prices"
+  )
+
+  for( i in 1:length(var_name) )
+    assign(var_name[i], file.path(path, "data", file_name[i]), envir = envir)
+
+}
+
+#' Get path names for user directory
+#'
+#' @usage get_user_path_names(path)
+#' @param path A single character string. Path where data are stored.
+#'
+#' @export
+get_user_path_names <- function(path) {
 
   ## Solution from https://github.com/josephguillaume/hydromad/issues/73
   pos <- 1
@@ -44,10 +75,7 @@ get_path_names <- function(path) {
                "complete_panel"
                )
 
-  for( i in 1:length(var_name) ) {
-
+  for( i in 1:length(var_name) )
     assign(var_name[i], file.path(path, "data", file_name[i]), envir = envir)
-
-  }
 
 }

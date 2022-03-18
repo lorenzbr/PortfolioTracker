@@ -7,7 +7,7 @@
 #' @export
 write_quantity_panels <- function(df.transaction.history, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   ## convert to data frame
   df.transaction.history <- as.data.frame(df.transaction.history)
@@ -164,10 +164,10 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
 
 }
 
-#' Write full history of prices for all tickers as csv
+#' Write price panels for all tickers to csv files
 #'
 #' @usage write_price_panels(df.transactions, path)
-#' @param df.transactions A data.frame containing transaction history.
+#' @param df.transactions A data frame containing transaction history.
 #' @param path A single character string containing the directory of the project.
 #'
 #' @export
@@ -175,7 +175,7 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
 #' @importFrom rlang .data
 write_price_panels <- function(df.transactions, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   ## Get tickers from history of transactions
   tickers <- get_tickers_from_transactions(df.transactions, path)
@@ -198,7 +198,7 @@ write_price_panels <- function(df.transactions, path) {
                                                              pattern = ticker))
         df.prices.files$filenames <- as.character(df.prices.files$filenames)
 
-        ## Load all files containing prices for ticker
+        ## Load all files containing prices for the given ticker
         list.price.data <- lapply(df.prices.files$filenames,
                                                function(x) data.table::fread(file.path(path.prices.raw, x)))
         df.price.panel <- do.call(rbind, list.price.data)
@@ -218,7 +218,7 @@ write_price_panels <- function(df.transactions, path) {
 
       } else {
 
-        # message("No price data for ticker ", ticker, " available.")
+        # message("No csv's with price data for ticker ", ticker, " available.")
 
       }
 
@@ -241,7 +241,7 @@ write_price_panels <- function(df.transactions, path) {
 #' @export
 write_price_quantity_panels <- function(df.transactions, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   ## Get tickers from history of transactions
   tickers <- get_tickers_from_transactions(df.transactions, path)
@@ -266,7 +266,7 @@ write_price_quantity_panels <- function(df.transactions, path) {
 #' @export
 write_price_quantity_panel <- function(ticker, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   ## Load price panel
   if ( length(list.files(path.price.panel, pattern = ticker)) > 0 ) {
@@ -328,7 +328,7 @@ write_price_quantity_panel <- function(ticker, path) {
 #' @import data.table
 write_value_panel <- function(transaction.type, ticker, df.transaction.history, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   df.transaction.history.ticker <- df.transaction.history[df.transaction.history$ticker == ticker, ]
 
@@ -432,7 +432,7 @@ write_value_panel_all_types <- function(ticker, df.transaction.history, path) {
 #' @export
 write_all_value_panels <- function(df.transaction.history, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   df.transaction.history <- as.data.frame(df.transaction.history)
 
@@ -481,7 +481,7 @@ write_all_value_panels <- function(df.transaction.history, path) {
 #' @export
 write_complete_panels <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   df.transaction.history <- data.table::fread(file.path(path.transactions,
                                                         file.transactions))
@@ -508,7 +508,7 @@ write_complete_panels <- function(path) {
 #' @export
 write_complete_panel <- function(ticker, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   if ( length(list.files(path.pricequantity.panel, pattern = ticker)) > 0 ) {
 
@@ -598,7 +598,10 @@ write_complete_panel <- function(ticker, path) {
 
 }
 
-#' Write all investment value panels to a csv file
+#' Write investment value panels for all tickers to csv files
+#'
+#' @description This functions writes investment value panels for all tickers
+#' to separate csv files. See \code{\link{write_investment_value_panel}} for further information.
 #'
 #' @usage write_investment_value_panels(path)
 #' @param path A single character string. Path where data are stored.
@@ -606,7 +609,7 @@ write_complete_panel <- function(ticker, path) {
 #' @export
 write_investment_value_panels <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   df.transaction.history <- data.table::fread(file.path(path.transactions,
                                                         file.transactions))
@@ -622,7 +625,14 @@ write_investment_value_panels <- function(path) {
 
 }
 
-#' Write investment value panel for given ticker
+#' Write investment value panel for given ticker to csv file
+#'
+#' @description The function writes the investment value for a given \emph{ticker}
+#' and day as a csv file to \emph{path}. The investment value is defined as the sum
+#' of the current value of the investment including current value of a sale and
+#' dividends excluding current costs from purchasing the investment.
+#' See \code{\link{write_investment_value_panels}} if you want to apply this function to all
+#' tickers in your table of transactions.
 #'
 #' @usage write_investment_value_panel(ticker, path)
 #' @param ticker A single character string containing the ticker symbol.
@@ -633,7 +643,7 @@ write_investment_value_panels <- function(path) {
 #' @import data.table
 write_investment_value_panel <- function(ticker, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   if ( length(list.files(path.pricequantity.panel, pattern = ticker)) > 0 ) {
 
@@ -727,13 +737,11 @@ write_investment_value_panel <- function(ticker, path) {
 #' @export
 get_complete_portfolio_panel <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   files.complete.panels <- list.files(path.complete.panel)
 
-  no.complete.panels <- length(files.complete.panels) == 0
-
-  if ( !no.complete.panels ) {
+  if ( length(files.complete.panels) > 0 ) {
 
     ## Load all complete panels
     files <- file.path(path.complete.panel, files.complete.panels)
@@ -749,7 +757,7 @@ get_complete_portfolio_panel <- function(path) {
     first.day <- min(df.all$date)
     last.day <- max(df.all$date)
 
-    ## Get daily full time period but remove saturday and sunday
+    ## Get daily full time period but remove Saturday and Sunday
     full.time.period <- seq(first.day, last.day, by = "day")
 
     ## Remove weekends (1 is Sunday, 7 is Saturday)

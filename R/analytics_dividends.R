@@ -7,7 +7,7 @@
 #' @export
 write_dividend_history <- function(df.transaction.history, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   ## get list of dividends
   df.dividend.history <- df.transaction.history[grepl("Dividend", df.transaction.history$transaction_type), ]
@@ -39,7 +39,7 @@ write_dividend_by_yr <- function(path) {
 
   tryCatch({
 
-    get_names(path)
+    get_user_names(path)
 
     if ( file.exists(file.path(path.dividends, file.dividend.history)) ) {
 
@@ -91,7 +91,7 @@ write_dividend_by_yr <- function(path) {
 #' @importFrom rlang .data
 write_dividend_by_month <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   tryCatch({
 

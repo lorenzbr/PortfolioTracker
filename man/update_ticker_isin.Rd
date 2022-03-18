@@ -5,16 +5,16 @@
 \title{Update ISIN-ticker table}
 \usage{
 update_ticker_isin(isins, path.tickers, file.ticker = "isin_ticker.csv",
-                   external.search = TRUE)
+                   external_search = TRUE)
 }
 \arguments{
 \item{isins}{A single character or vector of strings. ISINs.}
 
 \item{path.tickers}{A single character string. Folder where ISIN-ticker table is stored.}
 
-\item{file.ticker}{A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)}
+\item{file.ticker}{A single character string. Name of ISIN-ticker csv file (default: isin_ticker.csv)}
 
-\item{external.search}{Logical if TRUE, the function searches external sources to find the ticker.}
+\item{external_search}{Logical if TRUE, the function searches external sources to find the ticker.}
 }
 \description{
 Update ISIN-ticker table

@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_panels.R
 \name{write_investment_value_panels}
 \alias{write_investment_value_panels}
-\title{Write all investment value panels to a csv file}
+\title{Write investment value panels for all tickers to csv files}
 \usage{
 write_investment_value_panels(path)
 }
@@ -10,5 +10,6 @@ write_investment_value_panels(path)
 \item{path}{A single character string. Path where data are stored.}
 }
 \description{
-Write all investment value panels to a csv file
+This functions writes investment value panels for all tickers
+to separate csv files. See \code{\link{write_investment_value_panel}} for further information.
 }

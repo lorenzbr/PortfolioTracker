@@ -2,10 +2,10 @@
 #'
 #' @usage init_isin_ticker(path, file = "isin_ticker.csv")
 #' @param path A single character string. Path where data are stored.
-#' @param file A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)
+#' @param file A single character string. Name of ISIN-ticker csv file (default: isin_ticker.csv)
 #'
 #' @export
-init_isin_ticker <- function(path, file = "isin_ticker.csv"){
+init_isin_ticker <- function(path, file = "isin_ticker.csv") {
 
   if ( !file.exists(file.path(path, file)) ) {
     col.names <- c("isin", "ticker")
@@ -19,15 +19,15 @@ init_isin_ticker <- function(path, file = "isin_ticker.csv"){
 #' Update ISIN-ticker table
 #'
 #' @usage update_ticker_isin(isins, path.tickers, file.ticker = "isin_ticker.csv",
-#'                    external.search = TRUE)
+#'                    external_search = TRUE)
 #' @param isins A single character or vector of strings. ISINs.
 #' @param path.tickers A single character string. Folder where ISIN-ticker table is stored.
-#' @param file.ticker A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv)
-#' @param external.search Logical if TRUE, the function searches external sources to find the ticker.
+#' @param file.ticker A single character string. Name of ISIN-ticker csv file (default: isin_ticker.csv)
+#' @param external_search Logical if TRUE, the function searches external sources to find the ticker.
 #'
 #' @export
 update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.csv",
-                               external.search = TRUE){
+                               external_search = TRUE) {
 
   ## Variable isins is a vector containing ISINs for which tickers are needed
   isins <- unique(isins)
@@ -41,32 +41,33 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
   df.isin.ticker <- data.table::fread(file.path(path.tickers, file.ticker))
 
   ## Identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
-  new.isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
+  new_isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
 
-  if ( length(new.isins) > 0 ) {
+  if ( length(new_isins) > 0 ) {
 
-    for ( i in 1:length(new.isins) ) {
+    for ( i in 1:length(new_isins) ) {
 
-      isin <- new.isins[i]
+      isin <- new_isins[i]
 
       try({
 
         ##  WiP, better to include function argument with whatever data is collected
-        df.isin.ticker.database <- data.table::fread(system.file("extdata", "isin_ticker_name_list_xetra_june2017.csv",
-                                                                 package = "PortfolioTracker"))
+        df.isin.ticker.database <- data.table::fread(
+          system.file("extdata", "isin_ticker_name_list_xetra_june2017.csv",
+                      package = "PortfolioTracker"))
         df.isin.ticker.database <- as.data.frame(df.isin.ticker.database)
         ticker <- df.isin.ticker.database$ticker[df.isin.ticker.database$isin == isin]
 
-        if ( length(ticker) == 0 && external.search ) ticker <- get_ticker_from_xetra(isin)
+        if (length(ticker) == 0 && external_search)
+          ticker <- get_ticker_from_xetra(isin)
 
 
-
-        if ( ticker != "" ) {
+        if (ticker != "") {
 
           df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
 
-          data.table::fwrite(df.isin.ticker.new, file.path(path.tickers,
-                                                           file.ticker),
+          data.table::fwrite(df.isin.ticker.new,
+                             file.path(path.tickers, file.ticker),
                              append = TRUE)
 
           # print(paste("Ticker was missing.", ticker, "added."))
@@ -96,7 +97,7 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
 #' @param preferred.stock.exchange A single character string. Stock exchange (e.g., Xetra)
 #'
 #' @export
-get_ticker_from_investing <- function(isin, preferred.stock.exchange = ""){
+get_ticker_from_investing <- function(isin, preferred.stock.exchange = "") {
 
   url <- "https://www.investing.com/search/?q="
   url.isin <- paste0(url, isin)
@@ -134,7 +135,7 @@ get_ticker_from_investing <- function(isin, preferred.stock.exchange = ""){
 #' @param preferred.stock.exchange A single character string. Stock exchange (default is empty string)
 #'
 #' @export
-get_ticker_from_xetra <- function(isin, preferred.stock.exchange = ""){
+get_ticker_from_xetra <- function(isin, preferred.stock.exchange = "") {
 
   url <- "https://www.xetra.com/xetra-de/instrumente/alle-handelbaren-instrumente/boersefrankfurt/3906!search?query="
   url.isin <- paste0(url, isin)
@@ -173,7 +174,8 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = ""){
 
   ticker <- elements[grep("K.?rzel", names)]
 
-  if(preferred.stock.exchange == "Xetra"){ticker <- paste0(ticker, ".DE")}
+  if (preferred.stock.exchange == "Xetra")
+    ticker <- paste0(ticker, ".DE")
 
   return(ticker)
 
@@ -183,13 +185,13 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = ""){
 #' Add ISIN-ticker pairs to table
 #'
 #' @usage add_ticker_manually(df.isin.ticker.new, path.tickers, file.ticker = "isin_ticker.csv")
-#' @param df.isin.ticker.new A data frame containing a column for isin and ticker.
+#' @param df.isin.ticker.new A data frame containing a column for \emph{isin} and \emph{ticker}.
 #' @param path.tickers A single character string. Folder where ISIN-ticker table is stored.
-#' @param file.ticker A single character string. Name of ISIN-ticker csv file (Default: isin_ticker.csv).
+#' @param file.ticker A single character string. Name of ISIN-ticker csv file (default: isin_ticker.csv).
 #'
 #' @export
 add_ticker_manually <- function(df.isin.ticker.new, path.tickers,
-                                file.ticker = "isin_ticker.csv"){
+                                file.ticker = "isin_ticker.csv") {
 
   isins <- unique(df.isin.ticker.new$isin)
   isins <- isins[!grepl("^$", isins)]

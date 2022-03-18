@@ -85,13 +85,13 @@ rebalance_portfolio <- function(df, df.target.shares, money.to.invest, step.size
 #' @export
 write_default_target_shares <- function(df.target.shares, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   if (is.data.frame(df.target.shares)) {
 
     if ( all( c("isin", "target_share") %in% names(df.target.shares) )) {
 
-    data.table::fwrite(df.target.shares, file.path(path.rebalance, file.target.shares))
+      data.table::fwrite(df.target.shares, file.path(path.rebalance, file.target.shares))
 
     }
 

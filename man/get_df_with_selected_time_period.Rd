@@ -9,9 +9,11 @@ get_df_with_selected_time_period(df, nb_period = NULL, period_type = "max")
 \arguments{
 \item{df}{A data frame containing a panel.}
 
-\item{nb_period}{An integer indicating the number of months. Default is \emph{NULL}. Does not need to be specified for period_type \emph{max} and \emph{ytd}.}
+\item{nb_period}{An integer indicating the number of months. Default is
+\emph{NULL}. Does not need to be specified for period_type \emph{max} and \emph{ytd}.}
 
-\item{period_type}{A single character string. Default \emph{max}. Possible values \emph{max}, \emph{ytd}, \emph{weeks} and \emph{months}.}
+\item{period_type}{A single character string. Default \emph{max}. Possible
+values \emph{max}, \emph{ytd}, \emph{weeks} and \emph{months}.}
 }
 \value{
 A data frame containing the original data frame only for the specified time period.

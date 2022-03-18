@@ -7,7 +7,7 @@
 #' @export
 get_isins_missing_tickers <- function(path){
 
-  get_names(path)
+  get_user_names(path)
 
   transaction.history.exists <- file.exists(file.path(path.transactions, file.transactions))
   isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))

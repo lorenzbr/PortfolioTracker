@@ -2,17 +2,20 @@
 % Please edit documentation in R/get_price_data.R
 \name{update_prices_based_on_transactions}
 \alias{update_prices_based_on_transactions}
-\title{Update and store prices as csv based on new financial transactions}
+\title{Update and store prices as csv based on new transactions}
 \usage{
-update_prices_based_on_transactions(df.transactions, path, external.search = TRUE)
+update_prices_based_on_transactions(df.transactions, path, external_search = TRUE)
 }
 \arguments{
-\item{df.transactions}{A data frame. Results from [BankStatementParser::get_transactions()]}
+\item{df.transactions}{A data frame. Results from \code{\link[BankStatementParser]{get_transactions}}.
+At least three variables/columns are required: \emph{transaction_type}, \emph{isin}
+and \emph{transaction_date}}
 
 \item{path}{A single character string. Path where data are stored.}
 
-\item{external.search}{Logical if TRUE, the function searches external sources to find the ticker.}
+\item{external_search}{Logical; if TRUE, the function searches external
+sources to find the ticker.}
 }
 \description{
-Update and store prices as csv based on new financial transactions
+Update and store prices as csv based on new transactions
 }

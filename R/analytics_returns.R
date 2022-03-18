@@ -11,7 +11,7 @@ write_investment_irr_all <- function(path) {
 
   cash_flow <- NULL
 
-  get_names(path)
+  get_user_names(path)
 
   files.complete.panels <- list.files(path.complete.panel)
 
@@ -137,7 +137,7 @@ write_investment_irr_all <- function(path) {
 #' @export
 write_returns <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   files.price.panels <- list.files(path.price.panel)
 
@@ -234,7 +234,7 @@ get_returns_all <- function(df, ticker) {
 #' @importFrom rlang .data
 write_annualized_returns <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   returns.period <- "daily"
   returns.period.file <- "daily_returns"
@@ -320,7 +320,7 @@ write_annualized_returns <- function(path) {
 #' @export
 write_portfolio_return <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   # df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
   # df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
@@ -401,7 +401,7 @@ write_portfolio_return <- function(path) {
 #' @export
 write_roi_by_period_all <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   df.transaction.history <- data.table::fread(file.path(path.transactions,
                                                         file.transactions))
@@ -423,7 +423,7 @@ write_roi_by_period_all <- function(path) {
 #' @export
 write_roi_by_period <- function(ticker, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   if ( length(list.files(path.complete.panel, pattern = ticker)) > 0 ) {
 
@@ -515,7 +515,7 @@ get_roi_by_period <- function(df.complete.panel, nb_period = NULL, period_type =
 #' @export
 write_portfolio_twr_factors <- function(path) {
 
-  get_names(path)
+  get_user_names(path)
 
   df.all <- get_complete_portfolio_panel(path)
 
@@ -577,7 +577,7 @@ write_portfolio_twr_factors <- function(path) {
 #' @export
 get_portfolio_ttwror <- function(path, nb_period = NULL, period_type = "max") {
 
-  get_names(path)
+  get_user_names(path)
 
   if ( file.exists(file.path(path.returns, file.returns.twr.daily)) ) {
 
@@ -628,7 +628,7 @@ get_portfolio_irr <- function(path, nb_period = NULL, period_type = "max") {
 
   cash_flow <- NULL
 
-  get_names(path)
+  get_user_names(path)
 
   df.complete.portfolio <- get_complete_portfolio_panel(path)
 
@@ -640,7 +640,7 @@ get_portfolio_irr <- function(path, nb_period = NULL, period_type = "max") {
                                                        "currently_invested", "value_available")]
 
     ## Take sum by group "date" for value, purchase_value, sale_value and dividend_value
-    ## Group date means: the values for all individual investments are aggregted (summed)
+    ## Group date means: the values for all individual investments are aggregated (summed)
     df.portfolio <- data.table::setDT(df.complete.portfolio)[, lapply(.SD, sum, na.rm = TRUE),
                                                                       by = date]
 

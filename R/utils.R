@@ -2,20 +2,20 @@
 
 get_tickers_from_transactions <- function(df.transaction.history, path) {
 
-  get_names(path)
+  get_user_names(path)
 
   isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
   if (isin.ticker.exists) {
 
-    ## get table that converts ISIN to ticker
+    ## Get table that converts ISIN to ticker
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
     df.isin.ticker <- df.isin.ticker[df.isin.ticker$ticker != "", ]
 
-    ## add ticker to transaction data
+    ## Add ticker to transaction data
     df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
 
-    ## all tickers
+    ## Get all tickers
     tickers <- unique(df.transaction.history$ticker)
 
     return(tickers)
@@ -29,7 +29,8 @@ get_tickers_from_transactions <- function(df.transaction.history, path) {
 #' @usage get_annualized_returns(R, scale = 252)
 #'
 #' @param R An xts or matrix with returns
-#' @param scale A numeric for the number of periods in a year (daily = 252 is default, monthly = 12, quarterly = 4, yearly = 1)
+#' @param scale A numeric for the number of periods in a year (daily = 252 is
+#' default, monthly = 12, quarterly = 4, yearly = 1)
 #'
 #' @return A data frame with annualized returns for all investments
 #'
@@ -51,7 +52,8 @@ get_annualized_returns <- function(R, scale = 252) {
 #' @usage get_annualized_return(R, scale = 252)
 #'
 #' @param R An xts or vector with returns
-#' @param scale A numeric for the number of periods in a year (daily = 252 is default, monthly = 12, quarterly = 4, yearly = 1)
+#' @param scale A numeric for the number of periods in a year (daily = 252 is
+#' default, monthly = 12, quarterly = 4, yearly = 1)
 #'
 #' @return A vector with annualized returns
 #'
@@ -70,8 +72,10 @@ get_annualized_return <- function(R, scale = 252) {
 #'
 #' @usage get_df_with_selected_time_period(df, nb_period = NULL, period_type = "max")
 #' @param df A data frame containing a panel.
-#' @param nb_period An integer indicating the number of months. Default is \emph{NULL}. Does not need to be specified for period_type \emph{max} and \emph{ytd}.
-#' @param period_type A single character string. Default \emph{max}. Possible values \emph{max}, \emph{ytd}, \emph{weeks} and \emph{months}.
+#' @param nb_period An integer indicating the number of months. Default is
+#' \emph{NULL}. Does not need to be specified for period_type \emph{max} and \emph{ytd}.
+#' @param period_type A single character string. Default \emph{max}. Possible
+#' values \emph{max}, \emph{ytd}, \emph{weeks} and \emph{months}.
 #'
 #' @return A data frame containing the original data frame only for the specified time period.
 #'
@@ -121,7 +125,6 @@ get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type =
     df.selected.time.period <- df
 
   }
-
 
   if (period_type == "months" || period_type == "weeks" || period_type == "days"
       || period_type == "ytd") {

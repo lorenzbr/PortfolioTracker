@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_price_data.R
 \name{update_latest_prices}
 \alias{update_latest_prices}
-\title{Update most recent prices and store as csv}
+\title{Update most recent prices and store in csv files}
 \usage{
 update_latest_prices(path)
 }
@@ -10,5 +10,7 @@ update_latest_prices(path)
 \item{path}{A single character string. Path where data are stored.}
 }
 \description{
-Update most recent prices and store as csv
+Update prices for all tickers in the specified path. A new csv is created
+for the updated prices. Better use \code{\link{append_latest_prices}} which is
+more efficient.
 }

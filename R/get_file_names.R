@@ -1,9 +1,38 @@
-#' Get file names for PortfolioTracker
+#' Get file names for files in shared database
 #'
-#' @usage get_file_names()
+#' @usage get_db_file_names()
 #'
 #' @export
-get_file_names <- function() {
+get_db_file_names <- function() {
+
+  ## Solution from https://github.com/josephguillaume/hydromad/issues/73
+  pos <- 1
+  envir <- as.environment(pos)
+
+  var_name <- c("file.tickers.db",
+                "file.ticker.exchange.db",
+                "file.stock.splits.db",
+                "file.ticker.price.available.db"
+  )
+
+  file_name <- c("isin_ticker_db.csv",
+                 "ticker_exchange_db.csv",
+                 "stock_splits_db.csv",
+                 "ticker_price_available_db.csv"
+  )
+
+  for( i in 1:length(var_name) )
+    assign(var_name[i], file_name[i], envir = envir)
+
+}
+
+
+#' Get file names for files in user directory
+#'
+#' @usage get_user_file_names()
+#'
+#' @export
+get_user_file_names <- function() {
 
   ## Solution from https://github.com/josephguillaume/hydromad/issues/73
   pos <- 1
@@ -47,10 +76,7 @@ get_file_names <- function() {
                "investment_irr.csv"
                )
 
-  for( i in 1:length(var_name) ) {
-
+  for( i in 1:length(var_name) )
     assign(var_name[i], file_name[i], envir = envir)
-
-  }
 
 }

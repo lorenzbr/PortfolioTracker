@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_panels.R
 \name{write_investment_value_panel}
 \alias{write_investment_value_panel}
-\title{Write investment value panel for given ticker}
+\title{Write investment value panel for given ticker to csv file}
 \usage{
 write_investment_value_panel(ticker, path)
 }
@@ -12,5 +12,10 @@ write_investment_value_panel(ticker, path)
 \item{path}{A single character string. Path where data are stored.}
 }
 \description{
-Write investment value panel for given ticker
+The function writes the investment value for a given \emph{ticker}
+and day as a csv file to \emph{path}. The investment value is defined as the sum
+of the current value of the investment including current value of a sale and
+dividends excluding current costs from purchasing the investment.
+See \code{\link{write_investment_value_panels}} if you want to apply this function to all
+tickers in your table of transactions.
 }

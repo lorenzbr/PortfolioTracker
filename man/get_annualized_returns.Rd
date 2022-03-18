@@ -9,7 +9,8 @@ get_annualized_returns(R, scale = 252)
 \arguments{
 \item{R}{An xts or matrix with returns}
 
-\item{scale}{A numeric for the number of periods in a year (daily = 252 is default, monthly = 12, quarterly = 4, yearly = 1)}
+\item{scale}{A numeric for the number of periods in a year (daily = 252 is
+default, monthly = 12, quarterly = 4, yearly = 1)}
 }
 \value{
 A data frame with annualized returns for all investments

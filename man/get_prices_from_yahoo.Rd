@@ -2,11 +2,11 @@
 % Please edit documentation in R/get_price_data.R
 \name{get_prices_from_yahoo}
 \alias{get_prices_from_yahoo}
-\title{Get prices from the Yahoo Finance API}
+\title{Get prices for a given ticker from the Yahoo Finance API}
 \usage{
 get_prices_from_yahoo(ticker, from, to, preferred.stock.exchange = "Xetra",
-                          stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
-                          method = "simple")
+                             stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
+                             method = "simple")
 }
 \arguments{
 \item{ticker}{A single character string. Ticker symbol.}
@@ -15,12 +15,17 @@ get_prices_from_yahoo(ticker, from, to, preferred.stock.exchange = "Xetra",
 
 \item{to}{A single character string. End date.}
 
-\item{preferred.stock.exchange}{A single character string. Stock exchange (default is empty string)}
+\item{preferred.stock.exchange}{A single character string. Stock exchange
+(default is \emph{Xetra})}
 
-\item{stock.exchanges}{A vector of single character strings. Possible stock exchanges to get price data.}
+\item{stock.exchanges}{A vector of single character strings. Possible stock
+exchanges to get prices from.}
 
-\item{method}{A single character string (default: \emph{simple}). The method how to get prices from Yahoo. Use the R package \emph{quantmod} or a \emph{simple} solution.}
+\item{method}{A single character string (default: \emph{simple}). The method
+how to get prices from Yahoo. Use the R package \emph{quantmod} or a \emph{simple}
+and fast solution.}
 }
 \description{
-Get prices from the Yahoo Finance API
+Get prices for a given ticker from the Yahoo Finance API. Wrapper around
+\code{\link{get_ticker_prices}} with further arguments. E.g., select the stock exchange.
 }
