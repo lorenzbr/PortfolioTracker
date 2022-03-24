@@ -4,9 +4,9 @@
 \alias{get_prices_from_yahoo}
 \title{Get prices for a given ticker from the Yahoo Finance API}
 \usage{
-get_prices_from_yahoo(ticker, from, to, preferred.stock.exchange = "Xetra",
+get_prices_from_yahoo(ticker, from, to, preferred_exchange = "Xetra",
                              stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
-                             method = "simple")
+                             method = "simple", user_specific_exchange = TRUE)
 }
 \arguments{
 \item{ticker}{A single character string. Ticker symbol.}
@@ -15,7 +15,7 @@ get_prices_from_yahoo(ticker, from, to, preferred.stock.exchange = "Xetra",
 
 \item{to}{A single character string. End date.}
 
-\item{preferred.stock.exchange}{A single character string. Stock exchange
+\item{preferred_exchange}{A single character string. Stock exchange
 (default is \emph{Xetra})}
 
 \item{stock.exchanges}{A vector of single character strings. Possible stock
@@ -24,6 +24,10 @@ exchanges to get prices from.}
 \item{method}{A single character string (default: \emph{simple}). The method
 how to get prices from Yahoo. Use the R package \emph{quantmod} or a \emph{simple}
 and fast solution.}
+
+\item{user_specific_exchange}{Logical indicating whether prices are taken from
+exchange that is preferred by the user (i.e., stored in the user's profile).
+Default is \emph{TRUE}.}
 }
 \description{
 Get prices for a given ticker from the Yahoo Finance API. Wrapper around

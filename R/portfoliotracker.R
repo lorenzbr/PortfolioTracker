@@ -18,8 +18,8 @@ if (getRversion() >= "2.15.1") {
      "path.user.credentials",
      "path.user.data",
      "path.database",
-     "path.db.prices",
-     "path.db.tickers",
+     "path.prices.db",
+     "path.tickers.db",
      ## User-specific paths
      "path.data",
      "path.tickers",

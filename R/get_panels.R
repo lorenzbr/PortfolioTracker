@@ -36,6 +36,7 @@ write_quantity_panels <- function(df.transaction.history, path) {
       file.remove(file.path(path.quantity.panel, list.files(path.quantity.panel)))
 
     ## Create quantity panels for all tickers
+    ## For loop should not be slower
     output <- mapply(write_quantity_panel, tickers,
                      MoreArgs = list(df.transactions.with.tickers, path.quantity.panel))
 
@@ -59,26 +60,28 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
   df.transactions.with.tickers$transaction_date <- as.Date(df.transactions.with.tickers$transaction_date,
                                                            "%d-%m-%Y")
 
-  ## get transactions only for ticker
+  ## Get transactions only for ticker
   df.transaction.history.ticker <- df.transactions.with.tickers[df.transactions.with.tickers$ticker == ticker, ]
 
-  ## only sale and purchase transaction types are required to create quantity panels
-  df.transaction.history.ticker <- df.transaction.history.ticker[grepl("^Sale$|^Purchase$",
-                                                                       df.transaction.history.ticker$transaction_type), ]
+  ## Keep only sale and purchase transaction types are required to create quantity panels
+  df.transaction.history.ticker <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_type == "Sale"
+                                                                 | df.transaction.history.ticker$transaction_type == "Purchase", ]
+  # df.transaction.history.ticker <- df.transaction.history.ticker[grepl("^Sale$|^Purchase$",
+  #                                                                      df.transaction.history.ticker$transaction_type), ]
 
   if ( nrow(df.transaction.history.ticker) > 0 ) {
 
-    ## if transaction type is a sale, quantity needs to be negative (in order to be subtracted at a given point in time)
+    ## If transaction type is a sale, quantity needs to be negative (in order to be subtracted at a given point in time)
     is.sale.transaction <- df.transaction.history.ticker$transaction_type == "Sale"
     df.transaction.history.ticker$quantity[is.sale.transaction] <- (-1) * df.transaction.history.ticker$quantity[is.sale.transaction]
 
     df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "quantity")]
 
-    ## if several transactions per day, aggregate by transaction_date
+    ## If several transactions per day, aggregate by transaction_date
     df.transaction.history.ticker <- stats::aggregate(quantity ~ transaction_date,
                                                       df.transaction.history.ticker, sum)
 
-    ## take cumulative sum of transactions to get quantity over time
+    ## Take cumulative sum of transactions to get quantity over time
     df.transaction.history.ticker.keep <- df.transaction.history.ticker
     df.transaction.history.ticker <- df.transaction.history.ticker[order(df.transaction.history.ticker$transaction_date), ]
     df.transaction.history.ticker$cum_quantity <- cumsum(df.transaction.history.ticker$quantity)
@@ -92,7 +95,8 @@ write_quantity_panel <- function(ticker, df.transactions.with.tickers, path.quan
 
         ## Earliest transaction_date
         earliest.transaction.date <- min(df.transaction.history.ticker$transaction_date)
-        earliest.transaction.date <- as.Date(earliest.transaction.date, "%d-%m-%Y")
+        earliest.transaction.date <- as.Date(earliest.transaction.date,
+                                             format = "%d-%m-%Y")
 
         ## First transaction for each ticker (to get panel of quantity for each ticker)
         df.transaction.history.ticker.first <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_date == earliest.transaction.date, ]
@@ -415,7 +419,7 @@ write_value_panel_all_types <- function(ticker, df.transaction.history, path) {
 
   transaction.types <- c("Purchase", "Sale", "Dividend")
 
-  # for(transaction.type in transaction.types) {
+  # for (transaction.type in transaction.types) {
   #   write_value_panel(transaction.type, ticker, df.transaction.history, path)
   # }
   mapply(write_value_panel, transaction.types,
@@ -442,13 +446,13 @@ write_all_value_panels <- function(df.transaction.history, path) {
 
   isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-  if ( isin.ticker.exists ) {
+  if (isin.ticker.exists) {
 
     ## Get table that converts ISIN to ticker
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
     ## Add ticker to transaction data if not yet exists
-    if( !any(names(df.transaction.history) == "ticker") ) {
+    if (!any(names(df.transaction.history) == "ticker")) {
       df.transaction.history <- merge(df.transaction.history,
                                       df.isin.ticker, by = "isin")
     }
@@ -457,12 +461,12 @@ write_all_value_panels <- function(df.transaction.history, path) {
     tickers <- unique(df.transaction.history$ticker)
 
     ## Delete all files in folder
-    if ( length(list.files(path.value.panel)) > 0 ) {
+    if (length(list.files(path.value.panel)) > 0) {
       file.remove(file.path(path.value.panel, list.files(path.value.panel)))
     }
 
     ## For loop over all tickers
-    # for( ticker in tickers ) {
+    # for (ticker in tickers) {
     #   write_value_panel_all_types(ticker, df.transaction.history, path)
     # }
 
@@ -525,9 +529,14 @@ write_complete_panel <- function(ticker, path) {
 
       ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
 
-      purchase.exist <- grepl("^purchase", ticker.value.panels)
-      sale.exist <- grepl("^sale", ticker.value.panels)
-      dividend.exist <- grepl("^dividend", ticker.value.panels)
+      ## startsWith is faster than grepl("^...", )
+      purchase.exist <- startsWith(ticker.value.panels, "purchase")
+      sale.exist <- startsWith(ticker.value.panels, "sale")
+      dividend.exist <- startsWith(ticker.value.panels, "dividend")
+      # purchase.exist <- grepl("^purchase", ticker.value.panels)
+      # sale.exist <- grepl("^sale", ticker.value.panels)
+      # dividend.exist <- grepl("^dividend", ticker.value.panels)
+
 
       if ( any(purchase.exist) )
         df.purchasevalue.panel <- data.table::fread(file.path(path.value.panel,
@@ -659,9 +668,13 @@ write_investment_value_panel <- function(ticker, path) {
 
       ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
 
-      purchase.exist <- grepl("^purchase", ticker.value.panels)
-      sale.exist <- grepl("^sale", ticker.value.panels)
-      dividend.exist <- grepl("^dividend", ticker.value.panels)
+      ## startsWith is faster than grepl("^...", )
+      purchase.exist <- startsWith(ticker.value.panels, "purchase")
+      sale.exist <- startsWith(ticker.value.panels, "sale")
+      dividend.exist <- startsWith(ticker.value.panels, "dividend")
+      # purchase.exist <- grepl("^purchase", ticker.value.panels)
+      # sale.exist <- grepl("^sale", ticker.value.panels)
+      # dividend.exist <- grepl("^dividend", ticker.value.panels)
 
       if ( any(purchase.exist) )
         df.purchasevalue.panel <- data.table::fread(file.path(path.value.panel,

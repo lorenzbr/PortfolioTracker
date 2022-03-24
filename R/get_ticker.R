@@ -8,55 +8,54 @@
 init_isin_ticker <- function(path, file = "isin_ticker.csv") {
 
   if ( !file.exists(file.path(path, file)) ) {
-    col.names <- c("isin", "ticker")
-    df.isin.ticker.init <- data.frame(matrix(NA, nrow = 0, ncol = length(col.names),
-                                             dimnames = list(NULL, col.names)))
-    data.table::fwrite(df.isin.ticker.init, file.path(path, file))
+    col_names <- c("isin", "ticker")
+    df_isin_ticker_init <- data.frame(matrix(NA, nrow = 0, ncol = length(col_names),
+                                             dimnames = list(NULL, col_names)))
+    data.table::fwrite(df_isin_ticker_init, file.path(path, file))
   }
 
 }
 
 #' Update ISIN-ticker table
 #'
-#' @usage update_ticker_isin(isins, path.tickers, file.ticker = "isin_ticker.csv",
-#'                    external_search = TRUE)
+#' @usage update_ticker_isin(isins, path_tickers, file_tickers, external_search = TRUE)
 #' @param isins A single character or vector of strings. ISINs.
-#' @param path.tickers A single character string. Folder where ISIN-ticker table is stored.
-#' @param file.ticker A single character string. Name of ISIN-ticker csv file (default: isin_ticker.csv)
+#' @param path_tickers A single character string. Folder where ISIN-ticker table is stored.
+#' @param file_tickers A single character string. Name of ISIN-ticker csv file
 #' @param external_search Logical if TRUE, the function searches external sources to find the ticker.
 #'
 #' @export
-update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.csv",
+update_ticker_isin <- function(isins, path_tickers, file_tickers,
                                external_search = TRUE) {
 
-  ## Variable isins is a vector containing ISINs for which tickers are needed
+  ## Object 'isins' is a vector containing ISINs for which tickers are needed
   isins <- unique(isins)
   ## Remove empty entries
   isins <- isins[!grepl("^$", isins)]
 
   ## Create csv if not exists
-  init_isin_ticker(path.tickers, file.ticker)
+  init_isin_ticker(path_tickers, file_tickers)
 
   ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-  df.isin.ticker <- data.table::fread(file.path(path.tickers, file.ticker))
+  df_isin_ticker <- data.table::fread(file.path(path_tickers, file_tickers))
 
   ## Identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
-  new_isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
+  new_isins <- isins[!(isins %in% unique(df_isin_ticker$isin))]
 
-  if ( length(new_isins) > 0 ) {
+  if (length(new_isins) > 0) {
 
-    for ( i in 1:length(new_isins) ) {
+    for (i in 1:length(new_isins)) {
 
       isin <- new_isins[i]
 
       try({
 
         ##  WiP, better to include function argument with whatever data is collected
-        df.isin.ticker.database <- data.table::fread(
+        df_isin_ticker_database <- data.table::fread(
           system.file("extdata", "isin_ticker_name_list_xetra_june2017.csv",
                       package = "PortfolioTracker"))
-        df.isin.ticker.database <- as.data.frame(df.isin.ticker.database)
-        ticker <- df.isin.ticker.database$ticker[df.isin.ticker.database$isin == isin]
+        df_isin_ticker_database <- as.data.frame(df_isin_ticker_database)
+        ticker <- df_isin_ticker_database$ticker[df_isin_ticker_database$isin == isin]
 
         if (length(ticker) == 0 && external_search)
           ticker <- get_ticker_from_xetra(isin)
@@ -64,63 +63,69 @@ update_ticker_isin <- function(isins, path.tickers, file.ticker = "isin_ticker.c
 
         if (ticker != "") {
 
-          df.isin.ticker.new <- data.frame(isin = isin, ticker = ticker)
+          df_isin_ticker_new <- data.frame(isin = isin, ticker = ticker)
 
-          data.table::fwrite(df.isin.ticker.new,
-                             file.path(path.tickers, file.ticker),
+          data.table::fwrite(df_isin_ticker_new,
+                             file.path(path_tickers, file_tickers),
                              append = TRUE)
 
           # print(paste("Ticker was missing.", ticker, "added."))
 
-        } else {
+        } # else {
 
           # message("Ticker not found! Please add manually!")
 
-        }
+        # }
 
       })
 
     }
 
-  } else {
+  } # else {
 
     # print("New transactions, but ticker already available.")
 
-  }
+  # }
 
 }
 
 #' Get ticker based on ISIN by crawling investing.com
 #'
-#' @usage get_ticker_from_investing(isin, preferred.stock.exchange = "")
+#' @usage get_ticker_from_investing(isin, preferred_exchange = "")
 #' @param isin A single character string. ISIN.
-#' @param preferred.stock.exchange A single character string. Stock exchange (e.g., Xetra)
+#' @param preferred_exchange A single character string. Stock exchange (e.g., Xetra)
 #'
 #' @export
-get_ticker_from_investing <- function(isin, preferred.stock.exchange = "") {
+get_ticker_from_investing <- function(isin, preferred_exchange = "") {
 
   url <- "https://www.investing.com/search/?q="
-  url.isin <- paste0(url, isin)
+  url_isin <- paste0(url, isin)
 
-  html.output <- rvest::read_html(url.isin)
-  html.output.div <- rvest::html_nodes(html.output,
+  html_output <- rvest::read_html(url_isin)
+  html_output_div <- rvest::html_nodes(html_output,
                                        'div.js-inner-all-results-quotes-wrapper')
-  html.output.div <- rvest::html_nodes(html.output.div, 'a')
-  html.output.text <- rvest::html_text(html.output.div)
-  html.output.text.selected <- html.output.text[grepl(preferred.stock.exchange,
-                                                      html.output.text)]
-  if ( length(html.output.text.selected) == 0 ) {
-    ## if preferred stock exchange does not exist, select random one
-    html.output.text.selected <- html.output.text[sample(length(html.output.text), 1)]
+  html_output_div <- rvest::html_nodes(html_output_div, 'a')
+  html_output_text <- rvest::html_text(html_output_div)
+  ## If no regex is needed, grepl is faster with fixed = TRUE
+  html_output_text_selected <- html_output_text[grepl(preferred_exchange,
+                                                      html_output_text,
+                                                      fixed = TRUE)]
+  # html_output_text_selected <- html_output_text[grepl(preferred_exchange,
+  #                                                     html_output_text)]
+  if ( length(html_output_text_selected) == 0 ) {
+    ## If preferred stock exchange does not exist, select random one
+    html_output_text_selected <- html_output_text[sample(length(html_output_text), 1)]
   }
-  html.output.text.selected <- gsub("\t", "", html.output.text.selected)
-  html.output.text.selected <- gsub("^(\n)+|(\n)+$", "", html.output.text.selected)
+  html_output_text_selected <- gsub("\t", "", html_output_text_selected)
+  html_output_text_selected <- gsub("^(\n)+|(\n)+$", "", html_output_text_selected)
 
-  if ( length(html.output.text.selected) > 0 ) {
-    ticker <- strsplit(html.output.text.selected, "\n")[[1]][1]
-    if ( preferred.stock.exchange == "Xetra"
-         && grepl(preferred.stock.exchange, html.output.text.selected) ) {
-      ticker <- paste0(ticker, ".DE")}
+  if ( length(html_output_text_selected) > 0 ) {
+    ## strsplit namespace? should be stringr
+    ticker <- strsplit(html_output_text_selected, "\n")[[1]][1]
+    ## If no regex is needed, grepl is faster with fixed = TRUE
+    if ( preferred_exchange == "Xetra"
+         && grepl(preferred_exchange, html_output_text_selected, fixed = TRUE) ) {
+      ticker <- paste0(ticker, ".DE") }
   }
 
   return(ticker)
@@ -130,25 +135,25 @@ get_ticker_from_investing <- function(isin, preferred.stock.exchange = "") {
 
 #' Get ticker based on ISIN by crawling the Xetra website
 #'
-#' @usage get_ticker_from_xetra(isin, preferred.stock.exchange = "")
+#' @usage get_ticker_from_xetra(isin, preferred_exchange = "")
 #' @param isin A single character string. ISIN.
-#' @param preferred.stock.exchange A single character string. Stock exchange (default is empty string)
+#' @param preferred_exchange A single character string. Stock exchange (default is empty string)
 #'
 #' @export
-get_ticker_from_xetra <- function(isin, preferred.stock.exchange = "") {
+get_ticker_from_xetra <- function(isin, preferred_exchange = "") {
 
   url <- "https://www.xetra.com/xetra-de/instrumente/alle-handelbaren-instrumente/boersefrankfurt/3906!search?query="
-  url.isin <- paste0(url, isin)
+  url_isin <- paste0(url, isin)
 
-  html.output <- rvest::read_html(url.isin)
-  html.output.ol <- rvest::html_nodes(html.output, 'ol.list')
-  url2 <- rvest::html_attr(html.output.ol, 'href')
+  html_output <- rvest::read_html(url_isin)
+  html_output_ol <- rvest::html_nodes(html_output, 'ol.list')
+  url2 <- rvest::html_attr(html_output_ol, 'href')
 
   if ( length(url2) > 0 ) {
 
     if ( is.na(url2) ) {
-      html.output.ol <- rvest::html_nodes(html.output.ol, "a")
-      url2 <- rvest::html_attr(html.output.ol, 'href')
+      html_output_ol <- rvest::html_nodes(html_output_ol, "a")
+      url2 <- rvest::html_attr(html_output_ol, 'href')
     }
 
     # if ( is.na(url2) ) message(paste("URL for", isin, "not found! Please add ticker manually."))
@@ -161,11 +166,11 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = "") {
 
   url2 <- paste0("https://www.xetra.com", url2)
 
-  html.output <- rvest::read_html(url2)
-  html.output.dl <- rvest::html_nodes(html.output, 'dl.list')
+  html_output <- rvest::read_html(url2)
+  html_output_dl <- rvest::html_nodes(html_output, 'dl.list')
 
-  names <- rvest::html_elements(html.output.dl, "dt")
-  elements <- rvest::html_elements(html.output.dl, "dd")
+  names <- rvest::html_elements(html_output_dl, "dt")
+  elements <- rvest::html_elements(html_output_dl, "dd")
 
   names <- rvest::html_text(names)
   elements <- rvest::html_text(elements)
@@ -174,7 +179,7 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = "") {
 
   ticker <- elements[grep("K.?rzel", names)]
 
-  if (preferred.stock.exchange == "Xetra")
+  if (preferred_exchange == "Xetra")
     ticker <- paste0(ticker, ".DE")
 
   return(ticker)
@@ -184,26 +189,26 @@ get_ticker_from_xetra <- function(isin, preferred.stock.exchange = "") {
 
 #' Add ISIN-ticker pairs to table
 #'
-#' @usage add_ticker_manually(df.isin.ticker.new, path.tickers, file.ticker = "isin_ticker.csv")
-#' @param df.isin.ticker.new A data frame containing a column for \emph{isin} and \emph{ticker}.
+#' @usage add_ticker_manually(df_isin_ticker_new, path.tickers, file.ticker = "isin_ticker.csv")
+#' @param df_isin_ticker_new A data frame containing a column for \emph{isin} and \emph{ticker}.
 #' @param path.tickers A single character string. Folder where ISIN-ticker table is stored.
 #' @param file.ticker A single character string. Name of ISIN-ticker csv file (default: isin_ticker.csv).
 #'
 #' @export
-add_ticker_manually <- function(df.isin.ticker.new, path.tickers,
+add_ticker_manually <- function(df_isin_ticker_new, path.tickers,
                                 file.ticker = "isin_ticker.csv") {
 
-  isins <- unique(df.isin.ticker.new$isin)
+  isins <- unique(df_isin_ticker_new$isin)
   isins <- isins[!grepl("^$", isins)]
 
-  ## create csv if not exists
+  ## Create csv if not exists
   init_isin_ticker(path.tickers, file.ticker)
 
-  ## get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-  df.isin.ticker <- data.table::fread(file.path(path.tickers, file.ticker))
+  ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
+  df_isin_ticker <- data.table::fread(file.path(path.tickers, file.ticker))
 
-  ## identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
-  new_isins <- isins[!(isins %in% unique(df.isin.ticker$isin))]
+  ## Identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
+  new_isins <- isins[!(isins %in% unique(df_isin_ticker$isin))]
 
   if ( length(new_isins) > 0 ) {
 
@@ -213,12 +218,15 @@ add_ticker_manually <- function(df.isin.ticker.new, path.tickers,
 
       try({
 
-        df.isin.ticker.add <- df.isin.ticker.new[grepl(isin, df.isin.ticker.new$isin), ]
+        ## If no regex is needed, grepl is faster with fixed = TRUE
+        df_isin_ticker_add <- df_isin_ticker_new[grepl(isin, df_isin_ticker_new$isin,
+                                                       fixed = TRUE), ]
+        # df_isin_ticker_add <- df_isin_ticker_new[grepl(isin, df_isin_ticker_new$isin), ]
 
-        data.table::fwrite(df.isin.ticker.add,
+        data.table::fwrite(df_isin_ticker_add,
                            file.path(path.tickers, file.ticker), append = TRUE)
 
-        # message("Ticker was missing. ", df.isin.ticker.add$ticker, " added.")
+        # message("Ticker was missing. ", df_isin_ticker_add$ticker, " added.")
 
       })
 

@@ -11,7 +11,7 @@ create_main_dir <- function(path) {
   path.user.credentials <- file.path(path.root, "user_credentials")
   path.user.data <- file.path(path.root, "user_data")
   path.database <- file.path(path.root, "database")
-  path.db.prices <- file.path(path.database, "prices")
+  path.prices.db <- file.path(path.database, "prices")
 
   ## Create folders for tickers and prices (if not yet exists)
   folders <- c(path.root, path.user.credentials, path.user.data, path.database)

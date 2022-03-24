@@ -9,15 +9,18 @@ write_dividend_history <- function(df.transaction.history, path) {
 
   get_user_names(path)
 
-  ## get list of dividends
-  df.dividend.history <- df.transaction.history[grepl("Dividend", df.transaction.history$transaction_type), ]
+  ## Get list of dividends
+  ## Using fixed = TRUE if no regex is needed is faster
+  # df.dividend.history <- df.transaction.history[grepl("Dividend", df.transaction.history$transaction_type), ]
+  df.dividend.history <- df.transaction.history[grepl("Dividend", df.transaction.history$transaction_type,
+                                                      fixed = TRUE), ]
 
   if (nrow(df.dividend.history) > 0) {
 
-    ## make sure values are positive
+    ## Make sure values are positive
     df.dividend.history$transaction_value <- abs(df.dividend.history$transaction_value)
 
-    ## write dividend history
+    ## Write dividend history
     data.table::fwrite(df.dividend.history, file.path(path.dividends, file.dividend.history))
 
   } else {

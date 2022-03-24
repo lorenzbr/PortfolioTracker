@@ -21,7 +21,7 @@ get_db_file_names <- function() {
                  "ticker_price_available_db.csv"
   )
 
-  for( i in 1:length(var_name) )
+  for (i in 1:length(var_name))
     assign(var_name[i], file_name[i], envir = envir)
 
 }
@@ -55,28 +55,28 @@ get_user_file_names <- function() {
                 "file.return.portfolio.daily",
                 "file.returns.twr.daily",
                 "file.returns.irr"
-               )
+  )
 
   file_name <- c("transaction_fullhistory.csv",
-               "current_portfolio.csv",
-               "previous_investments.csv",
-               "isin_ticker.csv",
-               "ticker_exchange.csv",
-               "dividends_fullhistory.csv",
-               "dividends_by_year.csv",
-               "dividends_by_month.csv",
-               "default_target_shares.csv",
-               "portfolio_stats.csv",
-               "daily_returns.csv",
-               "monthly_returns.csv",
-               "annual_returns.csv",
-               "annualized_returns.csv",
-               "daily_portfolio_return.csv",
-               "twr_portfolio_factors_daily.csv",
-               "investment_irr.csv"
-               )
+                 "current_portfolio.csv",
+                 "previous_investments.csv",
+                 "isin_ticker.csv",
+                 "ticker_exchange.csv",
+                 "dividends_fullhistory.csv",
+                 "dividends_by_year.csv",
+                 "dividends_by_month.csv",
+                 "default_target_shares.csv",
+                 "portfolio_stats.csv",
+                 "daily_returns.csv",
+                 "monthly_returns.csv",
+                 "annual_returns.csv",
+                 "annualized_returns.csv",
+                 "daily_portfolio_return.csv",
+                 "twr_portfolio_factors_daily.csv",
+                 "investment_irr.csv"
+  )
 
-  for( i in 1:length(var_name) )
+  for (i in 1:length(var_name))
     assign(var_name[i], file_name[i], envir = envir)
 
 }

@@ -706,7 +706,7 @@ get_portfolio_irr <- function(path, nb_period = NULL, period_type = "max") {
     # irr_final <- NA
     #
     # ## TO DO: make code faster
-    # for(r in irr_seq) {
+    # for (r in irr_seq) {
     #   npv <- cash_flows[1]
     #   for ( i in 2:length(periods) ) {
     #     npv <- npv + ( cash_flows[i] / (1 + r)^(periods[i] - 1) )
@@ -719,7 +719,7 @@ get_portfolio_irr <- function(path, nb_period = NULL, period_type = "max") {
     #   }
     # }
 
-    if ( is.na(irr_final )) {
+    if (is.na(irr_final)) {
 
       # message("Cannot compute internal rate of return.")
 

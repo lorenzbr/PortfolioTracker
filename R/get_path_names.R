@@ -14,17 +14,17 @@ get_db_path_names <- function(path) {
                 "path.user.credentials",
                 "path.user.data",
                 "path.database",
-                "path.db.prices"
+                "path.prices.db"
   )
 
   file_name <- c("data",
                  "user_credentials",
                  "user_data",
                  "database",
-                 "prices"
+                 "database/prices"
   )
 
-  for( i in 1:length(var_name) )
+  for (i in 1:length(var_name))
     assign(var_name[i], file.path(path, "data", file_name[i]), envir = envir)
 
 }
@@ -42,40 +42,40 @@ get_user_path_names <- function(path) {
   envir <- as.environment(pos)
 
   var_name <- c("path.data",
-              "path.tickers",
-              "path.prices.raw",
-              "path.quantity.panel",
-              "path.price.panel",
-              "path.pricequantity.panel",
-              "path.dividends",
-              "path.transactions",
-              "path.rebalance",
-              "path.returns",
-              "path.returns.roi",
-              "path.cash",
-              "path.crypto",
-              "path.value.panel",
-              "path.complete.panel"
-              )
+                "path.tickers",
+                "path.prices.raw",
+                "path.quantity.panel",
+                "path.price.panel",
+                "path.pricequantity.panel",
+                "path.dividends",
+                "path.transactions",
+                "path.rebalance",
+                "path.returns",
+                "path.returns.roi",
+                "path.cash",
+                "path.crypto",
+                "path.value.panel",
+                "path.complete.panel"
+  )
 
   file_name <- c("/",
-               "tickers",
-               "prices_raw",
-               "quantity_panel",
-               "price_panel",
-               "price_quantity_panel",
-               "dividends",
-               "transactions",
-               "rebalance",
-               "returns",
-               "returns/roi",
-               "cash",
-               "crypto",
-               "value_panel",
-               "complete_panel"
-               )
+                 "tickers",
+                 "prices_raw",
+                 "quantity_panel",
+                 "price_panel",
+                 "price_quantity_panel",
+                 "dividends",
+                 "transactions",
+                 "rebalance",
+                 "returns",
+                 "returns/roi",
+                 "cash",
+                 "crypto",
+                 "value_panel",
+                 "complete_panel"
+  )
 
-  for( i in 1:length(var_name) )
+  for (i in 1:length(var_name))
     assign(var_name[i], file.path(path, "data", file_name[i]), envir = envir)
 
 }
