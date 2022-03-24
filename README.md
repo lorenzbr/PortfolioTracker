@@ -10,7 +10,7 @@ public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostat
 [![Codecov test coverage](https://codecov.io/gh/lorenzbr/PortfolioTracker/branch/main/graph/badge.svg)](https://codecov.io/gh/lorenzbr/PortfolioTracker?branch=main)
 <!-- badges: end -->
 
-This R package contains functions to track the performance of your investment portfolio. It is the back end of the Shiny App Portfolio Tracker. You can have a look at the documentation: [PortfolioTracker](https://github.com/lorenzbr/PortfolioTrackerDocs#readme).
+This R package contains functions to track the performance of your investment portfolio. It is the back end of the Shiny App Portfolio Tracker. You can have a look at the documentation: [PortfolioTracker](https://github.com/lorenzbr/PortfolioTrackerDocs).
 
 
 ## Installation
@@ -24,7 +24,7 @@ devtools::install_github("lorenzbr/PortfolioTracker")
 
 ## Usage
 
-Please have a look at the documentation of the app: [PortfolioTracker](https://github.com/lorenzbr/PortfolioTrackerDocs#readme).
+Please have a look at the documentation of the app: [PortfolioTracker](https://github.com/lorenzbr/PortfolioTrackerDocs).
 
 
 ## Contact
