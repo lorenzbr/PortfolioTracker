@@ -1,12 +1,18 @@
 #' Update and store prices in database based on new transactions
 #'
-#' @description Update and store prices in the database shared by all users.
-#' For each ticker, prices are written to a separate csv file.
+#' @description Update and store prices in the database (currently csv files)
+#' shared by all users. For each ticker, prices are written to a separate csv file.
+#' Prices are updated if incoming transactions are older than the latest price
+#' that is available according to a list with first and last date of a given ticker
+#' (this list is stored in a csv as well). Prices are also updated if there are
+#' no prices available for the given ticker.
 #'
-#' @usage update_db_prices_based_on_transactions(df_transactions, path, external_search = TRUE)
-#' @param df_transactions A data frame. Results from \code{\link[BankStatementParser]{get_transactions}}.
-#' At least three variables/columns are required: \emph{transaction_type}, \emph{isin}
-#' and \emph{transaction_date}
+#' @usage update_db_prices_based_on_transactions(df_transactions, path,
+#'          external_search = TRUE)
+#' @param df_transactions A data frame. Results from
+#' \code{\link[BankStatementParser]{get_transactions}}.
+#' At least three variables/columns are required: \emph{transaction_type},
+#' \emph{isin} and \emph{transaction_date}
 #' @param path A single character string. Path where data are stored.
 #' @param external_search Logical; if TRUE, the function searches external
 #' sources to find the ticker.
@@ -15,72 +21,26 @@
 update_db_prices_based_on_transactions <- function(df_transactions, path,
                                                    external_search = TRUE) {
 
-  ## function WIP:
-  # update prices based on new transactions. check database whether
-  # prices already exist. if not, then download prices from yahoo for given ticker.
-  # check database/price_availability.csv with available price periods for all tickers, if
-  # there is missing data, download prices and append to database/prices/prices_<ticker>.csv and
-  # update the database/price_availability.csv (first_date and last_date)
-  # to do: create database/price_availability.csv (filename + path + actual csv file)
-
   get_db_names(path)
 
-  ## To get prices, only purchase transactions are relevant (?) - with current
-  ## functionality, this should be correct.
+  ## Only purchase transactions are relevant
   df_transactions <- df_transactions[df_transactions$transaction_type == "Purchase", ]
-  # bef <- Sys.time()
-  # df_transactions2 <- df_transactions[df_transactions$transaction_type == "Purchase", ]
-  # aft <- Sys.time()
-  # aft - bef
 
-  # bef2 <- Sys.time()
-  # df_transactions3 <- df_transactions %>%
-  #   filter(transaction_type == "Purchase")
-  # aft2 <- Sys.time()
-  # aft2 - bef2
-
-  # dt_transactions <- data.table::setDT(df_transactions)
-  # bef3 <- Sys.time()
-  # dt_transactions4 <- dt_transactions[transaction_type == "Purchase", ]
-  # # df_transactions4 <- df_transactions %>%
-  # #   filter(transaction_type == "Purchase")
-  # aft3 <- Sys.time()
-  # aft3 - bef3
-
-  # df_transactions2 <- df_transactions3 <- df_transactions
-  # bef <- Sys.time()
-  # df_transactions2$sum <- df_transactions2$transaction_price + df_transactions2$transaction_value
-  # Sys.time() - bef
-  #
-  # bef2 <- Sys.time()
-  # df_transactions3 <- df_transactions3 %>%
-  #   mutate(sum = transaction_price + transaction_value)
-  # Sys.time() - bef2
-
-  ## Get unique ISINs in new transactions
   isins <- unique(df_transactions$isin)
 
-  ## Update ISIN-ticker table
   ## With external search it may take very long (due to crawling a website)
-  ## (If isin ticker csv does not exist, it will be created)
   update_ticker_isin(isins = isins,
                      path_tickers = path.database,
                      file_tickers = file.tickers.db,
                      external_search = external_search)
 
-  # isin_ticker_exists <- file.exists(file.path(path.database, file.tickers.db))
-  # ## Needed? Should always exist, because it is created if it not yet exists
-  # if (isin_ticker_exists) {
-
   ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
   df_isin_ticker <- data.table::fread(file.path(path.database, file.tickers.db))
 
-  ## Add tickers to transactions
   df_transactions <- merge(df_transactions, df_isin_ticker,
                            by = "isin", all.x = TRUE)
   df_transactions <- df_transactions[!is.na(df_transactions$ticker), ]
 
-  ## If there are new transactions for which we have the ticker symbol
   if (nrow(df_transactions) > 0) {
 
     ## Be aware of the specific date format
@@ -89,7 +49,8 @@ update_db_prices_based_on_transactions <- function(df_transactions, path,
 
     ## Keep oldest transactions for each ticker because younger transactions
     ## produce price data which are a subset of older transactions
-    ## Base solution is more convoluted but FASTER than dplyr for small data sets
+    ## Base solution is more convoluted but should be FASTER than dplyr for
+    ## small data
     df_transactions <- as.data.frame(df_transactions)
     col_names_transactions <- names(df_transactions)
     df <- stats::aggregate(transaction_date ~ ticker, data = df_transactions, FUN = min)
@@ -100,88 +61,42 @@ update_db_prices_based_on_transactions <- function(df_transactions, path,
     df_transactions <- df_transactions[, col_names_transactions]
     row.names(df_transactions) <- 1:nrow(df_transactions)
 
-    ## Need to import:
-    ## #' @importFrom magrittr %>%
-    ## #' @importFrom rlang .data
-    # df_transactions2 <- df_transactions
-    # df_transactions3a <- df_transactions
-    # bef <- Sys.time()
-    # df_transactions2 <- df_transactions %>%
-    #   dplyr::group_by(.data$ticker) %>%
-    #   dplyr::filter(transaction_date == min(.data$transaction_date))
-    # df_transactions2 <- df_transactions2 %>%
-    #   dplyr::group_by(.data$ticker) %>%
-    #   dplyr::sample_n(size = 1)
-    # Sys.time() - bef
-    # # df <- stats::aggregate(df_transactions$transaction_date, by = list(df_transactions$ticker), FUN = min)
-    # bef <- Sys.time()
-    # df_transactions3b <- as.data.frame(df_transactions3a)
-    # col_names_transactions <- names(df_transactions3b)
-    # df <- stats::aggregate(transaction_date ~ ticker, data = df_transactions3b, FUN = min)
-    # df_transactions3 <- merge(df_transactions3b, df, by = c("ticker", "transaction_date"))
-    # df_transactions3 <- do.call(rbind,
-    #                             lapply(split(df_transactions3, df_transactions3$ticker),
-    #                                    function(x) x[sample(nrow(x), 1), ]))
-    # df_transactions3 <- df_transactions3[, col_names_transactions]
-    # row.names(df_transactions3) <- 1:nrow(df_transactions3)
-    # Sys.time() - bef
-
-
-    ## Load price availability from csv (if exists)
     isin_price_available_exists <- file.exists(
       file.path(path.database, file.ticker.price.available.db))
 
     if (isin_price_available_exists) {
+
       df_price_available <- data.table::fread(file.path(
         path.database, file.ticker.price.available.db))
+      df_price_available <- as.data.frame(df_price_available)
+
     } else {
-      ## Create data frame for price available and save as csv
+
       col_names <- c("ticker", "first_date", "last_date")
       df_price_available <- data.frame(matrix(
-        nrow = 0, ncol = 3, dimnames = list(NULL, col_names)
-      ))
+        nrow = 0, ncol = 3, dimnames = list(NULL, col_names)))
       data.table::fwrite(df_price_available, file.path(
         path.database, file.ticker.price.available.db))
+
     }
 
-    ## Get current date
     today <- Sys.Date()
 
-    ## For loop over all transactions in file
-    ## To do: alternatively, use new function and apply function (probably NOT faster)
     for (i in 1:nrow(df_transactions)) {
 
       tryCatch({
 
-        ## Select transaction date and ticker
         transaction_date <- df_transactions$transaction_date[i]
         ticker <- df_transactions$ticker[i]
 
         ## Select ticker, first and latest date in price available df
         df_prices_same_ticker <- df_price_available[df_price_available$ticker == ticker, ]
 
-
-        ## Check whether prices for this ticker based on transaction date already exists:
-        ## if no: continue
-        ## if yes: 1) if the focal date is younger, don't do anything 2) if the
-        ## focal date is older, continue
-
-        # ## Get all prices with same ticker
-        # df_prices_same_ticker <- data.frame(filename = list.files(path.prices.db,
-        #                                                           pattern = ticker))
-
         ## Initialize earliest_date (required to have an existing valid date)
         earliest_date <- as.Date("1900-01-01", format = "%Y-%m-%d")
 
-        ## Identify earliest date for each of those files and compare to transaction_date
         if (nrow(df_prices_same_ticker) == 1) {
 
-          # df_prices_same_ticker$first_date <- stringr::str_match(df_prices_same_ticker$filename,
-          #                                                        "from_(.*?)_to")[, 2]
-          # df_prices_same_ticker$first_date <- as.Date(df_prices_same_ticker$first_date,
-          #                                             format = "%Y-%m-%d")
-          # min_date <- min(df_prices_same_ticker$first_date)
-          # df_prices_same_ticker <- df_prices_same_ticker[df_prices_same_ticker$first_date == min_date, ]
           earliest_date <- df_prices_same_ticker$first_date
 
           ## If new transaction is older than earliest date:
@@ -192,104 +107,69 @@ update_db_prices_based_on_transactions <- function(df_transactions, path,
         }
 
         ## If transaction_date is older than earliest_date of existing transactions
-        ## or no prices with same ticker exist, get prices:
+        ## or no prices with same ticker exist, get prices
         if (transaction_date < earliest_date || nrow(df_prices_same_ticker) == 0) {
 
-          ## Check whether such a file exists already, then no need to download again
-          # if (!file.exists(file.path(path.prices.db, filename_prices))) {
+          df_ticker_prices <- get_prices_from_yahoo(ticker = ticker,
+                                                    from = transaction_date,
+                                                    to = today,
+                                                    user_specific_exchange = FALSE)
 
-            df_ticker_prices <- get_prices_from_yahoo(ticker = ticker,
-                                                      from = transaction_date,
-                                                      to = today,
-                                                      user_specific_exchange = FALSE)
+          from <- min(df_ticker_prices$date)
+          to <- max(df_ticker_prices$date)
 
-            from <- min(df_ticker_prices$date)
-            to <- max(df_ticker_prices$date)
+          from <- as.Date(from, format = "%Y-%m-%d")
+          to <- as.Date(to, format = "%Y-%m-%d")
 
-            from <- as.Date(from, format = "%Y-%m-%d")
-            to <- as.Date(to, format = "%Y-%m-%d")
+          ## If prices are already available for given ticker, update dates
+          ## in price availability csv
+          is_current_ticker <- df_price_available$ticker == ticker
+          if (length(df_price_available$first_date[is_current_ticker]) > 0) {
+            if (from < earliest_date)
+              df_price_available$first_date[is_current_ticker] <- from
+            if (to > df_prices_same_ticker$last_date)
+              df_price_available$last_date[is_current_ticker] <- to
+          } else {
+            df_new <- data.frame(ticker = ticker, first_date = from,
+                                 last_date = to)
+            df_price_available <- rbind(df_price_available, df_new)
+          }
 
-            ## If prices are already available for given ticker, update dates
-            ## in price availability csv
-            is_current_ticker <- df_price_available$ticker == ticker
-            if (length(df_price_available$first_date[is_current_ticker]) > 0) {
-              if (from < earliest_date)
-                df_price_available$first_date[is_current_ticker] <- from
-              if (to > df_prices_same_ticker$last_date)
-                df_price_available$last_date[is_current_ticker] <- to
-            } else {
-              df_new <- data.frame(ticker = ticker, first_date = from,
-                                   last_date = to)
-              df_price_available <- rbind(df_price_available, df_new)
-            }
+          data.table::fwrite(df_price_available,
+                             file.path(path.database,
+                                       file.ticker.price.available.db))
 
-            data.table::fwrite(df_price_available,
-                               file.path(path.database,
-                                         file.ticker.price.available.db))
+          filename_prices <- paste0("prices_", ticker, ".csv")
 
-            filename_prices <- paste0("prices_", ticker, ".csv")
+          ## Append prices in correct order and store again as csv
+          prices_exist <- file.exists(file.path(path.prices.db, filename_prices))
+          if (prices_exist) {
+            df_ticker_prices_all <- data.table::fread(file.path(path.prices.db,
+                                                                filename_prices))
+            ## Order of row binding data frames important because this should be
+            ## correct already
+            df_ticker_prices <- rbind(df_ticker_prices,
+                                      df_ticker_prices_all)
+            ## Order by date: latest date should be first (on top)- Is it redundant
+            ## because of rbind?
+            df_ticker_prices <- df_ticker_prices[order(df_ticker_prices$date), ]
+          }
 
-            ## Append prices in correct order and store again as csv
-            prices_exist <- file.exists(file.path(path.prices.db, filename_prices))
-            if (prices_exist) {
-              df_ticker_prices_all <- data.table::fread(file.path(path.prices.db,
-                                                                  filename_prices))
-              ## Order of rbinding data frames important because this should be
-              ## correct already
-              df_ticker_prices <- rbind(df_ticker_prices,
-                                        df_ticker_prices_all)
-              ## Order by date: latest date should be first (on top)- Is it redundant
-              ## because of rbind?
-              df_ticker_prices <- df_ticker_prices[order(df_ticker_prices$date), ]
-            }
+          data.table::fwrite(df_ticker_prices,
+                             file.path(path.prices.db, filename_prices))
 
-            data.table::fwrite(df_ticker_prices,
-                               file.path(path.prices.db, filename_prices))
-
-
-            # if (today != Sys.Date()) {
-
-              # print(paste("Older transaction: Price update for", ticker, "from",
-              #             transaction.date, "to",
-              #             today, "successfully downloaded."))
-
-            # } # else {
-
-              # print(paste("Prices for", ticker, "from", transaction.date,
-              #                    "to", today, "successfully downloaded."))
-
-            # }
-
-          # } # else {
-
-            # print(paste("Prices for", ticker, "from", transaction.date, "to",
-            #             today, "already downloaded.", " File",
-            #             filename.data.raw.prices, "exists already."))
-
-          # } ## End of else if condition which checks whether file already exists
-
-        } # else {
-
-          # message("Prices based on older transaction already exist.")
-
-        # }
-        ## End of if else statement: transaction.date older than any other or no transactions exist
+        }
 
       }, error = function(cond) {
 
-        # message(paste0("No prices for ticker '", ticker, "' available."))
         message("Original message:")
         message(cond)
 
-      }
-
-      )
+      })
 
     }
 
   }
-
-  # }
 
 }
 

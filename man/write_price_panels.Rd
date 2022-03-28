@@ -9,7 +9,7 @@ write_price_panels(df.transactions, path)
 \arguments{
 \item{df.transactions}{A data frame containing transaction history.}
 
-\item{path}{A single character string containing the directory of the project.}
+\item{path}{A single character string containing the directory of the user.}
 }
 \description{
 Write price panels for all tickers to csv files

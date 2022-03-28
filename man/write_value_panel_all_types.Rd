@@ -11,7 +11,7 @@ write_value_panel_all_types(ticker, df.transaction.history, path)
 
 \item{df.transaction.history}{A data frame containing the full history of transactions.}
 
-\item{path}{A single character string containing the directory of the project.}
+\item{path}{A single character string containing the directory of the user.}
 }
 \description{
 Write value panels for purchase, dividend and sales transactions for given ticker

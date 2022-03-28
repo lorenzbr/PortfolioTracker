@@ -11,5 +11,6 @@ write_investment_value_panels(path)
 }
 \description{
 This functions writes investment value panels for all tickers
-to separate csv files. See \code{\link{write_investment_value_panel}} for further information.
+to separate csv files. See \code{\link{write_investment_value_panel}} for
+further information.
 }

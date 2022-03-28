@@ -7,9 +7,9 @@
 write_price_quantity_panels(df.transactions, path)
 }
 \arguments{
-\item{df.transactions}{A data.frame containing transaction history.}
+\item{df.transactions}{A data frame containing transaction history.}
 
-\item{path}{A single character string containing the directory of the project.}
+\item{path}{A single character string containing the directory of the user.}
 }
 \description{
 Write panels for the product of prices and quantity for all tickers as csv
