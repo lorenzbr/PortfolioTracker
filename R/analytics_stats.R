@@ -11,7 +11,7 @@ write_portfolio_stats <- function(path) {
 
   df.complete.portfolio <- get_complete_portfolio_panel(path)
 
-  if ( !is.null(df.complete.portfolio) ) {
+  if (!is.null(df.complete.portfolio)) {
 
     col_names_portfolio <- c("date", "value", "purchase_value", "sale_value",
                              "dividend_value", "currently_invested", "value_available")
@@ -30,11 +30,12 @@ write_portfolio_stats <- function(path) {
     df.portfolio[is.na(df.portfolio)] <- 0
 
     ## Remove all periods with no portfolio value, no purchase and no sale value at the same time
-    days.empty.portfolio <- df.portfolio$value == 0 & df.portfolio$purchase_value == 0 & df.portfolio$sale_value == 0
-    df.portfolio <- df.portfolio[ !days.empty.portfolio, ]
+    days.empty.portfolio <- df.portfolio$value == 0 &
+      df.portfolio$purchase_value == 0 &
+      df.portfolio$sale_value == 0
+    df.portfolio <- df.portfolio[!days.empty.portfolio, ]
 
     portfolio_value <- df.portfolio$value[df.portfolio$date == max(df.portfolio$date)]
-
 
     ## Select time period to compute portfolio stats
     nb_periods <- c(1, 3, 6, 12, 36, 60, 120, 1, 1)
@@ -45,7 +46,7 @@ write_portfolio_stats <- function(path) {
 
     df.stats <- data.frame(matrix(ncol = 9, nrow = 0, dimnames = list(NULL, col_names_stats)))
 
-    for (i in 1:length(nb_periods) ) {
+    for (i in 1:length(nb_periods)) {
 
       df.selected <- get_df_with_selected_time_period(df = df.portfolio,
                                                  nb_period = nb_periods[i],
@@ -57,7 +58,7 @@ write_portfolio_stats <- function(path) {
       first.date.actual <- min(df.selected$date)
 
       ## If difference is very large, data for this period not available
-      if ( difftime(first.date.actual, first.date.target) <= 30 ) {
+      if (difftime(first.date.actual, first.date.target) <= 30) {
 
         amount_invested <- sum(df.selected$purchase_value)
         amount_sold <- sum(df.selected$sale_value)
@@ -116,7 +117,7 @@ get_dividends_max <- function(path, file.dividend.history = "dividends_fullhisto
 
   get_user_names(path)
 
-  if ( file.exists(file.path(path.dividends, file.dividend.history)) ) {
+  if (file.exists(file.path(path.dividends, file.dividend.history))) {
 
     ## Load dividend history
     df.dividend.history <- data.table::fread(file.path(path.dividends, file.dividend.history))

@@ -44,14 +44,14 @@ write_dividend_by_yr <- function(path) {
 
     get_user_names(path)
 
-    if ( file.exists(file.path(path.dividends, file.dividend.history)) ) {
+    if (file.exists(file.path(path.dividends, file.dividend.history))) {
 
-      ## Load dividend history
-      df.dividend.history <- data.table::fread(file.path(path.dividends, file.dividend.history))
+      df.dividend.history <- data.table::fread(file.path(path.dividends,
+                                                         file.dividend.history))
 
       ## Storno needs to be a negative amount (i.e., payment)
       is.storno <- df.dividend.history$transaction_type == "Storno - Dividend"
-      df.dividend.history$transaction_value[is.storno] <- (-1) * df.dividend.history$transaction_value[is.storno]
+      df.dividend.history$transaction_value[is.storno] <- -df.dividend.history$transaction_value[is.storno]
 
       df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date,
                                                       format = "%d-%m-%Y")
@@ -98,19 +98,17 @@ write_dividend_by_month <- function(path) {
 
   tryCatch({
 
-    if ( file.exists(file.path(path.dividends, file.dividend.history)) ) {
+    if (file.exists(file.path(path.dividends, file.dividend.history))) {
 
-      ## Load dividend history
       df.dividend.history <- data.table::fread(file.path(path.dividends, file.dividend.history))
 
       ## Storno needs to be a negative amount (i.e., payment)
       is_storno <- df.dividend.history$transaction_type == "Storno - Dividend"
-      df.dividend.history$transaction_value[is_storno] <- (-1) * df.dividend.history$transaction_value[is_storno]
+      df.dividend.history$transaction_value[is_storno] <- -df.dividend.history$transaction_value[is_storno]
 
       df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date,
                                                       format = "%d-%m-%Y")
 
-      ## Get year-month
       df.dividend.history$yearmon <- lubridate::floor_date(df.dividend.history$transaction_date,
                                                            unit = "month")
 

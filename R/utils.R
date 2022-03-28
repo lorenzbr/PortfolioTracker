@@ -90,7 +90,7 @@ get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type =
     first.date <- Sys.Date() - months(nb_period)
 
     j <- 1
-    while ( is.na(first.date) && j < 10) {
+    while (is.na(first.date) && j < 10) {
       first.date <- (Sys.Date() - j) - months(nb_period)
       j = j + 1
     }
@@ -100,7 +100,7 @@ get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type =
     first.date <- Sys.Date() - lubridate::weeks(nb_period)
 
     j <- 1
-    while ( is.na(first.date) && j < 10 ) {
+    while (is.na(first.date) && j < 10) {
       first.date <- (Sys.Date() - j) - lubridate::weeks(nb_period)
       j = j + 1
     }

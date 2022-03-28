@@ -150,7 +150,7 @@ update_db_prices_based_on_transactions <- function(df_transactions, path,
             ## correct already
             df_ticker_prices <- rbind(df_ticker_prices,
                                       df_ticker_prices_all)
-            ## Order by date: latest date should be first (on top)- Is it redundant
+            ## Order by date: latest date should be first (on top) - Is it redundant
             ## because of rbind?
             df_ticker_prices <- df_ticker_prices[order(df_ticker_prices$date), ]
           }
@@ -194,10 +194,8 @@ update_prices_based_on_transactions <- function(df.transactions, path,
   ## To get prices, only purchase transactions are relevant (?)
   df.transactions <- df.transactions[df.transactions$transaction_type == "Purchase", ]
 
-  ## Get unique ISINs in new transactions
   isins <- unique(df.transactions$isin)
 
-  ## Update ISIN-ticker table
   update_ticker_isin(isins = isins,
                      path_tickers = path.tickers,
                      file_tickers = file.tickers,
@@ -271,7 +269,6 @@ update_prices_based_on_transactions <- function(df.transactions, path,
 
         }
 
-        ## File name for the data
         filename.data.raw.prices <- paste0("prices_ticker_", ticker, "_from_",
                                            transaction.date, "_to_", today, ".csv")
 
@@ -282,54 +279,26 @@ update_prices_based_on_transactions <- function(df.transactions, path,
           ## Check whether such a file exists already, then no need to download again
           if (!file.exists(file.path(path.prices.raw, filename.data.raw.prices))) {
 
-            ## Get price data from Yahoo Finance
             df.ticker.prices <- get_prices_from_yahoo(ticker = ticker,
                                                       from = transaction.date,
                                                       to = today)
 
-            ## Start and end date
-            from <- min(df.ticker.prices$date)
-            to <- max(df.ticker.prices$date)
+            filename.data.raw.prices <- paste0("prices_ticker_", ticker,
+                                               "_from_",
+                                               min(df.ticker.prices$date),
+                                               "_to_",
+                                               max(df.ticker.prices$date),
+                                               ".csv")
 
-            ## File name for the data
-            filename.data.raw.prices <- paste0("prices_ticker_", ticker, "_from_",
-                                               from, "_to_", to, ".csv")
-
-            ## Store as csv in raw price data
             data.table::fwrite(df.ticker.prices, file.path(path.prices.raw,
                                                            filename.data.raw.prices))
 
-            if (today != Sys.Date()) {
+          }
 
-              # print(paste("Older transaction: Price update for", ticker, "from",
-              #             transaction.date, "to",
-              #             today, "successfully downloaded."))
-
-            } # else {
-
-              # print(paste("Prices for", ticker, "from", transaction.date,
-              #                    "to", today, "successfully downloaded."))
-
-            # }
-
-          } # else {
-
-            # print(paste("Prices for", ticker, "from", transaction.date, "to",
-            #             today, "already downloaded.", " File",
-            #             filename.data.raw.prices, "exists already."))
-
-          # } ## End of else if condition which checks whether file already exists
-
-        } # else {
-
-          # message("Prices based on older transaction already exist.")
-
-        # }
-        ## End of if else statement: transaction.date older than any other or no transactions exist
+        }
 
       }, error = function(cond) {
 
-        # message(paste0("No prices for ticker '", ticker, "' available."))
         message("Original message:")
         message(cond)
 
@@ -359,24 +328,19 @@ append_latest_prices <- function(path) {
 
   get_user_names(path)
 
-  ## Load file names with price data
   filename.prices.raw.with.ticker <- list.files(path.prices.raw)
 
-  ## Only run code if filename.prices.raw.with.ticker is not empty
   if (length(filename.prices.raw.with.ticker) > 0) {
 
-    ## Create data frame with file names
     df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
 
     ## Identify first date
     df.files.price.data$first_date <- stringr::str_match(df.files.price.data$filename,
                                                         "from_(.*?)_to")[, 2]
 
-    ## Identify last date
     df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename,
                                                         "to_(.*?).csv")[, 2]
 
-    ## Identify tickers
     df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename,
                                                      "ticker_(.*?)_from")[, 2]
 
@@ -388,7 +352,6 @@ append_latest_prices <- function(path) {
     df.files.price.data <- merge(df.files.price.data, df.files.price.data2,
                                  by = c("ticker", "last_date"))
 
-    ## Get date of today
     today <- Sys.Date()
 
     ## Keep only tickers which are not up to date
@@ -409,25 +372,18 @@ append_latest_prices <- function(path) {
 
           ticker <- df.files.price.data$ticker[i]
           current_filename <- df.files.price.data$filename[i]
-          # first_date <- df.files.price.data$first_date[i]
 
           if (today > from) {
 
-            ## Get price data for ticker
             df.updated.prices <- get_prices_from_yahoo(ticker = ticker,
                                                        from = from,
                                                        to = today)
 
             if (!is.null(df.updated.prices)) {
 
-              ## Get actual start and end date for downloaded prices
-              # from <- min(df.updated.prices$date)
-              to <- max(df.updated.prices$date)
-
-              ## Create file name for data with ticker and start and end date
               filename.prices.raw <- paste0("prices_ticker_", ticker,
                                             "_from_", df.files.price.data$first_date[i],
-                                            "_to_", to,
+                                            "_to_", max(df.updated.prices$date),
                                             ".csv")
 
               ## Possibly too slow: better to use different approach: create a
@@ -440,18 +396,7 @@ append_latest_prices <- function(path) {
                                  file.path(path.prices.raw, filename.prices.raw),
                                  append = TRUE)
 
-              # print(paste("Prices for", ticker, "from", from, "to", to,
-              #             "successfully downloaded and appended."))
-
-            } else {
-
-              # print(paste("No recent prices for", ticker, "available"))
-
             }
-
-          } else {
-
-            # print(paste("Prices for ticker", ticker, "up to date."))
 
           }
 
@@ -461,17 +406,9 @@ append_latest_prices <- function(path) {
 
       }
 
-    } # else {
+    }
 
-      # print("Everything up to date!")
-
-    # }
-
-  } # else {
-
-    # print("No prices available for update.")
-
-  # }
+  }
 
 }
 
@@ -489,28 +426,21 @@ update_latest_prices <- function(path) {
 
   get_user_names(path)
 
-  ## Load file names with price data
   filename.prices.raw.with.ticker <- list.files(path.prices.raw)
 
-  ## Only run code if filename.prices.raw.with.ticker is not empty
   if (length(filename.prices.raw.with.ticker) > 0) {
 
-    ## Create data frame
     df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
 
-    ## Identify last date
     df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename,
                                                         "to_(.*?).csv")[, 2]
 
-    ## Identify tickers
     df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename,
                                                      "ticker_(.*?)_from")[, 2]
 
-    ## Keep latest date for each ticker
     df.files.price.data <- stats::aggregate(last_date ~ ticker,
                                             data = df.files.price.data, max)
 
-    ## Get date of today
     today <- Sys.Date()
 
     ## Keep only tickers which are not up to date
@@ -531,39 +461,23 @@ update_latest_prices <- function(path) {
 
           if (today > from) {
 
-            ## Get price data for ticker
             df.updated.prices <- get_prices_from_yahoo(ticker = ticker,
                                                        from = from,
                                                        to = today)
 
             if (!is.null(df.updated.prices)) {
 
-              ## Get actual start and end date for downloaded prices
-              from <- min(df.updated.prices$date)
-              to <- max(df.updated.prices$date)
+              filename.prices.raw <- paste0("prices_ticker_", ticker,
+                                            "_from_", min(df.updated.prices$date),
+                                            "_to_", max(df.updated.prices$date),
+                                            ".csv")
 
-              ## Create file name for data with ticker and start and end date
-              filename.prices.raw <- paste0("prices_ticker_", ticker, "_from_",
-                                            from, "_to_", to, ".csv")
-
-              ## Store as csv in raw financial data
               data.table::fwrite(df.updated.prices, file.path(path.prices.raw,
                                                               filename.prices.raw))
 
-              # print(paste("Prices for", ticker, "from", from, "to", to,
-              #             "successfully downloaded."))
+            }
 
-            } # else {
-
-              # print(paste("No recent prices for", ticker, "available"))
-
-            # }
-
-          } # else {
-
-            # print(paste("Prices for ticker", ticker, "up to date."))
-
-          # }
+          }
 
         }, error = function(e) { skip_to_next <- TRUE } )
 
@@ -571,15 +485,7 @@ update_latest_prices <- function(path) {
 
       }
 
-    } else {
-
-      # print("Everything up to date!")
-
     }
-
-  } else {
-
-    # print("No prices available for update.")
 
   }
 

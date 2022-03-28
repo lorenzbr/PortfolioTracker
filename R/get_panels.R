@@ -255,21 +255,21 @@ write_price_quantity_panel <- function(ticker, path) {
                                                    list.files(path.quantity.panel,
                                                               pattern = ticker)))
 
-      df.pricequantity.panel <- merge(df.price.panel,
-                                      df.quantity.panel,
-                                      by = "date")
+      df.panel <- merge(df.price.panel,
+                        df.quantity.panel,
+                        by = "date")
 
-      df.pricequantity.panel$value <- df.pricequantity.panel$adjusted * df.pricequantity.panel$cum_quantity
+      df.panel$value <- df.panel$adjusted * df.panel$cum_quantity
 
-      from <- min(df.pricequantity.panel$date)
-      to <- max(df.pricequantity.panel$date)
+      from <- min(df.panel$date)
+      to <- max(df.panel$date)
 
       file.pricequantity.panel <- paste0("pricequantity_panel_", ticker,
                                          "_from_", from,
                                          "_to_", to,
                                          ".csv")
 
-      data.table::fwrite(df.pricequantity.panel,
+      data.table::fwrite(df.panel,
                          file.path(path.pricequantity.panel,
                                    file.pricequantity.panel))
 
@@ -298,25 +298,23 @@ write_value_panel <- function(transaction.type, ticker,
 
   transaction_type_lc <- tolower(transaction.type)
 
-  df.transaction.history.ticker <- df.transaction.history[df.transaction.history$ticker == ticker, ]
+  df.transactions <- df.transaction.history[df.transaction.history$ticker == ticker, ]
 
-  df.transaction.history.ticker <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_type == transaction.type, ]
+  df.transactions <- df.transactions[df.transactions$transaction_type == transaction.type, ]
 
-  if (nrow(df.transaction.history.ticker) > 0) {
+  if (nrow(df.transactions) > 0) {
 
-    df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "transaction_value")]
-    df.transaction.history.ticker.keep <- df.transaction.history.ticker
-    df.transaction.history.ticker <- df.transaction.history.ticker[order(df.transaction.history.ticker$transaction_date), ]
-    df.transaction.history.ticker$cum_value <- cumsum(df.transaction.history.ticker$transaction_value)
-    df.transaction.history.ticker <- df.transaction.history.ticker[, c("transaction_date", "cum_value")]
-    names(df.transaction.history.ticker)[names(df.transaction.history.ticker) == "cum_value"] <- paste0(transaction_type_lc,
-                                                                                                        "_cum_value")
+    df.transactions <- df.transactions[, c("transaction_date", "transaction_value")]
+    df.transactions.keep <- df.transactions
+    df.transactions <- df.transactions[order(df.transactions$transaction_date), ]
+    df.transactions$cum_value <- cumsum(df.transactions$transaction_value)
+    df.transactions <- df.transactions[, c("transaction_date", "cum_value")]
+    names(df.transactions)[names(df.transactions) == "cum_value"] <- paste0(transaction_type_lc,
+                                                                            "_cum_value")
 
-    if (all(!is.na(df.transaction.history.ticker$transaction_date))) {
+    if (all(!is.na(df.transactions$transaction_date))) {
 
-      earliest.date <- min(df.transaction.history.ticker$transaction_date)
-
-      df.transaction.history.ticker.first <- df.transaction.history.ticker[df.transaction.history.ticker$transaction_date == earliest.date, ]
+      earliest.date <- min(df.transactions$transaction_date)
 
       ## Create panel with date and value for ticker from transaction date
       ## until today (remove Saturday and Sunday)
@@ -330,14 +328,14 @@ write_value_panel <- function(transaction.type, ticker,
       df.panel <- data.frame(date = dates)
 
       data.table::setDT(df.panel)
-      data.table::setDT(df.transaction.history.ticker)
+      data.table::setDT(df.transactions)
       data.table::setkey(df.panel, "date")
-      data.table::setkey(df.transaction.history.ticker, "transaction_date")
-      DT.panel <- df.transaction.history.ticker[df.panel, roll = TRUE]
+      data.table::setkey(df.transactions, "transaction_date")
+      DT.panel <- df.transactions[df.panel, roll = TRUE]
       df.panel <- data.table::setDF(DT.panel)
 
       df.panel <- merge(df.panel,
-                        df.transaction.history.ticker.keep,
+                        df.transactions.keep,
                         by = "transaction_date",
                         all.x = TRUE)
       df.panel$transaction_value[is.na(df.panel$transaction_value)] <- 0
@@ -372,9 +370,6 @@ write_value_panel_all_types <- function(ticker, df.transaction.history, path) {
 
   transaction.types <- c("Purchase", "Sale", "Dividend")
 
-  # for (transaction.type in transaction.types) {
-  #   write_value_panel(transaction.type, ticker, df.transaction.history, path)
-  # }
   mapply(write_value_panel, transaction.types,
          MoreArgs = list(ticker, df.transaction.history, path))
 
@@ -453,19 +448,20 @@ write_complete_panel <- function(ticker, path) {
 
   get_user_names(path)
 
-  if (length(list.files(path.pricequantity.panel, pattern = ticker)) > 0) {
+  pricequantity.panels <- list.files(path.pricequantity.panel,
+                                     pattern = ticker)
+
+  if (length(pricequantity.panels) > 0) {
 
     df.pricequantity.panel <- data.table::fread(file.path(path.pricequantity.panel,
-                                                       list.files(path.pricequantity.panel,
-                                                                  pattern = ticker)))
-
+                                                          pricequantity.panels))
 
     df.pricequantity.panel <- df.pricequantity.panel[, c("date", "adjusted", "value",
                                                          "cum_quantity", "quantity")]
 
-    if (length(list.files(path.value.panel, pattern = ticker)) > 0) {
+    ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
 
-      ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
+    if (length(ticker.value.panels) > 0) {
 
       purchase.exist <- startsWith(ticker.value.panels, "purchase")
       sale.exist <- startsWith(ticker.value.panels, "sale")
@@ -679,10 +675,9 @@ get_complete_portfolio_panel <- function(path) {
 
     df.all <- do.call(rbind, list.dfs)
 
-    first.day <- min(df.all$date)
-    last.day <- max(df.all$date)
-
-    full.time.period <- seq(first.day, last.day, by = "day")
+    full.time.period <- seq(min(df.all$date),
+                            max(df.all$date),
+                            by = "day")
 
     ## Remove weekends (1 is Sunday, 7 is Saturday)
     full.time.period <- full.time.period[lubridate::wday(full.time.period) != 1

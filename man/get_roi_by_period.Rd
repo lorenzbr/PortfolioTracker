@@ -11,7 +11,8 @@ get_roi_by_period(df.complete.panel, nb_period = NULL, period_type = "max")
 
 \item{nb_period}{An integer indicating the number of months. Default is \emph{NULL}.}
 
-\item{period_type}{A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.}
+\item{period_type}{A single character string. Default \emph{max}. Possible
+values \emph{max}, \emph{weeks} and \emph{months}.}
 }
 \value{
 A data frame containing the cumulative return on investment for a given period.

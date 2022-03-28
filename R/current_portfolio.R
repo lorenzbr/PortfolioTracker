@@ -10,8 +10,7 @@ write_current_portfolio <- function(path) {
 
   get_user_names(path)
 
-  ## Load price quantity panels if exists
-  if ( length(list.files(path.pricequantity.panel)) > 0 ) {
+  if (length(list.files(path.pricequantity.panel)) > 0) {
 
     files <- file.path(path.pricequantity.panel, list.files(path.pricequantity.panel))
     list.dfs <- lapply(files, data.table::fread)
@@ -20,7 +19,7 @@ write_current_portfolio <- function(path) {
                                                         file.transactions))
     isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
-    if ( transaction.history.exists && isin.ticker.exists ) {
+    if (transaction.history.exists && isin.ticker.exists) {
 
       ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
       df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
