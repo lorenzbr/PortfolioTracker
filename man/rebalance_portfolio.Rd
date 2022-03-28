@@ -8,15 +8,18 @@ rebalance_portfolio(df, df.target.shares, money.to.invest, step.size = 500,
                            exclude.from.rebalancing = NA)
 }
 \arguments{
-\item{df}{A data frame containing at least a column for \code{isin} (character) and \code{value} (numeric)}
+\item{df}{A data frame containing at least a column for \code{isin}
+(character) and \code{value} (numeric)}
 
-\item{df.target.shares}{A data frame containing a column for \code{isin} (character) and \code{target_share} (numeric)}
+\item{df.target.shares}{A data frame containing a column for \code{isin}
+(character) and \code{target_share} (numeric)}
 
 \item{money.to.invest}{A single numeric. Amount to invest for rebalancing.}
 
 \item{step.size}{A single numeric. Step size (default is 500).}
 
-\item{exclude.from.rebalancing}{A single character or vector of strings. Should contain ISINs (default is NA).}
+\item{exclude.from.rebalancing}{A single character or vector of strings.
+Should contain ISINs (default is NA).}
 }
 \description{
 Produces a suggestion to rebalance your portfolio

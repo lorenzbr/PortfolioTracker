@@ -7,7 +7,7 @@
 #' @export
 init_isin_ticker <- function(path, file = "isin_ticker.csv") {
 
-  if ( !file.exists(file.path(path, file)) ) {
+  if (!file.exists(file.path(path, file))) {
     col_names <- c("isin", "ticker")
     df_isin_ticker_init <- data.frame(matrix(NA, nrow = 0, ncol = length(col_names),
                                              dimnames = list(NULL, col_names)))
@@ -59,7 +59,6 @@ update_ticker_isin <- function(isins, path_tickers, file_tickers,
 
         if (length(ticker) == 0 && external_search)
           ticker <- get_ticker_from_xetra(isin)
-
 
         if (ticker != "") {
 
