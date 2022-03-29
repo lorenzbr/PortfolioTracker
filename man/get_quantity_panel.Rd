@@ -12,6 +12,9 @@ get_quantity_panel(ticker, df_transactions_with_tickers)
 \item{df_transactions_with_tickers}{A data frame containing transactions
 and ticker.}
 }
+\value{
+A data frame with a quantity panel.
+}
 \description{
 Get quantity panel for ticker
 }

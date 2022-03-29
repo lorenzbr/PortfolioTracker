@@ -159,6 +159,8 @@ write_quantity_panel <- function(ticker, df_transactions_with_tickers,
 #' @param df_transactions_with_tickers A data frame containing transactions
 #' and ticker.
 #'
+#' @return A data frame with a quantity panel.
+#'
 #' @export
 #' @import data.table
 get_quantity_panel <- function(ticker, df_transactions_with_tickers) {
@@ -358,35 +360,49 @@ write_price_quantity_panel_db <- function(ticker, df_transactions_with_tickers,
   get_user_names(user_path)
   get_db_names(db_path)
 
+  df_panel <- get_price_quantity_panel_db(ticker, df_transactions_with_tickers,
+                                          path.prices.db)
+
+  file_pricequantity_panel <- paste0("pricequantity_panel_", ticker,
+                                     "_from_", min(df_panel$date),
+                                     "_to_", max(df_panel$date),
+                                     ".csv")
+
+  data.table::fwrite(df_panel, file.path(path.pricequantity.panel,
+                                         file_pricequantity_panel))
+
+}
+
+#' Get panel for the product of prices and quantity for input ticker
+#'
+#' @usage get_price_quantity_panel_db(ticker, df_transactions_with_tickers,
+#'                                      path.prices.db)
+#' @param ticker A single character string containing a ticker symbol.
+#' @param df_transactions_with_tickers A data frame containing transactions
+#' and ticker.
+#' @param path.prices.db A single character string containing the directory of
+#' the price database.
+#'
+#' @return A data frame with price quantity panel.
+#'
+#' @export
+get_price_quantity_panel_db <- function(ticker, df_transactions_with_tickers,
+                                        path.prices.db) {
+
   file_prices <- file.path(path.prices.db, paste0("prices_", ticker, ".csv"))
 
   if (file.exists(file_prices)) {
 
     df_prices <- data.table::fread(file_prices)
 
-    if (length(list.files(path.quantity.panel, pattern = ticker)) > 0) {
+    df_quantity_panel <- get_quantity_panel(ticker, df_transactions_with_tickers)
 
-      df_quantity_panel <- get_quantity_panel(ticker, df_transactions_with_tickers)
+    df_panel <- merge(df_prices, df_quantity_panel, by = "date")
 
-      # df_quantity_panel <- data.table::fread(file.path(path.quantity.panel,
-      #                                                  list.files(path.quantity.panel,
-      #                                                             pattern = ticker)))
+    ## Is this needed?? Check this!
+    df_panel$value <- df_panel$adjusted * df_panel$cum_quantity
 
-      df_panel <- merge(df_prices, df_quantity_panel, by = "date")
-
-      ## Is this needed?? Check this!
-      df_panel$value <- df_panel$adjusted * df_panel$cum_quantity
-
-      file_pricequantity_panel <- paste0("pricequantity_panel_", ticker,
-                                         "_from_", min(df_panel$date),
-                                         "_to_", max(df_panel$date),
-                                         ".csv")
-
-      data.table::fwrite(df_panel,
-                         file.path(path.pricequantity.panel,
-                                   file_pricequantity_panel))
-
-    }
+    return(df_panel)
 
   }
 
