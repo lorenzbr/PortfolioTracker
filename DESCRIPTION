@@ -39,3 +39,4 @@ Suggests:
     covr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+URL: http://www.lorenz-brachtendorf.com/PortfolioTracker/

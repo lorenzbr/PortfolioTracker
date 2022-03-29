@@ -328,7 +328,6 @@ append_latest_prices_db <- function(db_path, tickers) {
   ## Therefore, need to input all user relevant tickers as as a function argument
 
 
-
   filename.prices.raw.with.ticker <- list.files(path.prices.raw)
 
   if (length(filename.prices.raw.with.ticker) > 0) {
