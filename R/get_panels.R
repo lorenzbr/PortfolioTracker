@@ -316,37 +316,44 @@ write_price_panels <- function(df.transactions, path) {
 
 #' Write panels for the product of prices and quantity for all tickers as csv
 #'
-#' @usage write_price_quantity_panels_db(df.transactions, user_path, db_path)
-#' @param df.transactions A data frame containing transaction history.
+#' @usage write_price_quantity_panels_db(df_transactions, user_path, db_path)
+#' @param df_transactions A data frame containing transaction history.
 #' @param user_path A single character string containing the directory of the user.
 #' @param db_path A single character string containing the directory of the database.
 #'
 #' @export
-write_price_quantity_panels_db <- function(df.transactions, user_path, db_path) {
+write_price_quantity_panels_db <- function(df_transactions, user_path, db_path) {
 
   get_user_names(user_path)
   get_db_names(db_path)
 
-  tickers <- get_tickers_from_db(df.transactions, db_path)
+  list_output <- get_tickers_from_db(df_transactions, db_path)
+  df_transactions_with_tickers <- list_output[[1]]
+  tickers <- list_output[[2]]
 
   if (length(list.files(path.pricequantity.panel)) > 0)
     file.remove(file.path(path.pricequantity.panel,
                           list.files(path.pricequantity.panel)))
 
   output <- mapply(write_price_quantity_panel_db, tickers,
-                   MoreArgs = list(user_path, db_path))
+                   MoreArgs = list(df_transactions_with_tickers,
+                                   user_path, db_path))
 
 }
 
 #' Write panel for the product of prices and quantity for input ticker as csv
 #'
-#' @usage write_price_quantity_panel_db(ticker, user_path, db_path)
+#' @usage write_price_quantity_panel_db(ticker, df_transactions_with_tickers,
+#'                                      user_path, db_path)
 #' @param ticker A single character string containing a ticker symbol.
+#' @param df_transactions_with_tickers A data frame containing transactions
+#' and ticker.
 #' @param user_path A single character string containing the directory of the user.
 #' @param db_path A single character string containing the directory of the database.
 #'
 #' @export
-write_price_quantity_panel_db <- function(ticker, user_path, db_path) {
+write_price_quantity_panel_db <- function(ticker, df_transactions_with_tickers,
+                                          user_path, db_path) {
 
   get_user_names(user_path)
   get_db_names(db_path)
@@ -359,11 +366,11 @@ write_price_quantity_panel_db <- function(ticker, user_path, db_path) {
 
     if (length(list.files(path.quantity.panel, pattern = ticker)) > 0) {
 
-      # df_quantity_panel <- get_quantity_panel(ticker, df_transactions_with_tickers)
+      df_quantity_panel <- get_quantity_panel(ticker, df_transactions_with_tickers)
 
-      df_quantity_panel <- data.table::fread(file.path(path.quantity.panel,
-                                                       list.files(path.quantity.panel,
-                                                                  pattern = ticker)))
+      # df_quantity_panel <- data.table::fread(file.path(path.quantity.panel,
+      #                                                  list.files(path.quantity.panel,
+      #                                                             pattern = ticker)))
 
       df_panel <- merge(df_prices, df_quantity_panel, by = "date")
 

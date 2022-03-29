@@ -13,60 +13,61 @@ write_current_portfolio <- function(path) {
   if (length(list.files(path.pricequantity.panel)) > 0) {
 
     files <- file.path(path.pricequantity.panel, list.files(path.pricequantity.panel))
-    list.dfs <- lapply(files, data.table::fread)
+    list_dfs <- lapply(files, data.table::fread)
 
-    transaction.history.exists <- file.exists(file.path(path.transactions,
+    transaction_history_exists <- file.exists(file.path(path.transactions,
                                                         file.transactions))
-    isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
+    isin_ticker_exists <- file.exists(file.path(path.tickers, file.tickers))
 
-    if (transaction.history.exists && isin.ticker.exists) {
+    if (transaction_history_exists && isin_ticker_exists) {
 
       ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-      df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+      df_isin_ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-      df.transaction.history <- data.table::fread(file.path(path.transactions,
+      df_transaction_history <- data.table::fread(file.path(path.transactions,
                                                             file.transactions))
-      df.ticker.investmentnames <- unique(df.transaction.history[, c("isin", "name",
+      df_ticker_investmentnames <- unique(df_transaction_history[, c("isin", "name",
                                                                      "transaction_date")])
 
       ## Use name from most recent transaction
-      df.ticker.investmentnames$date <- as.Date(df.ticker.investmentnames$transaction_date,
+      df_ticker_investmentnames$date <- as.Date(df_ticker_investmentnames$transaction_date,
                                                 format = "%d-%m-%Y")
-      df.ticker.investmentnames <- df.ticker.investmentnames %>%
+      df_ticker_investmentnames <- df_ticker_investmentnames %>%
         dplyr::group_by(.data$isin) %>%
         dplyr::filter(date == max(.data$date))
-      df.ticker.investmentnames <- df.ticker.investmentnames %>%
+      df_ticker_investmentnames <- df_ticker_investmentnames %>%
         dplyr::group_by(.data$isin) %>%
         dplyr::sample_n(size = 1)
 
-      df.ticker.investmentnames <- merge(df.ticker.investmentnames,
-                                         df.isin.ticker, by = "isin")
-      df.ticker.investmentnames <- unique(df.ticker.investmentnames[, c("ticker",
+      df_ticker_investmentnames <- merge(df_ticker_investmentnames,
+                                         df_isin_ticker,
+                                         by = "isin")
+      df_ticker_investmentnames <- unique(df_ticker_investmentnames[, c("ticker",
                                                                         "name")])
 
       #### Get most recent entry in each price-quantity panel
 
-      df.all <- do.call(rbind, list.dfs)
+      df_all <- do.call(rbind, list_dfs)
 
-      df.current <- stats::aggregate(date ~ ticker, data = df.all, max)
+      df_current <- stats::aggregate(date ~ ticker, data = df_all, max)
 
-      df.current <- merge(df.all, df.current, by = c("ticker", "date"))
+      df_current <- merge(df_all, df_current, by = c("ticker", "date"))
 
-      df.current <- df.current[df.current$cum_quantity > 0, ]
+      df_current <- df_current[df_current$cum_quantity > 0, ]
 
-      df.current <- unique(df.current)
+      df_current <- unique(df_current)
 
-      df.current <- merge(df.current, df.ticker.investmentnames, by = "ticker")
-      df.current <- merge(df.current, df.isin.ticker, by = "ticker")
+      df_current <- merge(df_current, df_ticker_investmentnames, by = "ticker")
+      df_current <- merge(df_current, df_isin_ticker, by = "ticker")
 
-      df.current <- df.current[, c("name", "isin", "ticker", "adjusted",
+      df_current <- df_current[, c("name", "isin", "ticker", "adjusted",
                                    "cum_quantity", "value")]
 
-      total.portfolio.value <- sum(df.current$value)
+      total_portfolio_value <- sum(df_current$value)
 
-      df.current$weight <- df.current$value / total.portfolio.value
+      df_current$weight <- df_current$value / total_portfolio_value
 
-      data.table::fwrite(df.current, file.path(path.data, file.current))
+      data.table::fwrite(df_current, file.path(path.data, file.current))
 
     }
 

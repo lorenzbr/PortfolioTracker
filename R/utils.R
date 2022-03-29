@@ -1,6 +1,6 @@
 # Helpers -----------------------------------------------------------------
 
-get_tickers_from_db <- function(df.transactions, db_path) {
+get_tickers_from_db <- function(df_transactions, db_path) {
 
   get_db_names(db_path)
 
@@ -11,13 +11,13 @@ get_tickers_from_db <- function(df.transactions, db_path) {
     df_isin_ticker <- data.table::fread(file.path(path.database, file.tickers.db))
     df_isin_ticker <- df_isin_ticker[df_isin_ticker$ticker != "", ]
 
-    df.transactions <- merge(df.transactions,
+    df_transactions <- merge(df_transactions,
                              df_isin_ticker,
                              by = "isin")
 
-    tickers <- unique(df.transactions$ticker)
+    tickers <- unique(df_transactions$ticker)
 
-    return(tickers)
+    return(list(df_transactions, tickers))
 
   }
 

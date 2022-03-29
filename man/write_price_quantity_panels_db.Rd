@@ -4,10 +4,10 @@
 \alias{write_price_quantity_panels_db}
 \title{Write panels for the product of prices and quantity for all tickers as csv}
 \usage{
-write_price_quantity_panels_db(df.transactions, user_path, db_path)
+write_price_quantity_panels_db(df_transactions, user_path, db_path)
 }
 \arguments{
-\item{df.transactions}{A data frame containing transaction history.}
+\item{df_transactions}{A data frame containing transaction history.}
 
 \item{user_path}{A single character string containing the directory of the user.}
 

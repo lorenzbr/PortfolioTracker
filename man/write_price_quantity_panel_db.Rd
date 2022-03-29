@@ -4,10 +4,14 @@
 \alias{write_price_quantity_panel_db}
 \title{Write panel for the product of prices and quantity for input ticker as csv}
 \usage{
-write_price_quantity_panel_db(ticker, user_path, db_path)
+write_price_quantity_panel_db(ticker, df_transactions_with_tickers,
+                                     user_path, db_path)
 }
 \arguments{
 \item{ticker}{A single character string containing a ticker symbol.}
+
+\item{df_transactions_with_tickers}{A data frame containing transactions
+and ticker.}
 
 \item{user_path}{A single character string containing the directory of the user.}
 
