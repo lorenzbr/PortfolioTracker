@@ -34,9 +34,10 @@ Depends:
     R (>= 2.10)
 Suggests: 
     rmarkdown,
+    markdown,
     knitr,
     testthat (>= 3.0.0),
     covr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: http://www.lorenz-brachtendorf.com/PortfolioTracker/
+URL: https://www.lorenz-brachtendorf.com/PortfolioTracker/
