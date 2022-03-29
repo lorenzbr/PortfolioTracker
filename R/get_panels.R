@@ -318,13 +318,13 @@ write_price_panels <- function(df.transactions, path) {
 
 #' Write panels for the product of prices and quantity for all tickers as csv
 #'
-#' @usage write_price_quantity_panels_db(df_transactions, user_path, db_path)
+#' @usage write_price_quantity_panels2(df_transactions, user_path, db_path)
 #' @param df_transactions A data frame containing transaction history.
 #' @param user_path A single character string containing the directory of the user.
 #' @param db_path A single character string containing the directory of the database.
 #'
 #' @export
-write_price_quantity_panels_db <- function(df_transactions, user_path, db_path) {
+write_price_quantity_panels2 <- function(df_transactions, user_path, db_path) {
 
   get_user_names(user_path)
   get_db_names(db_path)
@@ -337,7 +337,7 @@ write_price_quantity_panels_db <- function(df_transactions, user_path, db_path) 
     file.remove(file.path(path.pricequantity.panel,
                           list.files(path.pricequantity.panel)))
 
-  output <- mapply(write_price_quantity_panel_db, tickers,
+  output <- mapply(write_price_quantity_panel2, tickers,
                    MoreArgs = list(df_transactions_with_tickers,
                                    user_path, db_path))
 
@@ -345,7 +345,7 @@ write_price_quantity_panels_db <- function(df_transactions, user_path, db_path) 
 
 #' Write panel for the product of prices and quantity for input ticker as csv
 #'
-#' @usage write_price_quantity_panel_db(ticker, df_transactions_with_tickers,
+#' @usage write_price_quantity_panel2(ticker, df_transactions_with_tickers,
 #'                                      user_path, db_path)
 #' @param ticker A single character string containing a ticker symbol.
 #' @param df_transactions_with_tickers A data frame containing transactions
@@ -354,13 +354,13 @@ write_price_quantity_panels_db <- function(df_transactions, user_path, db_path) 
 #' @param db_path A single character string containing the directory of the database.
 #'
 #' @export
-write_price_quantity_panel_db <- function(ticker, df_transactions_with_tickers,
+write_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
                                           user_path, db_path) {
 
   get_user_names(user_path)
   get_db_names(db_path)
 
-  df_panel <- get_price_quantity_panel_db(ticker, df_transactions_with_tickers,
+  df_panel <- get_price_quantity_panel2(ticker, df_transactions_with_tickers,
                                           path.prices.db)
 
   file_pricequantity_panel <- paste0("pricequantity_panel_", ticker,
@@ -375,7 +375,7 @@ write_price_quantity_panel_db <- function(ticker, df_transactions_with_tickers,
 
 #' Get panel for the product of prices and quantity for input ticker
 #'
-#' @usage get_price_quantity_panel_db(ticker, df_transactions_with_tickers,
+#' @usage get_price_quantity_panel2(ticker, df_transactions_with_tickers,
 #'                                      path.prices.db)
 #' @param ticker A single character string containing a ticker symbol.
 #' @param df_transactions_with_tickers A data frame containing transactions
@@ -386,7 +386,7 @@ write_price_quantity_panel_db <- function(ticker, df_transactions_with_tickers,
 #' @return A data frame with price quantity panel.
 #'
 #' @export
-get_price_quantity_panel_db <- function(ticker, df_transactions_with_tickers,
+get_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
                                         path.prices.db) {
 
   file_prices <- file.path(path.prices.db, paste0("prices_", ticker, ".csv"))
@@ -642,13 +642,13 @@ write_complete_panel <- function(ticker, path) {
 
   get_user_names(path)
 
-  pricequantity.panels <- list.files(path.pricequantity.panel,
+  pricequantity_panels <- list.files(path.pricequantity.panel,
                                      pattern = ticker)
 
-  if (length(pricequantity.panels) > 0) {
+  if (length(pricequantity_panels) > 0) {
 
     df.pricequantity.panel <- data.table::fread(file.path(path.pricequantity.panel,
-                                                          pricequantity.panels))
+                                                          pricequantity_panels))
 
     df.pricequantity.panel <- df.pricequantity.panel[, c("date", "adjusted", "value",
                                                          "cum_quantity", "quantity")]
@@ -825,12 +825,12 @@ write_investment_value_panel <- function(ticker, path) {
 
       df.panel <- df.panel[, c("date", "investment_value")]
 
-      file.panel <- paste0("investment_panel_", ticker,
+      file_panel <- paste0("investment_panel_", ticker,
                            "_from_", min(df.panel$date),
                            "_to_", max(df.panel$date),
                            ".csv")
 
-      data.table::fwrite(df.panel, file.path(path.value.panel, file.panel))
+      data.table::fwrite(df.panel, file.path(path.value.panel, file_panel))
 
     }
 
@@ -850,60 +850,60 @@ get_complete_portfolio_panel <- function(path) {
 
   get_user_names(path)
 
-  files.complete.panels <- list.files(path.complete.panel)
+  files_complete_panels <- list.files(path.complete.panel)
 
-  if (length(files.complete.panels) > 0) {
+  if (length(files_complete_panels) > 0) {
 
-    files <- file.path(path.complete.panel, files.complete.panels)
-    list.dfs <- lapply(files, data.table::fread)
+    files <- file.path(path.complete.panel, files_complete_panels)
+    list_dfs <- lapply(files, data.table::fread)
 
     ## Get full time period for each ticker; data frame in list and store back into list
     ## Why? Because I need to have the same period for all individual investments
     ## in order to compute the cash flow in each period.
 
-    df.all <- do.call(rbind, list.dfs)
+    df_all <- do.call(rbind, list_dfs)
 
-    full.time.period <- seq(min(df.all$date),
-                            max(df.all$date),
+    full_time_period <- seq(min(df_all$date),
+                            max(df_all$date),
                             by = "day")
 
     ## Remove weekends (1 is Sunday, 7 is Saturday)
-    full.time.period <- full.time.period[lubridate::wday(full.time.period) != 1
-                                         & lubridate::wday(full.time.period) != 7]
+    full_time_period <- full_time_period[lubridate::wday(full_time_period) != 1
+                                         & lubridate::wday(full_time_period) != 7]
 
-    df.full.time.period <- data.frame(date = full.time.period)
+    df_full_time_period <- data.frame(date = full_time_period)
 
 
     ## For some dates no price information is available. Thus, I create a column indicating this
     ## I re-calculate the cumulative quantity of the investment because I take the full time period
-    for (i in 1:length(list.dfs)) {
+    for (i in 1:length(list_dfs)) {
 
-      df <- list.dfs[[i]]
+      df <- list_dfs[[i]]
 
-      df.new <- merge(df.full.time.period, df,
+      df_new <- merge(df_full_time_period, df,
                       by = "date", all.x = TRUE)
-      df.new$ticker <- df$ticker[1]
-      df.new[is.na(df.new)] <- 0
+      df_new$ticker <- df$ticker[1]
+      df_new[is.na(df_new)] <- 0
 
       ## New cumulative sum of quantity (because time period is completed,
       ## also for dates without price information)
-      df.new$cum_quantity <- cumsum(df.new$quantity)
-      df.new$currently_invested <- ifelse(df.new$cum_quantity > 0, 1, 0)
+      df_new$cum_quantity <- cumsum(df_new$quantity)
+      df_new$currently_invested <- ifelse(df_new$cum_quantity > 0, 1, 0)
 
-      df.new$value_available <- ifelse(df.new$value != 0, 1, 0)
+      df_new$value_available <- ifelse(df_new$value != 0, 1, 0)
 
-      list.dfs[[i]] <- df.new
+      list_dfs[[i]] <- df_new
 
     }
 
-    df.all <- do.call(rbind, list.dfs)
+    df_all <- do.call(rbind, list_dfs)
 
   } else {
 
-    df.all <- NULL
+    df_all <- NULL
 
   }
 
-  return(df.all)
+  return(df_all)
 
 }

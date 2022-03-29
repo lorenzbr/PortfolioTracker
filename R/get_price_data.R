@@ -309,6 +309,115 @@ update_prices_based_on_transactions <- function(df.transactions, path,
 
 #' Append most recent prices to existing files
 #'
+#' @description Append prices for all tickers specified as an argument. The existing
+#' csv files are used to append prices.
+#'
+#' @usage append_latest_prices_db(db_path, tickers)
+#' @param db_path A single character string. Path where data are stored.
+#' @param tickers A vector of character strings containing tickers.
+#'
+#' @export
+append_latest_prices_db <- function(db_path, tickers) {
+
+  get_db_names(db_path)
+
+  ## WiP
+  ## ...
+  ## To do:
+  ## Update only prices that are of interest for the user
+  ## Therefore, need to input all user relevant tickers as as a function argument
+
+
+
+  filename.prices.raw.with.ticker <- list.files(path.prices.raw)
+
+  if (length(filename.prices.raw.with.ticker) > 0) {
+
+    df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
+
+    df.files.price.data$first_date <- stringr::str_match(df.files.price.data$filename,
+                                                         "from_(.*?)_to")[, 2]
+
+    df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename,
+                                                        "to_(.*?).csv")[, 2]
+
+    df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename,
+                                                     "ticker_(.*?)_from")[, 2]
+
+    ## Keep latest date for each ticker
+    ## To do: there should be only one file for each ticker anyways! So, no need
+    ## to do this!?
+    df.files.price.data2 <- stats::aggregate(last_date ~ ticker,
+                                             data = df.files.price.data, max)
+    df.files.price.data <- merge(df.files.price.data, df.files.price.data2,
+                                 by = c("ticker", "last_date"))
+
+    today <- Sys.Date()
+
+    ## Keep only tickers which are not up to date
+    df.files.price.data <- df.files.price.data[df.files.price.data$last_date < today, ]
+
+    ## If at least one ticker is not up to date
+    if (nrow(df.files.price.data) > 0) {
+
+      ## Loop over all tickers: get prices from Yahoo Finance API
+      for (i in 1:nrow(df.files.price.data)) {
+
+        skip_to_next <- FALSE
+
+        tryCatch({
+
+          ## Date "from" is the last date + one day (since last date exists already)
+          from <- as.Date(df.files.price.data$last_date[i]) + 1
+
+          ticker <- df.files.price.data$ticker[i]
+          current_filename <- df.files.price.data$filename[i]
+
+          if (today > from) {
+
+            df.updated.prices <- get_prices_from_yahoo(ticker = ticker,
+                                                       from = from,
+                                                       to = today)
+
+            if (!is.null(df.updated.prices)) {
+
+              filename.prices.raw <- paste0("prices_ticker_", ticker,
+                                            "_from_", df.files.price.data$first_date[i],
+                                            "_to_", max(df.updated.prices$date),
+                                            ".csv")
+
+              ## Possibly too slow: better to use different approach: create a
+              ## separate csv file with ticker, first_date and last_date
+              file.rename(from = file.path(path.prices.raw, current_filename),
+                          to = file.path(path.prices.raw, filename.prices.raw))
+
+              ## Append updated prices in csv with price data for current ticker
+              data.table::fwrite(df.updated.prices,
+                                 file.path(path.prices.raw, filename.prices.raw),
+                                 append = TRUE)
+
+            }
+
+          }
+
+        }, error = function(e) {
+
+          skip_to_next <- TRUE
+
+        })
+
+        if (skip_to_next) next
+
+      }
+
+    }
+
+  }
+
+}
+
+#' Append most recent prices to existing files
+#'
 #' @description Append prices for all tickers in the specified path. The existing
 #' csv files are used.
 #'
@@ -329,7 +438,6 @@ append_latest_prices <- function(path) {
 
     df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
 
-    ## Identify first date
     df.files.price.data$first_date <- stringr::str_match(df.files.price.data$filename,
                                                         "from_(.*?)_to")[, 2]
 
@@ -395,7 +503,11 @@ append_latest_prices <- function(path) {
 
           }
 
-        }, error = function(e) { skip_to_next <- TRUE } )
+        }, error = function(e) {
+
+          skip_to_next <- TRUE
+
+        })
 
         if (skip_to_next) next
 
