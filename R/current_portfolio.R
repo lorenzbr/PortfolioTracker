@@ -24,7 +24,6 @@ write_current_portfolio <- function(path) {
       ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
       df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-      ## Keep ISIN and name
       df.transaction.history <- data.table::fread(file.path(path.transactions,
                                                             file.transactions))
       df.ticker.investmentnames <- unique(df.transaction.history[, c("isin", "name",
@@ -40,7 +39,6 @@ write_current_portfolio <- function(path) {
         dplyr::group_by(.data$isin) %>%
         dplyr::sample_n(size = 1)
 
-      ## Add tickers
       df.ticker.investmentnames <- merge(df.ticker.investmentnames,
                                          df.isin.ticker, by = "isin")
       df.ticker.investmentnames <- unique(df.ticker.investmentnames[, c("ticker",
@@ -50,37 +48,27 @@ write_current_portfolio <- function(path) {
 
       df.all <- do.call(rbind, list.dfs)
 
-      ## Keep latest date for each ticker
       df.current <- stats::aggregate(date ~ ticker, data = df.all, max)
 
-      ## Add details
       df.current <- merge(df.all, df.current, by = c("ticker", "date"))
 
-      ## Keep investments with quantity greater zero
       df.current <- df.current[df.current$cum_quantity > 0, ]
 
       df.current <- unique(df.current)
 
-      ## Add name and ISIN
       df.current <- merge(df.current, df.ticker.investmentnames, by = "ticker")
       df.current <- merge(df.current, df.isin.ticker, by = "ticker")
 
       df.current <- df.current[, c("name", "isin", "ticker", "adjusted",
                                    "cum_quantity", "value")]
 
-      ## Current total portfolio value
       total.portfolio.value <- sum(df.current$value)
 
-      ## Compute weight of each investment in total portfolio value
       df.current$weight <- df.current$value / total.portfolio.value
 
       data.table::fwrite(df.current, file.path(path.data, file.current))
 
     }
-
-  } else {
-
-    # message("No price quantity panels available.")
 
   }
 

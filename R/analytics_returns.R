@@ -166,9 +166,15 @@ write_returns <- function(path) {
 
       df.yearly.temp$date <- lubridate::floor_date(df.yearly.temp$date, unit = "year")
 
-      df.daily <- merge(df.daily, df.daily.temp, by = "date", all.x = TRUE, all.y = TRUE)
-      df.monthly <- merge(df.monthly, df.monthly.temp, by = "date", all.x = TRUE, all.y = TRUE)
-      df.annual <- merge(df.annual, df.yearly.temp, by = "date", all.x = TRUE, all.y = TRUE)
+      df.daily <- merge(df.daily, df.daily.temp,
+                        by = "date",
+                        all.x = TRUE, all.y = TRUE)
+      df.monthly <- merge(df.monthly, df.monthly.temp,
+                          by = "date",
+                          all.x = TRUE, all.y = TRUE)
+      df.annual <- merge(df.annual, df.yearly.temp,
+                         by = "date",
+                         all.x = TRUE, all.y = TRUE)
 
     }
 
@@ -239,7 +245,8 @@ write_annualized_returns <- function(path) {
 
   xts.returns.max <- xts::as.xts(df.returns)
 
-  df.annualized.years <- data.frame(matrix(nrow = length(names(xts.returns.max)), ncol = 0,
+  df.annualized.years <- data.frame(matrix(nrow = length(names(xts.returns.max)),
+                                           ncol = 0,
                                      dimnames = list(names(xts.returns.max), NULL)))
 
   ## Annualized returns for 1, 3, 5 and 10 years
@@ -269,12 +276,14 @@ write_annualized_returns <- function(path) {
   df.annualized <- df.annualized[, c("ticker", col.names)]
 
 
-  transaction.history.exists <- file.exists(file.path(path.transactions, file.transactions))
+  transaction.history.exists <- file.exists(file.path(path.transactions,
+                                                      file.transactions))
   isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
 
   if (transaction.history.exists && isin.ticker.exists) {
 
-    df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
+    df.transaction.history <- data.table::fread(file.path(path.transactions,
+                                                          file.transactions))
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
     df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
@@ -300,7 +309,8 @@ write_annualized_returns <- function(path) {
       df.annualized[i, incomplete.positions] <- NA
     }
 
-    df.annualized <- df.annualized[, names(df.annualized) != "age_yrs" & names(df.annualized) != "date"]
+    df.annualized <- df.annualized[, names(df.annualized) != "age_yrs"
+                                   & names(df.annualized) != "date"]
 
     data.table::fwrite(df.annualized, file.path(path.returns, file.returns.annualized))
 
@@ -350,7 +360,8 @@ write_portfolio_return <- function(path) {
 
   }
 
-  df.weight.final <- data.frame(matrix(nrow = 0, ncol = 1, dimnames = list(NULL, "date")))
+  df.weight.final <- data.frame(matrix(nrow = 0, ncol = 1,
+                                       dimnames = list(NULL, "date")))
 
   for (i in 1:length(list.dfs)) {
 
@@ -360,7 +371,10 @@ write_portfolio_return <- function(path) {
     df.weight.panel <- df.pricequantity.panel[, c("date", "value")]
     names(df.weight.panel)[2] <- ticker
 
-    df.weight.final <- merge(df.weight.final, df.weight.panel, by = "date", all.x = TRUE, all.y = TRUE)
+    df.weight.final <- merge(df.weight.final,
+                             df.weight.panel,
+                             by = "date",
+                             all.x = TRUE, all.y = TRUE)
 
   }
 

@@ -1,5 +1,28 @@
 # Helpers -----------------------------------------------------------------
 
+get_tickers_from_db <- function(df.transactions, db_path) {
+
+  get_db_names(db_path)
+
+  isin_ticker_exists <- file.exists(file.path(path.database, file.tickers.db))
+
+  if (isin_ticker_exists) {
+
+    df_isin_ticker <- data.table::fread(file.path(path.database, file.tickers.db))
+    df_isin_ticker <- df_isin_ticker[df_isin_ticker$ticker != "", ]
+
+    df.transactions <- merge(df.transactions,
+                             df_isin_ticker,
+                             by = "isin")
+
+    tickers <- unique(df.transactions$ticker)
+
+    return(tickers)
+
+  }
+
+}
+
 get_tickers_from_transactions <- function(df.transaction.history, path) {
 
   get_user_names(path)
@@ -8,14 +31,13 @@ get_tickers_from_transactions <- function(df.transaction.history, path) {
 
   if (isin.ticker.exists) {
 
-    ## Get table that converts ISIN to ticker
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
     df.isin.ticker <- df.isin.ticker[df.isin.ticker$ticker != "", ]
 
-    ## Add ticker to transaction data
-    df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+    df.transaction.history <- merge(df.transaction.history,
+                                    df.isin.ticker,
+                                    by = "isin")
 
-    ## Get all tickers
     tickers <- unique(df.transaction.history$ticker)
 
     return(tickers)

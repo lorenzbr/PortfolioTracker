@@ -50,16 +50,14 @@ write_dividend_by_yr <- function(path) {
                                                          file.dividend.history))
 
       ## Storno needs to be a negative amount (i.e., payment)
-      is.storno <- df.dividend.history$transaction_type == "Storno - Dividend"
-      df.dividend.history$transaction_value[is.storno] <- -df.dividend.history$transaction_value[is.storno]
+      is_storno <- df.dividend.history$transaction_type == "Storno - Dividend"
+      df.dividend.history$transaction_value[is_storno] <- -df.dividend.history$transaction_value[is_storno]
 
       df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date,
                                                       format = "%d-%m-%Y")
 
-      ## Get year
       df.dividend.history$year <- lubridate::year(df.dividend.history$transaction_date)
 
-      ## Get dividends by year
       df.dividend.history.sum.yr <- stats::aggregate(transaction_value ~ year,
                                                      data = df.dividend.history, sum)
       df.dividend.history.sum.yr <- df.dividend.history.sum.yr %>%

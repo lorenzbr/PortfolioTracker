@@ -28,18 +28,15 @@ init_isin_ticker <- function(path, file = "isin_ticker.csv") {
 update_ticker_isin <- function(isins, path_tickers, file_tickers,
                                external_search = TRUE) {
 
-  ## Object 'isins' is a vector containing ISINs for which tickers are needed
   isins <- unique(isins)
-  ## Remove empty entries
+
   isins <- isins[!grepl("^$", isins)]
 
-  ## Create csv if not exists
   init_isin_ticker(path_tickers, file_tickers)
 
   ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
   df_isin_ticker <- data.table::fread(file.path(path_tickers, file_tickers))
 
-  ## Identify all ISINs in transaction data and check whether the corresponding ticker is in the table already
   new_isins <- isins[!(isins %in% unique(df_isin_ticker$isin))]
 
   if (length(new_isins) > 0) {
@@ -68,23 +65,13 @@ update_ticker_isin <- function(isins, path_tickers, file_tickers,
                              file.path(path_tickers, file_tickers),
                              append = TRUE)
 
-          # print(paste("Ticker was missing.", ticker, "added."))
-
-        } # else {
-
-          # message("Ticker not found! Please add manually!")
-
-        # }
+        }
 
       })
 
     }
 
-  } # else {
-
-    # print("New transactions, but ticker already available.")
-
-  # }
+  }
 
 }
 
@@ -172,7 +159,7 @@ get_ticker_from_xetra <- function(isin, preferred_exchange = "") {
   names <- rvest::html_text(names)
   elements <- rvest::html_text(elements)
 
-  names <- gsub("\t|\n","", names)
+  names <- gsub("\t|\n", "", names)
 
   ticker <- elements[grep("K.?rzel", names)]
 

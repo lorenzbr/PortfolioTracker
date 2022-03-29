@@ -115,11 +115,8 @@ update_db_prices_based_on_transactions <- function(df_transactions, path,
                                                     to = today,
                                                     user_specific_exchange = FALSE)
 
-          from <- min(df_ticker_prices$date)
-          to <- max(df_ticker_prices$date)
-
-          from <- as.Date(from, format = "%Y-%m-%d")
-          to <- as.Date(to, format = "%Y-%m-%d")
+          from <- as.Date(min(df_ticker_prices$date), format = "%Y-%m-%d")
+          to <- as.Date(max(df_ticker_prices$date), format = "%Y-%m-%d")
 
           ## If prices are already available for given ticker, update dates
           ## in price availability csv
@@ -208,12 +205,10 @@ update_prices_based_on_transactions <- function(df.transactions, path,
     ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-    ## Add tickers to transactions
     df.transactions <- merge(df.transactions, df.isin.ticker, by = "isin",
                              all.x = TRUE)
     df.transactions <- df.transactions[!is.na(df.transactions$ticker), ]
 
-    ## Transaction date to date format
     df.transactions$transaction_date <- as.Date(df.transactions$transaction_date,
                                                 format = "%d-%m-%Y")
 
