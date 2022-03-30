@@ -39,6 +39,7 @@ Please have a look at the documentation of the app: [Portfolio Tracker](https://
 ## Contact
 
 Please contact <lorenz.brachtendorf@gmx.de> if you want to:
+
 * contribute to this project
 * have additional features (e.g., returns on investments, cash reserves, other currencies, ...)
 

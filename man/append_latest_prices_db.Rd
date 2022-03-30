@@ -12,6 +12,6 @@ append_latest_prices_db(db_path, tickers)
 \item{tickers}{A vector of character strings containing tickers.}
 }
 \description{
-Append prices for all tickers specified as an argument. The existing
-csv files are used to append prices.
+Append prices for all tickers specified as an argument.
+The existing csv files are used to append prices.
 }

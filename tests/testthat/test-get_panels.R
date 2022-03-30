@@ -18,9 +18,6 @@ list_quantity_panels <- mapply(get_quantity_panel, tickers,
                                  SIMPLIFY = FALSE)
 # df_quantity_panels <- do.call(rbind, unname(list_quantity_panels))
 
-# df <- get_price_quantity_panel_db(tickers[1], df_transactions_with_tickers,
-#                             path.prices.db = test_path("testdata"))
-
 list_pricequantity_panels <- mapply(get_price_quantity_panel2, tickers,
                                MoreArgs = list(df_transactions_with_tickers,
                                                path.prices.db = test_path("testdata")),

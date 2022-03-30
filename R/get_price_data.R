@@ -293,8 +293,8 @@ update_prices_based_on_transactions <- function(df.transactions, path,
 
 #' Append most recent prices to existing files
 #'
-#' @description Append prices for all tickers specified as an argument. The existing
-#' csv files are used to append prices.
+#' @description Append prices for all tickers specified as an argument.
+#' The existing csv files are used to append prices.
 #'
 #' @usage append_latest_prices_db(db_path, tickers)
 #' @param db_path A single character string. Path where data are stored.

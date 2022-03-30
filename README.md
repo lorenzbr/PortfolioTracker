@@ -34,9 +34,11 @@ Tracker](https://github.com/lorenzbr/PortfolioTrackerDocs).
 
 ## Contact
 
-Please contact <lorenz.brachtendorf@gmx.de> if you want to: \*
-contribute to this project \* have additional features (e.g., returns on
-investments, cash reserves, other currencies, …)
+Please contact <lorenz.brachtendorf@gmx.de> if you want to:
+
+-   contribute to this project
+-   have additional features (e.g., returns on investments, cash
+    reserves, other currencies, …)
 
 You can also submit bug reports and suggestions via e-mail or
 <https://github.com/lorenzbr/PortfolioTracker/issues>
