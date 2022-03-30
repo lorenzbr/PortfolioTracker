@@ -1,5 +1,29 @@
 # Helpers -----------------------------------------------------------------
 
+
+get_available_price_date_range <- function(path.database,
+                                           file.ticker.price.available.db) {
+
+  full_filename <- file.path(path.database, file.ticker.price.available.db)
+
+  if (file.exists(full_filename)) {
+
+    df_price_range <- data.table::fread(full_filename)
+    df_price_range <- as.data.frame(df_price_range)
+
+  } else {
+
+    col_names <- c("ticker", "first_date", "last_date")
+    df_price_range <- data.frame(matrix(
+      nrow = 0, ncol = 3, dimnames = list(NULL, col_names)))
+    data.table::fwrite(df_price_range, full_filename)
+
+  }
+
+  return(df_price_range)
+
+}
+
 get_tickers_from_db <- function(df_transactions, db_path) {
 
   get_db_names(db_path)

@@ -29,6 +29,9 @@ and fast solution.}
 exchange that is preferred by the user (i.e., stored in the user's profile).
 Default is \emph{TRUE}.}
 }
+\value{
+A data frame containing dates, prices (open, high, low, close, adjusted) and volume.
+}
 \description{
 Get prices for a given ticker from the Yahoo Finance API. Wrapper around
 \code{\link{get_ticker_prices}} with further arguments. E.g., select the stock exchange.
