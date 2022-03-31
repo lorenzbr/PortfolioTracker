@@ -4,13 +4,13 @@
 \alias{create_user_dir}
 \title{Create directory for user}
 \usage{
-create_user_dir(path, portfolio_name = "my_portfolio")
+create_user_dir(path, portfolio_name = "portfolio_1")
 }
 \arguments{
 \item{path}{A single character string. Path where user data are stored.}
 
 \item{portfolio_name}{A single character string indicating the name of the
-portfolio. Currently the default is \emph{my_portfolio}.}
+portfolio. Currently the default is \emph{portfolio_1}.}
 }
 \value{
 Returns a list with path names for user-specific data storage

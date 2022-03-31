@@ -13,13 +13,16 @@ get_db_names <- function(path) {
 
 #' Get user-specific path and file names
 #'
-#' @usage get_user_names(path)
+#' @usage get_user_names(path, portfolio_name = "portfolio_1")
 #' @param path A single character string. Path where user-specific data are stored.
+#' @param portfolio_name A single character string with the name of the
+#' portfolio. All portfolio-specific data for the focal user are stored in
+#' a folder with this name. Default is \emph{portfolio_1}.
 #'
 #' @export
-get_user_names <- function(path) {
+get_user_names <- function(path, portfolio_name = "portfolio_1") {
 
-  get_user_path_names(path)
+  get_user_path_names(path, portfolio_name)
   get_user_file_names()
 
 }

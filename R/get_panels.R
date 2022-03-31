@@ -397,9 +397,10 @@ get_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
 
     df_quantity_panel <- get_quantity_panel(ticker, df_transactions_with_tickers)
 
-    df_panel <- merge(df_prices, df_quantity_panel, by = "date")
+    if (!is.null(df_quantity_panel))
+      df_panel <- merge(df_prices, df_quantity_panel, by = "date")
 
-    ## Is this needed?? Check this!
+    ## Is this needed?? Check this!!!
     df_panel$value <- df_panel$adjusted * df_panel$cum_quantity
 
     return(df_panel)

@@ -22,17 +22,17 @@ create_main_dir <- function(path) {
 
 #' Create directory for user
 #'
-#' @usage create_user_dir(path, portfolio_name = "my_portfolio")
+#' @usage create_user_dir(path, portfolio_name = "portfolio_1")
 #' @param path A single character string. Path where user data are stored.
 #' @param portfolio_name A single character string indicating the name of the
-#' portfolio. Currently the default is \emph{my_portfolio}.
+#' portfolio. Currently the default is \emph{portfolio_1}.
 #' @return Returns a list with path names for user-specific data storage
 #'
 #' @export
-create_user_dir <- function(path, portfolio_name = "my_portfolio") {
+create_user_dir <- function(path, portfolio_name = "portfolio_1") {
 
   ## Name of user's portfolio
-  ## Currently the name is fixed to "my_portfolio" (currently cannot be seen in UI)
+  ## Currently the name is fixed to "portfolio_1" (currently cannot be seen in UI)
 
   path <- file.path(path, portfolio_name)
 

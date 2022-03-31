@@ -31,11 +31,14 @@ get_db_path_names <- function(path) {
 
 #' Get path names for user directory
 #'
-#' @usage get_user_path_names(path)
+#' @usage get_user_path_names(path, portfolio_name = "portfolio_1")
 #' @param path A single character string. Path where data are stored.
+#' @param portfolio_name A single character string with the name of the
+#' portfolio. All portfolio-specific data for the focal user are stored in
+#' a folder with this name. Default is \emph{portfolio_1}.
 #'
 #' @export
-get_user_path_names <- function(path) {
+get_user_path_names <- function(path, portfolio_name = "portfolio_1") {
 
   ## Solution from https://github.com/josephguillaume/hydromad/issues/73
   pos <- 1
@@ -76,6 +79,7 @@ get_user_path_names <- function(path) {
   )
 
   for (i in 1:length(var_name))
-    assign(var_name[i], file.path(path, "data", file_name[i]), envir = envir)
+    assign(var_name[i], file.path(path, portfolio_name,
+                                  file_name[i]), envir = envir)
 
 }

@@ -4,10 +4,14 @@
 \alias{get_user_names}
 \title{Get user-specific path and file names}
 \usage{
-get_user_names(path)
+get_user_names(path, portfolio_name = "portfolio_1")
 }
 \arguments{
 \item{path}{A single character string. Path where user-specific data are stored.}
+
+\item{portfolio_name}{A single character string with the name of the
+portfolio. All portfolio-specific data for the focal user are stored in
+a folder with this name. Default is \emph{portfolio_1}.}
 }
 \description{
 Get user-specific path and file names
