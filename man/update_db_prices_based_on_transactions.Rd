@@ -4,7 +4,7 @@
 \alias{update_db_prices_based_on_transactions}
 \title{Update and store prices in database based on new transactions}
 \usage{
-update_db_prices_based_on_transactions(df_transactions, path,
+update_db_prices_based_on_transactions(df_transactions, db_path,
          external_search = TRUE)
 }
 \arguments{
@@ -13,7 +13,7 @@ update_db_prices_based_on_transactions(df_transactions, path,
 At least three variables/columns are required: \emph{transaction_type},
 \emph{isin} and \emph{transaction_date}}
 
-\item{path}{A single character string. Path where data are stored.}
+\item{db_path}{A single character string containing the directory of the database.}
 
 \item{external_search}{Logical; if TRUE, the function searches external
 sources to find the ticker.}

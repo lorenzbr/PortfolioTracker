@@ -24,6 +24,16 @@ get_available_price_date_range <- function(path.database,
 
 }
 
+#' Get transactions with tickers
+#'
+#' @usage get_tickers_from_db(df_transactions, db_path)
+#' @param df_transactions A data frame containing the transaction history.
+#' @param db_path A single character string containing the directory of the database.
+#'
+#' @return A list with a data frame containing transactions including the ticker
+#' and a vector of all unique tickers in this data frame.
+#'
+#' @export
 get_tickers_from_db <- function(df_transactions, db_path) {
 
   get_db_names(db_path)

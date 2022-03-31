@@ -7,21 +7,21 @@
 #' (this list is stored in a csv as well). Prices are also updated if there are
 #' no prices available for the given ticker.
 #'
-#' @usage update_db_prices_based_on_transactions(df_transactions, path,
+#' @usage update_db_prices_based_on_transactions(df_transactions, db_path,
 #'          external_search = TRUE)
 #' @param df_transactions A data frame. Results from
 #' \code{\link[BankStatementParser]{get_transactions}}.
 #' At least three variables/columns are required: \emph{transaction_type},
 #' \emph{isin} and \emph{transaction_date}
-#' @param path A single character string. Path where data are stored.
+#' @param db_path A single character string containing the directory of the database.
 #' @param external_search Logical; if TRUE, the function searches external
 #' sources to find the ticker.
 #'
 #' @export
-update_db_prices_based_on_transactions <- function(df_transactions, path,
+update_db_prices_based_on_transactions <- function(df_transactions, db_path,
                                                    external_search = TRUE) {
 
-  get_db_names(path)
+  get_db_names(db_path)
 
   ## Only purchase transactions are relevant
   df_transactions <- df_transactions[df_transactions$transaction_type == "Purchase", ]
