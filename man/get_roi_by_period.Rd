@@ -4,7 +4,8 @@
 \alias{get_roi_by_period}
 \title{Get cumulative return on investment for specific period}
 \usage{
-get_roi_by_period(df.complete.panel, nb_period = NULL, period_type = "max")
+get_roi_by_period(df.complete.panel, nb_period = NULL,
+                         period_type = "max")
 }
 \arguments{
 \item{df.complete.panel}{A data.frame containing the complete panel.}

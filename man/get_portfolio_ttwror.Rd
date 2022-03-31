@@ -4,17 +4,21 @@
 \alias{get_portfolio_ttwror}
 \title{Get true time-weighted rate of return (TTWROR) of total portfolio}
 \usage{
-get_portfolio_ttwror(path, nb_period = NULL, period_type = "max")
+get_portfolio_ttwror(path, nb_period = NULL,
+                            period_type = "max")
 }
 \arguments{
 \item{path}{A single character string. Path where data are stored.}
 
-\item{nb_period}{An integer indicating the number of months. Default is \emph{NULL}.}
+\item{nb_period}{An integer indicating the number of months. Default
+is \emph{NULL}.}
 
-\item{period_type}{A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.}
+\item{period_type}{A single character string. Default \emph{max}.
+Possible values \emph{max}, \emph{weeks} and \emph{months}.}
 }
 \value{
-A numeric for the true time-weighted rate of return (TTWROR) of your portfolio
+A numeric for the true time-weighted rate of return (TTWROR) of
+your portfolio
 }
 \description{
 Get true time-weighted rate of return (TTWROR) of total portfolio

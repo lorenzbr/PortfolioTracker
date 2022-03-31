@@ -17,7 +17,7 @@ get_db_path_names <- function(path) {
                 "path.prices.db"
   )
 
-  file_name <- c("data",
+  file_name <- c("",
                  "user_credentials",
                  "user_data",
                  "database",
@@ -58,7 +58,7 @@ get_user_path_names <- function(path) {
                 "path.complete.panel"
   )
 
-  file_name <- c("/",
+  file_name <- c("",
                  "tickers",
                  "prices_raw",
                  "quantity_panel",

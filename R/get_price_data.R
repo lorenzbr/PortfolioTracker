@@ -107,35 +107,36 @@ update_db_prices_based_on_transactions <- function(df_transactions, db_path,
             ## in price availability csv
             from <- as.Date(min(df_ticker_prices$date), format = "%Y-%m-%d")
             to <- as.Date(max(df_ticker_prices$date), format = "%Y-%m-%d")
-            is_current_ticker <- df_price_available$ticker == ticker
-            if (length(df_price_available$first_date[is_current_ticker]) > 0) {
+            is_current_ticker <- df_price_range$ticker == ticker
+            if (length(df_price_range$first_date[is_current_ticker]) > 0) {
               if (from < earliest_date)
-                df_price_available$first_date[is_current_ticker] <- from
+                df_price_range$first_date[is_current_ticker] <- from
               if (to > df_prices_same_ticker$last_date)
-                df_price_available$last_date[is_current_ticker] <- to
+                df_price_range$last_date[is_current_ticker] <- to
             } else {
               df_new <- data.frame(ticker = ticker, first_date = from,
                                    last_date = to)
-              df_price_available <- rbind(df_price_available, df_new)
+              df_price_range <- rbind(df_price_range, df_new)
             }
-            data.table::fwrite(df_price_available,
+            data.table::fwrite(df_price_range,
                                file.path(path.database,
                                          file.ticker.price.available.db))
 
             #### Update csv with prices
             filename_prices <- paste0("prices_", ticker, ".csv")
+            file_path_prices <- file.path(path.prices.db, filename_prices)
             ## Append prices in correct order and store again as csv
-            df_ticker_prices_all <- data.table::fread(file.path(path.prices.db,
-                                                                filename_prices))
-            ## Order of row binding data frames important because this should be
-            ## correct already
-            df_ticker_prices <- rbind(df_ticker_prices,
-                                      df_ticker_prices_all)
-            ## Order by date: latest date should be first (on top) - Is it redundant
-            ## because of rbind?
-            df_ticker_prices <- df_ticker_prices[order(df_ticker_prices$date), ]
-            data.table::fwrite(df_ticker_prices,
-                               file.path(path.prices.db, filename_prices))
+            if (file.exists(file_path_prices)) {
+              df_ticker_prices_all <- data.table::fread(file_path_prices)
+              ## Order of row binding data frames important because this should be
+              ## correct already
+              df_ticker_prices <- rbind(df_ticker_prices,
+                                        df_ticker_prices_all)
+              ## Order by date: latest date should be first (on top) - Is it redundant
+              ## because of rbind?
+              df_ticker_prices <- df_ticker_prices[order(df_ticker_prices$date), ]
+            }
+            data.table::fwrite(df_ticker_prices, file_path_prices)
 
           }
 
@@ -547,7 +548,11 @@ update_latest_prices <- function(path) {
 
           }
 
-        }, error = function(e) { skip_to_next <- TRUE } )
+        }, error = function(e) {
+
+          skip_to_next <- TRUE
+
+        })
 
         if (skip_to_next) next
 

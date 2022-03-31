@@ -9,9 +9,11 @@ get_portfolio_irr(path, nb_period = NULL, period_type = "max")
 \arguments{
 \item{path}{A single character string. Path where data are stored.}
 
-\item{nb_period}{An integer indicating the number of months. Default is \emph{NULL}.}
+\item{nb_period}{An integer indicating the number of months. Default
+is \emph{NULL}.}
 
-\item{period_type}{A single character string. Default \emph{max}. Possible values \emph{max}, \emph{weeks} and \emph{months}.}
+\item{period_type}{A single character string. Default \emph{max}.
+Possible values \emph{max}, \emph{weeks} and \emph{months}.}
 }
 \value{
 A numeric for the internal rate of return (IRR) of your portfolio

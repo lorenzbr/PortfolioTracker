@@ -138,8 +138,10 @@ get_annualized_return <- function(R, scale = 252) {
 #' @export
 get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type = "max") {
 
-  ## Reason for while loop: if first.date does not exist (i.e., NA) go one more day into the past
-  ## E.g., Feb 29 does not exist for all years
+  ## Reason for while loop: if first.date does not exist (i.e., NA) go one more
+  ## day into the past
+  ## E.g., Feb 29 does not exist for all years, April 31, Feb 30 and Feb 31 do
+  ## not exist
   ## Holidays and weekend days may not exist either
   if (period_type == "months") {
 
@@ -192,3 +194,5 @@ get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type =
   return(df.selected.time.period)
 
 }
+
+
