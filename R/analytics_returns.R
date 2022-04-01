@@ -14,26 +14,25 @@ write_investment_irr_all <- function(path) {
 
   get_user_names(path)
 
-  files.complete.panels <- list.files(path.complete.panel)
+  files_complete_panels <- list.files(path.complete.panel)
 
-  if (length(files.complete.panels) > 0) {
+  if (length(files_complete_panels) > 0) {
 
-    files <- file.path(path.complete.panel, files.complete.panels)
-    list.dfs <- lapply(files, data.table::fread)
+    files <- file.path(path.complete.panel, files_complete_panels)
+    list_dfs <- lapply(files, data.table::fread)
 
-    panel.name <- "complete_panel"
-
-    col.names <- c("ticker", "time_period", "irr")
     df.irr <- data.frame(
-      matrix(ncol = length(col.names), nrow = 0, dimnames = list(NULL, col.names)))
+      matrix(ncol = 3, nrow = 0,
+             dimnames = list(NULL,
+                             c("ticker", "time_period", "irr"))))
 
     ## Could also do mapply and do.call (if necessary)
     ## For loop over all investments
-    for (i in 1:length(list.dfs)) {
+    for (i in 1:length(list_dfs)) {
 
       ticker <- stringr::str_match(
-        files[i], paste0(panel.name, "_(.*?)_from"))[, 2]
-      df.panel <- list.dfs[[i]]
+        files[i], "complete_panel_(.*?)_from")[, 2]
+      df.panel <- list_dfs[[i]]
 
       ## Select time period to compute IRR
       nb_periods <- c(1, 3, 6, 12, 36, 60, 120, 1, 1)
@@ -42,13 +41,15 @@ write_investment_irr_all <- function(path) {
       for (t in 1:length(nb_periods)) {
 
         df.selected <- get_df_with_selected_time_period(
-          df = df.panel, nb_period = nb_periods[t], period_type = period_types[t])
+          df = df.panel, nb_period = nb_periods[t],
+          period_type = period_types[t])
 
         if (nrow(df.selected) > 0) {
 
           time_period <- paste(nb_periods[t], period_types[t])
 
-          ## Sometimes dates do not exist (e.g., Feb 29, Feb 30, Feb 31, April 31)
+          ## Sometimes dates do not exist (e.g., Feb 29, Feb 30,
+          ## Feb 31, April 31)
           first.date.target <- Sys.Date() - months(nb_periods[t])
           j <- 1
           while (is.na(first.date.target) && j < 5) {
@@ -60,8 +61,8 @@ write_investment_irr_all <- function(path) {
           ## If difference is very large, data for this period not available
           if (difftime(first.date.actual, first.date.target) <= 30) {
 
-            ## Remove all periods with no portfolio value, no purchase and no
-            ## sale value at the same time
+            ## Remove all periods with no portfolio value,
+            ## no purchase and no sale value at the same time
             days.empty.portfolio <- df.selected$value == 0 &
               df.selected$purchase_value == 0 &
               df.selected$sale_value == 0
@@ -69,15 +70,13 @@ write_investment_irr_all <- function(path) {
 
             ## In the first period, the investment would be hypothetically purchased
             ## If something was indeed purchased, this would appear in the
-            ## "value" column. So no need to
-            ## consider it twice
+            ## "value" column. So no need to consider it twice
             is.first.day <- df.selected$date == min(df.selected$date)
             df.selected$purchase_value[is.first.day] <- df.selected$value[is.first.day]
 
             ## In the last period, the investment would be hypothetically sold
             ## If something was indeed sold on the last day, this would NOT
-            ## appear in the "value" column.
-            ## So need to consider this as well.
+            ## appear in the "value" column. So need to consider this as well.
             is.last.day <- df.selected$date == max(df.selected$date)
             df.selected$sale_value[is.last.day] <- df.selected$sale_value[is.last.day] +
               df.selected$value[is.last.day]
@@ -108,11 +107,11 @@ write_investment_irr_all <- function(path) {
 
           df.irr <- rbind(df.irr, df.temp)
 
-        } ## If statement: if selected time period is non-empty
+        }
 
-      } ## For loop over all periods
+      }
 
-    } ## For loop over all investments
+    }
 
     ## Long to wide
     data.table::setDT(df.irr)
@@ -304,8 +303,9 @@ write_annualized_returns <- function(path) {
 
   if (transaction.history.exists && isin.ticker.exists) {
 
-    df.transaction.history <- data.table::fread(file.path(path.transactions,
-                                                          file.transactions))
+    df.transaction.history <- data.table::fread(
+      file.path(path.transactions, file.transactions))
+
     df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
     df.transaction.history <- merge(df.transaction.history,
@@ -326,7 +326,7 @@ write_annualized_returns <- function(path) {
     df.ticker.date$age_yrs <- floor(
       lubridate::time_length(difftime(Sys.Date(), df.ticker.date$date), "years"))
 
-    ## make return NA or "-" if column year greater than age_yrs
+    ## Make return NA or "-" if column year greater than age_yrs
     df.annualized <- merge(df.annualized, df.ticker.date, by = "ticker")
     for (i in 1:nrow(df.annualized)) {
       incomplete.positions <- which(df.annualized$age_yrs[i] < annualize.return.periods) + 1
@@ -353,10 +353,12 @@ write_portfolio_return <- function(path) {
 
   get_user_names(path)
 
-  # df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
+  # df.transaction.history <- data.table::fread(
+  #   file.path(path.transactions, file.transactions))
   # df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
-  #
-  # df.transaction.history <- merge(df.transaction.history, df.isin.ticker, by = "isin")
+  # df.transaction.history <- merge(df.transaction.history,
+  #                                 df.isin.ticker,
+  #                                 by = "isin")
 
   returns.period <- "daily"
   returns.period.file <- "daily_returns"
@@ -391,7 +393,8 @@ write_portfolio_return <- function(path) {
 
   for (i in 1:length(list.dfs)) {
 
-    ticker <- stringr::str_match(files[i], "pricequantity_panel_(.*?)_from")[, 2]
+    ticker <- stringr::str_match(files[i],
+                                 "pricequantity_panel_(.*?)_from")[, 2]
     df.pricequantity.panel <- list.dfs[[i]]
 
     df.weight.panel <- df.pricequantity.panel[, c("date", "value")]
@@ -487,11 +490,13 @@ write_roi_by_period <- function(ticker, path) {
 #' @usage get_roi_by_period(df.complete.panel, nb_period = NULL,
 #'                          period_type = "max")
 #' @param df.complete.panel A data.frame containing the complete panel.
-#' @param nb_period An integer indicating the number of months. Default is \emph{NULL}.
+#' @param nb_period An integer indicating the number of months.
+#' Default is \emph{NULL}.
 #' @param period_type A single character string. Default \emph{max}. Possible
 #' values \emph{max}, \emph{weeks} and \emph{months}.
 #'
-#' @return A data frame containing the cumulative return on investment for a given period.
+#' @return A data frame containing the cumulative return on investment
+#' for a given period.
 #'
 #' @export
 get_roi_by_period <- function(df.complete.panel, nb_period = NULL,

@@ -346,7 +346,7 @@ write_price_quantity_panels2 <- function(df_transactions, user_path, db_path) {
 #' Write panel for the product of prices and quantity for input ticker as csv
 #'
 #' @usage write_price_quantity_panel2(ticker, df_transactions_with_tickers,
-#'                                      user_path, db_path)
+#'                                    user_path, db_path)
 #' @param ticker A single character string containing a ticker symbol.
 #' @param df_transactions_with_tickers A data frame containing transactions
 #' and ticker.
@@ -355,28 +355,32 @@ write_price_quantity_panels2 <- function(df_transactions, user_path, db_path) {
 #'
 #' @export
 write_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
-                                          user_path, db_path) {
+                                        user_path, db_path) {
 
   get_user_names(user_path)
   get_db_names(db_path)
 
-  df_panel <- get_price_quantity_panel2(ticker, df_transactions_with_tickers,
-                                          path.prices.db)
+  df_panel <- get_price_quantity_panel2(
+    ticker, df_transactions_with_tickers, path.prices.db)
 
-  file_pricequantity_panel <- paste0("pricequantity_panel_", ticker,
-                                     "_from_", min(df_panel$date),
-                                     "_to_", max(df_panel$date),
-                                     ".csv")
+  if (!is.null(df_panel)) {
 
-  data.table::fwrite(df_panel, file.path(path.pricequantity.panel,
-                                         file_pricequantity_panel))
+    file_pricequantity_panel <- paste0("pricequantity_panel_", ticker,
+                                       "_from_", min(df_panel$date),
+                                       "_to_", max(df_panel$date),
+                                       ".csv")
+
+    data.table::fwrite(df_panel, file.path(path.pricequantity.panel,
+                                           file_pricequantity_panel))
+
+  }
 
 }
 
 #' Get panel for the product of prices and quantity for input ticker
 #'
 #' @usage get_price_quantity_panel2(ticker, df_transactions_with_tickers,
-#'                                      path.prices.db)
+#'                                  path.prices.db)
 #' @param ticker A single character string containing a ticker symbol.
 #' @param df_transactions_with_tickers A data frame containing transactions
 #' and ticker.
@@ -387,7 +391,7 @@ write_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
 #'
 #' @export
 get_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
-                                        path.prices.db) {
+                                      path.prices.db) {
 
   file_prices <- file.path(path.prices.db, paste0("prices_", ticker, ".csv"))
 
@@ -397,11 +401,18 @@ get_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
 
     df_quantity_panel <- get_quantity_panel(ticker, df_transactions_with_tickers)
 
-    if (!is.null(df_quantity_panel))
+    if (!is.null(df_quantity_panel)) {
+
       df_panel <- merge(df_prices, df_quantity_panel, by = "date")
 
-    ## Is this needed?? Check this!!!
-    df_panel$value <- df_panel$adjusted * df_panel$cum_quantity
+      ## Is this needed?? Check this!!!
+      df_panel$value <- df_panel$adjusted * df_panel$cum_quantity
+
+    } else {
+
+      df_panel <- NULL
+
+    }
 
     return(df_panel)
 

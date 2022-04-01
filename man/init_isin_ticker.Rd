@@ -9,7 +9,8 @@ init_isin_ticker(path, file = "isin_ticker.csv")
 \arguments{
 \item{path}{A single character string. Path where data are stored.}
 
-\item{file}{A single character string. Name of ISIN-ticker csv file (default: isin_ticker.csv)}
+\item{file}{A single character string. Name of ISIN-ticker csv
+file (default: isin_ticker.csv).}
 }
 \description{
 Create ISIN-ticker table as csv if no such file exists

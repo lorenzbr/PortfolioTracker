@@ -10,13 +10,15 @@ get_roi_by_period(df.complete.panel, nb_period = NULL,
 \arguments{
 \item{df.complete.panel}{A data.frame containing the complete panel.}
 
-\item{nb_period}{An integer indicating the number of months. Default is \emph{NULL}.}
+\item{nb_period}{An integer indicating the number of months.
+Default is \emph{NULL}.}
 
 \item{period_type}{A single character string. Default \emph{max}. Possible
 values \emph{max}, \emph{weeks} and \emph{months}.}
 }
 \value{
-A data frame containing the cumulative return on investment for a given period.
+A data frame containing the cumulative return on investment
+for a given period.
 }
 \description{
 Get cumulative return on investment for specific period

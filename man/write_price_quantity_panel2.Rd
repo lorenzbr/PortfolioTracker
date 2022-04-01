@@ -5,7 +5,7 @@
 \title{Write panel for the product of prices and quantity for input ticker as csv}
 \usage{
 write_price_quantity_panel2(ticker, df_transactions_with_tickers,
-                                     user_path, db_path)
+                                   user_path, db_path)
 }
 \arguments{
 \item{ticker}{A single character string containing a ticker symbol.}

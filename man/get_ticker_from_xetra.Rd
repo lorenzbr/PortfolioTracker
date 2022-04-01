@@ -9,7 +9,11 @@ get_ticker_from_xetra(isin, preferred_exchange = "")
 \arguments{
 \item{isin}{A single character string. ISIN.}
 
-\item{preferred_exchange}{A single character string. Stock exchange (default is empty string)}
+\item{preferred_exchange}{A single character string. Stock exchange
+(default is empty string)}
+}
+\value{
+A single character string containing the ticker for the given ISIN.
 }
 \description{
 Get ticker based on ISIN by crawling the Xetra website
