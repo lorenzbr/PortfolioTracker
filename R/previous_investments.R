@@ -1,101 +1,104 @@
 #' Write previous portfolio investments to a csv file
 #'
-#' @usage write_previous_investments(path)
-#' @param path A single character string. Directory of your data.
+#' @usage write_previous_investments(user_path, db_path)
+#' @param user_path A single character string containing the directory of the user.
+#' @param db_path A single character string containing the directory of the database.
 #'
 #' @export
-write_previous_investments <- function(path) {
+write_previous_investments <- function(user_path, db_path) {
 
-  get_user_names(path)
+  get_user_names(user_path)
+  get_db_names(db_path)
 
   if (length(list.files(path.pricequantity.panel)) > 0) {
 
     files <- file.path(path.pricequantity.panel, list.files(path.pricequantity.panel))
-    list.dfs <- lapply(files, data.table::fread)
+    list_dfs <- lapply(files, data.table::fread)
 
-    transaction.history.exists <- file.exists(file.path(path.transactions, file.transactions))
-    isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
+    file_path_transactions <- file.path(path.transactions, file.transactions)
 
-    if (isin.ticker.exists && transaction.history.exists) {
+    if (file.exists(file_path_transactions)) {
 
       ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-      df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+      df_isin_ticker <- data.table::fread(file.path(path.database, file.tickers.db))
 
       ## Keep ISIN and name
-      df.transaction.history <- data.table::fread(file.path(path.transactions, file.transactions))
+      df_transactions <- data.table::fread(file_path_transactions)
 
-      df.ticker.investmentnames <- unique(df.transaction.history[, c("isin", "name")])
+      df_ticker_names <- unique(df_transactions[, c("isin", "name")])
 
       ## Add tickers
-      df.ticker.investmentnames <- merge(df.ticker.investmentnames, df.isin.ticker, by = "isin")
-      df.ticker.investmentnames <- unique(df.ticker.investmentnames[, c("ticker", "name")])
+      df_ticker_names <- merge(df_ticker_names, df_isin_ticker, by = "isin")
+      df_ticker_names <- unique(df_ticker_names[, c("ticker", "name")])
 
       ## All price-quantity panels in one data frame
-      df.all <- do.call(rbind, list.dfs)
+      df_all <- do.call(rbind, list_dfs)
 
-      ## Keep latest date for each ticker
-      df.previous <- stats::aggregate(date ~ ticker, data = df.all, max)
-
-      ## Add details
-      df.previous <- merge(df.all, df.previous, by = c("ticker", "date"))
+      df_previous <- stats::aggregate(date ~ ticker, data = df_all, max)
+      df_previous <- merge(df_all, df_previous, by = c("ticker", "date"))
 
       ## TO DO: KEEP INVESTMENTS WHICH HAVE AT LEAST ONE SALES TRANSACTION
       ## (USE TRANSACTION HISTORY TO IDENTIFY THOSE)
 
       ## Keep investments with quantity equal to zero
-      df.previous <- df.previous[df.previous$cum_quantity == 0, ]
+      df_previous <- df_previous[df_previous$cum_quantity == 0, ]
 
-      df.previous <- unique(df.previous)
+      df_previous <- unique(df_previous)
 
       ## Add name and ISIN
-      df.previous <- merge(df.previous, df.ticker.investmentnames, by = "ticker")
-      df.previous <- merge(df.previous, df.isin.ticker, by = "ticker")
+      df_previous <- merge(df_previous, df_ticker_names, by = "ticker")
+      df_previous <- merge(df_previous, df_isin_ticker, by = "ticker")
 
-      df.previous <- df.previous[, c("name", "isin", "ticker", "adjusted",
+      df_previous <- df_previous[, c("name", "isin", "ticker", "adjusted",
                                      "cum_quantity", "value")]
 
-      previous.isins <- unique(df.previous$isin)
+      previous_isins <- unique(df_previous$isin)
 
-      isins.sold <- unique(df.transaction.history$isin[df.transaction.history$transaction_type == "Sale"])
-      isins.purchase <- unique(df.transaction.history$isin[df.transaction.history$transaction_type == "Purchase"])
-      isins.both <- intersect(isins.sold, isins.purchase)
-      previous.isins <- intersect(previous.isins, isins.both)
+      isins_sold <- unique(df_transactions$isin[df_transactions$transaction_type == "Sale"])
+      isins_purchase <- unique(df_transactions$isin[df_transactions$transaction_type == "Purchase"])
+      isins_both <- intersect(isins_sold, isins_purchase)
+      previous_isins <- intersect(previous_isins, isins_both)
 
-      if (length(previous.isins) > 0) {
+      if (length(previous_isins) > 0) {
 
         ## Keep all transactions from ISINS which have both Purchase and Sale transactions
-        df.investments.sold <- unique(df.transaction.history[df.transaction.history$isin %in% isins.both, ])
+        df_investments_sold <- unique(df_transactions[df_transactions$isin %in% isins_both, ])
 
-        col_names <- c("isin", "name", "investment", "income", "return_absolute",
-                       "return_percent", "quantity")
+        col_names <- c("isin", "name", "investment", "income",
+                       "return_absolute", "return_percent", "quantity")
         df <- data.frame(matrix(nrow = 0, ncol = length(col_names),
                                 dimnames = list(NULL, col_names)))
 
         ## For each sold ISIN
-        for (i in 1:length(previous.isins)) {
+        for (i in 1:length(previous_isins)) {
 
-          previous.isin <- previous.isins[i]
-          df.sold.isin <- df.investments.sold[df.investments.sold$isin == previous.isin, ]
+          previous_isin <- previous_isins[i]
+          df_sold_isin <- df_investments_sold[df_investments_sold$isin == previous_isin, ]
 
-          name <- df.sold.isin$name[i]
+          name <- df_sold_isin$name[i]
 
-          investment <- sum(df.sold.isin$transaction_value[df.sold.isin$transaction_type == "Purchase"
-                                                           | df.sold.isin$transaction_type == "Steuerpflichtige Vorabpauschale"])
-          income <- sum(df.sold.isin$transaction_value[df.sold.isin$transaction_type == "Dividend"
-                                         | df.sold.isin$transaction_type == "Sale"
-                                         | df.sold.isin$transaction_type == "Sale - Part"])
-          return.abs <- income - investment
-          return.perc <- return.abs / investment
+          investment <- sum(df_sold_isin$transaction_value[df_sold_isin$transaction_type == "Purchase"
+                                                           | df_sold_isin$transaction_type == "Steuerpflichtige Vorabpauschale"])
+          income <- sum(df_sold_isin$transaction_value[df_sold_isin$transaction_type == "Dividend"
+                                                       | df_sold_isin$transaction_type == "Sale"
+                                                       | df_sold_isin$transaction_type == "Sale - Part"])
+          return_abs <- income - investment
+          return_perc <- return_abs / investment
 
-          quantity.sold <- sum(df.sold.isin$quantity[df.sold.isin$transaction_type == "Sale"
-                                                | df.sold.isin$transaction_type == "Sale - Part"])
+          quantity_sold <- sum(df_sold_isin$quantity[df_sold_isin$transaction_type == "Sale"
+                                                     | df_sold_isin$transaction_type == "Sale - Part"])
 
 
-          df.temp <- data.frame(isin = previous.isin, name, investment,
-                                income, return_absolute = return.abs,
-                                return_percent = return.perc, quantity = quantity.sold)
+          df_temp <- data.frame(isin = previous_isin,
+                                name,
+                                investment,
+                                income,
+                                return_absolute = return_abs,
+                                return_percent = return_perc,
+                                quantity = quantity_sold
+                                )
 
-          df <- rbind(df, df.temp)
+          df <- rbind(df, df_temp)
 
         }
 
@@ -103,7 +106,7 @@ write_previous_investments <- function(path) {
 
       } else {
 
-        ## If no previous ISINs: delete file (if it exists)
+        ## If no previous ISINs exist, delete file with previous investments
         unlink(file.path(path.data, file.previous))
 
       }

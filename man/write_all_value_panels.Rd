@@ -4,12 +4,15 @@
 \alias{write_all_value_panels}
 \title{Write all value panels for purchase, dividend and sales transactions for all tickers}
 \usage{
-write_all_value_panels(df.transaction.history, path)
+write_all_value_panels(df_transactions, user_path, db_path)
 }
 \arguments{
-\item{df.transaction.history}{A data frame containing the full history of transactions.}
+\item{df_transactions}{A data frame containing the full history
+of transactions.}
 
-\item{path}{A single character string containing the directory of the user.}
+\item{user_path}{A single character string containing the directory of the user.}
+
+\item{db_path}{A single character string containing the directory of the database.}
 }
 \description{
 Write all value panels for purchase, dividend and sales transactions for all tickers

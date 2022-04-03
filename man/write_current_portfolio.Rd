@@ -4,10 +4,12 @@
 \alias{write_current_portfolio}
 \title{Write current portfolio investments to a csv file}
 \usage{
-write_current_portfolio(path)
+write_current_portfolio(user_path, db_path)
 }
 \arguments{
-\item{path}{A single character string. Directory of your data.}
+\item{user_path}{A single character string containing the directory of the user.}
+
+\item{db_path}{A single character string containing the directory of the database.}
 }
 \description{
 Write current portfolio investments to a csv file

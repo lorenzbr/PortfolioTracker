@@ -146,60 +146,60 @@ write_returns <- function(path) {
 
   get_user_names(path)
 
-  files.price.panels <- list.files(path.price.panel)
+  files_pricequantity_panels <- list.files(path.pricequantity.panel)
 
-  if (length(files.price.panels) > 0) {
+  if (length(files_pricequantity_panels) > 0) {
 
-    files <- file.path(path.price.panel, files.price.panels)
-    list.dfs <- lapply(files, data.table::fread)
+    files <- file.path(path.pricequantity.panel, files_pricequantity_panels)
+    list_dfs <- lapply(files, data.table::fread)
 
-    # last.year <- lubridate::year(Sys.Date()) - 1
-    # df.annual <- data.frame(year = last.year)
-    df.daily <- data.frame(matrix(nrow = 0, ncol = 1,
+    # last_year <- lubridate::year(Sys.Date()) - 1
+    # df_annual <- data.frame(year = last.year)
+    df_daily <- data.frame(matrix(nrow = 0, ncol = 1,
                                   dimnames = list(NULL, "date")))
-    df.monthly <- data.frame(matrix(nrow = 0, ncol = 1,
+    df_monthly <- data.frame(matrix(nrow = 0, ncol = 1,
                                     dimnames = list(NULL, "date")))
-    df.annual <- data.frame(matrix(nrow = 0, ncol = 1,
+    df_annual <- data.frame(matrix(nrow = 0, ncol = 1,
                                    dimnames = list(NULL, "date")))
 
     ## Could also do mapply and do.call (if necessary)
-    for (i in 1:length(list.dfs)) {
+    for (i in 1:length(list_dfs)) {
 
       ticker <- stringr::str_match(files[i],
-                                   "price_panel_(.*?)_from")[, 2]
-      df.price.panel <- list.dfs[[i]]
+                                   "pricequantity_panel_(.*?)_from")[, 2]
+      df_pricequantity_panel <- list_dfs[[i]]
 
-      df.temp <- get_returns_all(df.price.panel, ticker)
+      df_temp <- get_returns_all(df_pricequantity_panel, ticker)
 
-      ticker.daily <- paste0(ticker, ".daily")
-      ticker.monthly <- paste0(ticker, ".monthly")
-      ticker.yearly <- paste0(ticker, ".yearly")
+      ticker_daily <- paste0(ticker, ".daily")
+      ticker_monthly <- paste0(ticker, ".monthly")
+      ticker_yearly <- paste0(ticker, ".yearly")
 
-      df.daily.temp <- df.temp[!is.na(df.temp[, ticker.daily]),
-                               c("date", ticker.daily)]
-      df.monthly.temp <- df.temp[!is.na(df.temp[, ticker.monthly]),
-                                 c("date", ticker.monthly)]
-      df.yearly.temp <- df.temp[!is.na(df.temp[, ticker.yearly]),
-                                c("date", ticker.yearly)]
+      df_daily_temp <- df_temp[!is.na(df_temp[, ticker_daily]),
+                               c("date", ticker_daily)]
+      df_monthly_temp <- df_temp[!is.na(df_temp[, ticker_monthly]),
+                                 c("date", ticker_monthly)]
+      df_yearly_temp <- df_temp[!is.na(df_temp[, ticker_yearly]),
+                                c("date", ticker_yearly)]
 
-      df.yearly.temp$date <- lubridate::floor_date(df.yearly.temp$date,
-                                                   unit = "year")
+      df_yearly_temp$date <- lubridate::floor_date(
+        df_yearly_temp$date, unit = "year")
 
-      df.daily <- merge(df.daily, df.daily.temp,
+      df_daily <- merge(df_daily, df_daily_temp,
                         by = "date",
                         all.x = TRUE, all.y = TRUE)
-      df.monthly <- merge(df.monthly, df.monthly.temp,
+      df_monthly <- merge(df_monthly, df_monthly_temp,
                           by = "date",
                           all.x = TRUE, all.y = TRUE)
-      df.annual <- merge(df.annual, df.yearly.temp,
+      df_annual <- merge(df_annual, df_yearly_temp,
                          by = "date",
                          all.x = TRUE, all.y = TRUE)
 
     }
 
-    data.table::fwrite(df.daily, file.path(path.returns, file.returns.daily))
-    data.table::fwrite(df.monthly, file.path(path.returns, file.returns.monthly))
-    data.table::fwrite(df.annual, file.path(path.returns, file.returns.annual))
+    data.table::fwrite(df_daily, file.path(path.returns, file.returns.daily))
+    data.table::fwrite(df_monthly, file.path(path.returns, file.returns.monthly))
+    data.table::fwrite(df_annual, file.path(path.returns, file.returns.annual))
 
   }
 
@@ -555,50 +555,50 @@ write_portfolio_twr_factors <- function(path) {
 
   get_user_names(path)
 
-  df.all <- get_complete_portfolio_panel(path)
+  df_all <- get_complete_portfolio_panel(path)
 
-  if (!is.null(df.all)) {
+  if (!is.null(df_all)) {
 
-    df.all <- df.all[, c("date", "value", "purchase_value",
+    df_all <- df_all[, c("date", "value", "purchase_value",
                          "sale_value", "dividend_value",
                          "currently_invested", "value_available")]
 
     ## Take sum by group "date" for value, purchase_value, sale_value and dividend_cum_value
-    df.all <- data.table::setDT(
-      df.all)[, lapply(.SD, sum, na.rm = TRUE), by = date]
+    df_all <- data.table::setDT(
+      df_all)[, lapply(.SD, sum, na.rm = TRUE), by = date]
 
     ## Re-compute cumulative dividend payments
-    df.all <- df.all[order(df.all$date), ]
-    df.all$dividend_cum_value <- cumsum(df.all$dividend_value)
+    df_all <- df_all[order(df_all$date), ]
+    df_all$dividend_cum_value <- cumsum(df_all$dividend_value)
 
     ## Remove all dates where currently invested is unequal value available
     ## this means that prices are not available for all current investments at time t
-    df.all <- df.all[df.all$currently_invested == df.all$value_available, ]
+    df_all <- df_all[df_all$currently_invested == df_all$value_available, ]
 
-    df.twr <- df.all
+    df_twr <- df_all
 
-    df.twr[is.na(df.twr)] <- 0
+    df_twr[is.na(df_twr)] <- 0
 
     ## Remove all periods with no portfolio value, no purchase and no sale value at the same time
-    days.empty.portfolio <- df.twr$value == 0 &
-      df.twr$purchase_value == 0 &
-      df.twr$sale_value == 0
-    df.twr <- df.twr[!days.empty.portfolio, ]
+    days.empty.portfolio <- df_twr$value == 0 &
+      df_twr$purchase_value == 0 &
+      df_twr$sale_value == 0
+    df_twr <- df_twr[!days.empty.portfolio, ]
 
 
-    df.twr$end_value <- df.twr$value + df.twr$dividend_cum_value
+    df_twr$end_value <- df_twr$value + df_twr$dividend_cum_value
 
-    df.twr$initial_value <- data.table::shift(df.twr$value) +
-      data.table::shift(df.twr$dividend_cum_value)
+    df_twr$initial_value <- data.table::shift(df_twr$value) +
+      data.table::shift(df_twr$dividend_cum_value)
 
-    df.twr$cash_flow <- df.twr$purchase_value - df.twr$sale_value
+    df_twr$cash_flow <- df_twr$purchase_value - df_twr$sale_value
 
     ## Compute daily holding period return
     ## Cash flows occur just before the valuation (of end_value)
-    df.twr$twr_factor <- (df.twr$end_value - df.twr$cash_flow) / df.twr$initial_value
-    # df.twr$twr_factor <- df.twr$end_value / (df.twr$initial_value + df.twr$cash_flow)
+    df_twr$twr_factor <- (df_twr$end_value - df_twr$cash_flow) / df_twr$initial_value
+    # df_twr$twr_factor <- df_twr$end_value / (df_twr$initial_value + df_twr$cash_flow)
 
-    data.table::fwrite(df.twr, file.path(path.returns, file.returns.twr.daily))
+    data.table::fwrite(df_twr, file.path(path.returns, file.returns.twr.daily))
 
   }
 

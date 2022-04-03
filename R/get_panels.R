@@ -485,28 +485,83 @@ write_price_quantity_panel <- function(ticker, path) {
 
 }
 
+#' Write all value panels for purchase, dividend and sales transactions for all tickers
+#'
+#' @usage write_all_value_panels(df_transactions, user_path, db_path)
+#' @param df_transactions A data frame containing the full history
+#' of transactions.
+#' @param user_path A single character string containing the directory of the user.
+#' @param db_path A single character string containing the directory of the database.
+#'
+#' @export
+write_all_value_panels <- function(df_transactions, user_path, db_path) {
+
+  get_user_names(user_path)
+  get_db_names(db_path)
+
+  df_transactions <- as.data.frame(df_transactions)
+
+  df_transactions$transaction_date <- as.Date(
+    df_transactions$transaction_date, format = "%d-%m-%Y")
+
+  df_isin_ticker <- data.table::fread(file.path(path.database,
+                                                file.tickers.db))
+
+  if (!any(names(df_transactions) == "ticker"))
+    df_transactions <- merge(df_transactions,
+                             df_isin_ticker,
+                             by = "isin")
+
+  tickers <- unique(df_transactions$ticker)
+
+  if (length(list.files(path.value.panel)) > 0)
+    file.remove(file.path(path.value.panel,
+                          list.files(path.value.panel)))
+
+  output <- mapply(write_value_panel_all_types, tickers,
+         MoreArgs = list(df_transactions, user_path))
+
+}
+
+#' Write value panels for purchase, dividend and sales transactions for given ticker
+#'
+#' @usage write_value_panel_all_types(ticker, df_transactions, user_path)
+#' @param ticker A single character string containing the ticker symbol.
+#' @param df_transactions A data frame containing the full history of transactions.
+#' @param user_path A single character string containing the directory of the user.
+#'
+#' @export
+write_value_panel_all_types <- function(ticker, df_transactions, user_path) {
+
+  transaction_types <- c("Purchase", "Sale", "Dividend")
+
+  mapply(write_value_panel, transaction_types,
+         MoreArgs = list(ticker, df_transactions, user_path))
+
+}
+
 #' Write value panel for purchase, dividend and sales transactions for given ticker
 #'
-#' @usage write_value_panel(transaction.type, ticker,
-#'                          df.transaction.history, path)
-#' @param transaction.type A single character string containing the transaction
+#' @usage write_value_panel(transaction_type, ticker,
+#'                          df_transactions, user_path)
+#' @param transaction_type A single character string containing the transaction
 #' type (e.g., \emph{Purchase}, \emph{Sale} or \emph{Dividend})
 #' @param ticker A single character string containing the ticker symbol.
-#' @param df.transaction.history A data frame containing the full history of transactions.
-#' @param path A single character string containing the directory of the user.
+#' @param df_transactions A data frame containing the full history of transactions.
+#' @param user_path A single character string containing the directory of the user.
 #'
 #' @export
 #' @import data.table
-write_value_panel <- function(transaction.type, ticker,
-                              df.transaction.history, path) {
+write_value_panel <- function(transaction_type, ticker,
+                              df_transactions, user_path) {
 
-  get_user_names(path)
+  get_user_names(user_path)
 
-  transaction_type_lc <- tolower(transaction.type)
+  transaction_type_lc <- tolower(transaction_type)
 
-  df_transactions <- df.transaction.history[df.transaction.history$ticker == ticker, ]
+  df_transactions <- df_transactions[df_transactions$ticker == ticker, ]
 
-  df_transactions <- df_transactions[df_transactions$transaction_type == transaction.type, ]
+  df_transactions <- df_transactions[df_transactions$transaction_type == transaction_type, ]
 
   if (nrow(df_transactions) > 0) {
 
@@ -564,170 +619,119 @@ write_value_panel <- function(transaction.type, ticker,
 
 }
 
-#' Write value panels for purchase, dividend and sales transactions for given ticker
-#'
-#' @usage write_value_panel_all_types(ticker, df.transaction.history, path)
-#' @param ticker A single character string containing the ticker symbol.
-#' @param df.transaction.history A data frame containing the full history of transactions.
-#' @param path A single character string containing the directory of the user.
-#'
-#' @export
-write_value_panel_all_types <- function(ticker, df.transaction.history, path) {
-
-  transaction.types <- c("Purchase", "Sale", "Dividend")
-
-  mapply(write_value_panel, transaction.types,
-         MoreArgs = list(ticker, df.transaction.history, path))
-
-}
-
-#' Write all value panels for purchase, dividend and sales transactions for all tickers
-#'
-#' @usage write_all_value_panels(df.transaction.history, path)
-#' @param df.transaction.history A data frame containing the full history of transactions.
-#' @param path A single character string containing the directory of the user.
-#'
-#' @export
-write_all_value_panels <- function(df.transaction.history, path) {
-
-  get_user_names(path)
-
-  df.transaction.history <- as.data.frame(df.transaction.history)
-
-  df.transaction.history$transaction_date <- as.Date(df.transaction.history$transaction_date,
-                                                     format = "%d-%m-%Y")
-
-  isin_ticker_exists <- file.exists(file.path(path.tickers, file.tickers))
-
-  if (isin_ticker_exists) {
-
-    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
-
-    if (!any(names(df.transaction.history) == "ticker"))
-      df.transaction.history <- merge(df.transaction.history,
-                                      df.isin.ticker,
-                                      by = "isin")
-
-    tickers <- unique(df.transaction.history$ticker)
-
-    if (length(list.files(path.value.panel)) > 0) {
-      file.remove(file.path(path.value.panel, list.files(path.value.panel)))
-    }
-
-    mapply(write_value_panel_all_types, tickers,
-           MoreArgs = list(df.transaction.history, path))
-
-  }
-
-}
-
 #' Write complete panels to a csv file
 #'
-#' @usage write_complete_panels(path)
-#' @param path A single character string. Path where data are stored.
+#' @usage write_complete_panels(user_path, db_path)
+#' @param user_path A single character string containing the directory of the user.
+#' @param db_path A single character string containing the directory of the database.
 #'
 #' @export
-write_complete_panels <- function(path) {
+write_complete_panels <- function(user_path, db_path) {
 
-  get_user_names(path)
+  get_user_names(user_path)
+  get_db_names(db_path)
 
-  df.transaction.history <- data.table::fread(file.path(path.transactions,
-                                                        file.transactions))
+  df_transactions <- data.table::fread(
+    file.path(path.transactions, file.transactions))
 
-  tickers <- get_tickers_from_transactions(df.transaction.history, path)
+  tickers <- get_tickers_from_db(df_transactions, db_path)[[2]]
 
   if (length(list.files(path.complete.panel)) > 0)
-    file.remove(file.path(path.complete.panel, list.files(path.complete.panel)))
+    file.remove(file.path(path.complete.panel,
+                          list.files(path.complete.panel)))
 
-  output <- mapply(write_complete_panel, tickers, MoreArgs = list(path))
+  output <- mapply(write_complete_panel, tickers,
+                   MoreArgs = list(user_path))
 
 }
 
 #' Write complete panel to a csv file
 #'
-#' @usage write_complete_panel(ticker, path)
+#' @usage write_complete_panel(ticker, user_path)
 #' @param ticker A single character string containing the ticker.
-#' @param path A single character string. Path where data are stored.
+#' @param user_path A single character string. Path where data are stored.
 #'
 #' @export
-write_complete_panel <- function(ticker, path) {
+write_complete_panel <- function(ticker, user_path) {
 
-  get_user_names(path)
+  get_user_names(user_path)
 
   pricequantity_panels <- list.files(path.pricequantity.panel,
                                      pattern = ticker)
 
   if (length(pricequantity_panels) > 0) {
 
-    df.pricequantity.panel <- data.table::fread(file.path(path.pricequantity.panel,
-                                                          pricequantity_panels))
+    df_pricequantity_panel <- data.table::fread(
+      file.path(path.pricequantity.panel, pricequantity_panels))
 
-    df.pricequantity.panel <- df.pricequantity.panel[, c("date", "adjusted", "value",
+    df_pricequantity_panel <- df_pricequantity_panel[, c("date", "adjusted", "value",
                                                          "cum_quantity", "quantity")]
 
-    ticker.value.panels <- list.files(path.value.panel, pattern = ticker)
+    ticker_value_panels <- list.files(path.value.panel, pattern = ticker)
 
-    if (length(ticker.value.panels) > 0) {
+    if (length(ticker_value_panels) > 0) {
 
-      purchase.exist <- startsWith(ticker.value.panels, "purchase")
-      sale.exist <- startsWith(ticker.value.panels, "sale")
-      dividend.exist <- startsWith(ticker.value.panels, "dividend")
+      purchase_exist <- startsWith(ticker_value_panels, "purchase")
+      sale_exist <- startsWith(ticker_value_panels, "sale")
+      dividend_exist <- startsWith(ticker_value_panels, "dividend")
 
-      if (any(purchase.exist))
-        df.purchasevalue.panel <- data.table::fread(file.path(path.value.panel,
-                                                              ticker.value.panels[purchase.exist]))
+      if (any(purchase_exist))
+        df_purchasevalue_panel <- data.table::fread(
+          file.path(path.value.panel, ticker_value_panels[purchase_exist]))
 
-      if (any(sale.exist))
-        df.salevalue.panel <- data.table::fread(file.path(path.value.panel,
-                                                          ticker.value.panels[sale.exist]))
+      if (any(sale_exist))
+        df_salevalue_panel <- data.table::fread(
+          file.path(path.value.panel, ticker_value_panels[sale_exist]))
 
-      if (any(dividend.exist))
-        df.dividendvalue.panel <- data.table::fread(file.path(path.value.panel,
-                                                              ticker.value.panels[dividend.exist]))
+      if (any(dividend_exist))
+        df_dividendvalue_panel <- data.table::fread(
+          file.path(path.value.panel, ticker_value_panels[dividend_exist]))
 
-      if (exists("df.purchasevalue.panel")) {
+      if (exists("df_purchasevalue_panel")) {
 
-        df.panel <- merge(df.pricequantity.panel,
-                          df.purchasevalue.panel,
+        df_panel <- merge(df_pricequantity_panel,
+                          df_purchasevalue_panel,
                           by = "date",
                           all = TRUE)
 
-        if (exists("df.salevalue.panel")) {
-          df.panel <- merge(df.panel,
-                            df.salevalue.panel,
+        if (exists("df_salevalue_panel")) {
+          df_panel <- merge(df_panel,
+                            df_salevalue_panel,
                             by = "date",
                             all = TRUE)
         } else {
-          df.panel$sale_cum_value <- 0
-          df.panel$sale_value <- 0
+          df_panel$sale_cum_value <- 0
+          df_panel$sale_value <- 0
         }
 
-        if (exists("df.dividendvalue.panel")) {
-          df.panel <- merge(df.panel,
-                            df.dividendvalue.panel,
+        if (exists("df_dividendvalue_panel")) {
+          df_panel <- merge(df_panel,
+                            df_dividendvalue_panel,
                             by = "date",
                             all = TRUE)
         } else {
-          df.panel$dividend_cum_value <- 0
-          df.panel$dividend_value <- 0
+          df_panel$dividend_cum_value <- 0
+          df_panel$dividend_value <- 0
         }
 
       }
 
-      df.panel[is.na(df.panel)] <- 0
-      df.panel <- df.panel[df.panel$cum_quantity != 0
-                           | df.panel$sale_value != 0
-                           | df.panel$dividend_value != 0, ]
+      df_panel[is.na(df_panel)] <- 0
+      df_panel <- df_panel[df_panel$cum_quantity != 0
+                           | df_panel$sale_value != 0
+                           | df_panel$dividend_value != 0, ]
 
-      ## Add ticker (makes it a bit easier when using lapply to read all panels)
-      df.panel$ticker <- ticker
+      ## Add ticker (makes it a bit easier when using lapply
+      ## to read all panels)
+      df_panel$ticker <- ticker
 
       file_panel <- paste0("complete_panel_", ticker,
-                           "_from_", min(df.panel$date),
-                           "_to_", max(df.panel$date),
+                           "_from_", min(df_panel$date),
+                           "_to_", max(df_panel$date),
                            ".csv")
 
-      data.table::fwrite(df.panel, file.path(path.complete.panel, file_panel))
+      data.table::fwrite(
+        df_panel, file.path(path.complete.panel, file_panel))
 
     }
 

@@ -4,12 +4,12 @@
 \alias{write_complete_panel}
 \title{Write complete panel to a csv file}
 \usage{
-write_complete_panel(ticker, path)
+write_complete_panel(ticker, user_path)
 }
 \arguments{
 \item{ticker}{A single character string containing the ticker.}
 
-\item{path}{A single character string. Path where data are stored.}
+\item{user_path}{A single character string. Path where data are stored.}
 }
 \description{
 Write complete panel to a csv file

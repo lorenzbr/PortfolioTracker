@@ -4,8 +4,7 @@
 \alias{get_dividends_max}
 \title{Get total dividend payments}
 \usage{
-get_dividends_max(path,
-                         file.dividend.history = "dividends_fullhistory.csv")
+get_dividends_max(path, file.dividend.history = "dividends_fullhistory.csv")
 }
 \arguments{
 \item{path}{A single character string. Path where data are stored.}

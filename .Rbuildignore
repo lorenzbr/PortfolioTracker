@@ -10,3 +10,5 @@
 ^dev$
 ^codecov\.yml$
 ^README\.Rmd$
+tests/testthat/testdata/data
+^tests/testthat/test-pt_workflow\.R$

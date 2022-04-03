@@ -14,7 +14,8 @@ create_main_dir <- function(path) {
   path.prices.db <- file.path(path.database, "prices")
 
   ## Create folders for tickers and prices (if not yet exists)
-  folders <- c(path.root, path.user.credentials, path.user.data, path.database)
+  folders <- c(path.root, path.user.credentials, path.user.data,
+               path.database, path.prices.db)
   for (folder in folders)
     if (!dir.exists(folder)) dir.create(folder, recursive = TRUE)
 

@@ -1,49 +1,47 @@
 #' Write current portfolio investments to a csv file
 #'
-#' @usage write_current_portfolio(path)
-#' @param path A single character string. Directory of your data.
+#' @usage write_current_portfolio(user_path, db_path)
+#' @param user_path A single character string containing the directory of the user.
+#' @param db_path A single character string containing the directory of the database.
 #'
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
-write_current_portfolio <- function(path) {
+write_current_portfolio <- function(user_path, db_path) {
 
-  get_user_names(path)
+  get_user_names(user_path)
+  get_db_names(db_path)
 
   if (length(list.files(path.pricequantity.panel)) > 0) {
 
     files <- file.path(path.pricequantity.panel, list.files(path.pricequantity.panel))
     list_dfs <- lapply(files, data.table::fread)
 
-    transaction_history_exists <- file.exists(file.path(path.transactions,
-                                                        file.transactions))
-    isin_ticker_exists <- file.exists(file.path(path.tickers, file.tickers))
+    file_path_transactions <- file.path(path.transactions, file.transactions)
 
-    if (transaction_history_exists && isin_ticker_exists) {
+    if (file.exists(file_path_transactions)) {
 
       ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-      df_isin_ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+      df_isin_ticker <- data.table::fread(file.path(path.database, file.tickers.db))
 
-      df_transaction_history <- data.table::fread(file.path(path.transactions,
-                                                            file.transactions))
-      df_ticker_investmentnames <- unique(df_transaction_history[, c("isin", "name",
-                                                                     "transaction_date")])
+      df_transactions <- data.table::fread(file_path_transactions)
+      df_ticker_names <- unique(df_transactions[, c("isin",
+                                                    "name",
+                                                    "transaction_date")])
 
       ## Use name from most recent transaction
-      df_ticker_investmentnames$date <- as.Date(df_ticker_investmentnames$transaction_date,
-                                                format = "%d-%m-%Y")
-      df_ticker_investmentnames <- df_ticker_investmentnames %>%
+      df_ticker_names$date <- as.Date(
+        df_ticker_names$transaction_date, format = "%d-%m-%Y")
+
+      df_ticker_names <- df_ticker_names %>%
         dplyr::group_by(.data$isin) %>%
         dplyr::filter(date == max(.data$date))
-      df_ticker_investmentnames <- df_ticker_investmentnames %>%
+      df_ticker_names <- df_ticker_names %>%
         dplyr::group_by(.data$isin) %>%
         dplyr::sample_n(size = 1)
 
-      df_ticker_investmentnames <- merge(df_ticker_investmentnames,
-                                         df_isin_ticker,
-                                         by = "isin")
-      df_ticker_investmentnames <- unique(df_ticker_investmentnames[, c("ticker",
-                                                                        "name")])
+      df_ticker_names <- merge(df_ticker_names, df_isin_ticker, by = "isin")
+      df_ticker_names <- unique(df_ticker_names[, c("ticker", "name")])
 
       #### Get most recent entry in each price-quantity panel
 
@@ -57,7 +55,7 @@ write_current_portfolio <- function(path) {
 
       df_current <- unique(df_current)
 
-      df_current <- merge(df_current, df_ticker_investmentnames, by = "ticker")
+      df_current <- merge(df_current, df_ticker_names, by = "ticker")
       df_current <- merge(df_current, df_isin_ticker, by = "ticker")
 
       df_current <- df_current[, c("name", "isin", "ticker", "adjusted",

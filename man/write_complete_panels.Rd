@@ -4,10 +4,12 @@
 \alias{write_complete_panels}
 \title{Write complete panels to a csv file}
 \usage{
-write_complete_panels(path)
+write_complete_panels(user_path, db_path)
 }
 \arguments{
-\item{path}{A single character string. Path where data are stored.}
+\item{user_path}{A single character string containing the directory of the user.}
+
+\item{db_path}{A single character string containing the directory of the database.}
 }
 \description{
 Write complete panels to a csv file
