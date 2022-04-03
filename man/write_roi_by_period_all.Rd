@@ -4,10 +4,12 @@
 \alias{write_roi_by_period_all}
 \title{Write cumulative daily investment returns for all tickers to a csv file}
 \usage{
-write_roi_by_period_all(path)
+write_roi_by_period_all(user_path, db_path)
 }
 \arguments{
-\item{path}{A single character string. Path where data are stored.}
+\item{user_path}{A single character string containing the directory of the user.}
+
+\item{db_path}{A single character string containing the directory of the database.}
 }
 \description{
 Write cumulative daily investment returns for all tickers to a csv file

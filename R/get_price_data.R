@@ -157,8 +157,8 @@ update_db_prices_based_on_transactions <- function(df_transactions, db_path,
 
 #' Update and store prices as csv based on new transactions
 #'
-#' @usage update_prices_based_on_transactions(df.transactions, path, external_search = TRUE)
-#' @param df.transactions A data frame. Results from \code{\link[BankStatementParser]{get_transactions}}.
+#' @usage update_prices_based_on_transactions(df_transactions, path, external_search = TRUE)
+#' @param df_transactions A data frame. Results from \code{\link[BankStatementParser]{get_transactions}}.
 #' At least three variables/columns are required: \emph{transaction_type}, \emph{isin}
 #' and \emph{transaction_date}
 #' @param path A single character string. Path where data are stored.
@@ -168,41 +168,41 @@ update_db_prices_based_on_transactions <- function(df_transactions, db_path,
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
-update_prices_based_on_transactions <- function(df.transactions, path,
+update_prices_based_on_transactions <- function(df_transactions, path,
                                                 external_search = TRUE) {
 
   get_user_names(path)
 
   ## To get prices, only purchase transactions are relevant (?)
-  df.transactions <- df.transactions[df.transactions$transaction_type == "Purchase", ]
+  df_transactions <- df_transactions[df_transactions$transaction_type == "Purchase", ]
 
-  isins <- unique(df.transactions$isin)
+  isins <- unique(df_transactions$isin)
 
   update_ticker_isin(isins = isins,
                      path_tickers = path.tickers,
                      file_tickers = file.tickers,
                      external_search = external_search)
 
-  isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
+  isin_ticker_exists <- file.exists(file.path(path.tickers, file.tickers))
 
-  if (isin.ticker.exists) {
+  if (isin_ticker_exists) {
 
     ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+    df_isin_ticker <- data.table::fread(file.path(path.tickers, file.tickers))
 
-    df.transactions <- merge(df.transactions, df.isin.ticker, by = "isin",
+    df_transactions <- merge(df_transactions, df_isin_ticker, by = "isin",
                              all.x = TRUE)
-    df.transactions <- df.transactions[!is.na(df.transactions$ticker), ]
+    df_transactions <- df_transactions[!is.na(df_transactions$ticker), ]
 
-    df.transactions$transaction_date <- as.Date(df.transactions$transaction_date,
+    df_transactions$transaction_date <- as.Date(df_transactions$transaction_date,
                                                 format = "%d-%m-%Y")
 
     ## Keep oldest transactions for each ticker because younger transactions
     ## produce price data which are a subset of older transactions
-    df.transactions <- df.transactions %>%
+    df_transactions <- df_transactions %>%
       dplyr::group_by(.data$ticker) %>%
       dplyr::filter(transaction_date == min(.data$transaction_date))
-    df.transactions <- df.transactions %>%
+    df_transactions <- df_transactions %>%
       dplyr::group_by(.data$ticker) %>%
       dplyr::sample_n(size = 1)
 
@@ -211,13 +211,13 @@ update_prices_based_on_transactions <- function(df.transactions, path,
 
     ## For loop over all transactions in file
     ## To do: alternatively, use new function and apply function (probably NOT faster)
-    for (i in 1:nrow(df.transactions)) {
+    for (i in 1:nrow(df_transactions)) {
 
       tryCatch({
 
         ## Select transaction date and ticker
-        transaction.date <- df.transactions$transaction_date[i]
-        ticker <- df.transactions$ticker[i]
+        transaction_date <- df_transactions$transaction_date[i]
+        ticker <- df_transactions$ticker[i]
 
         ## Check whether prices for this ticker based on transaction date already exists:
         ## if no: continue
@@ -225,42 +225,42 @@ update_prices_based_on_transactions <- function(df.transactions, path,
         ## focal date is older, continue
 
         ## Get all prices with same ticker
-        df.prices.same.ticker <- data.frame(filename = list.files(path.prices.raw,
-                                                                  pattern = ticker))
+        df_prices_same_ticker <- data.frame(
+          filename = list.files(path.prices.raw, pattern = ticker))
 
-        ## Initialize earliest.date (required to have an existing valid date)
-        earliest.date <- as.Date("1900-01-01", format = "%Y-%m-%d")
+        ## Initialize earliest_date (required to have an existing valid date)
+        earliest_date <- as.Date("1900-01-01", format = "%Y-%m-%d")
 
-        ## Identify earliest date for each of those files and compare to transaction.date
-        if (nrow(df.prices.same.ticker) > 0) {
+        ## Identify earliest date for each of those files and compare to transaction_date
+        if (nrow(df_prices_same_ticker) > 0) {
 
-          df.prices.same.ticker$first_date <- stringr::str_match(df.prices.same.ticker$filename,
-                                                                 "from_(.*?)_to")[, 2]
-          df.prices.same.ticker$first_date <- as.Date(df.prices.same.ticker$first_date,
-                                                      format = "%Y-%m-%d")
-          min.date <- min(df.prices.same.ticker$first_date)
-          df.prices.same.ticker <- df.prices.same.ticker[df.prices.same.ticker$first_date == min.date, ]
-          earliest.date <- unique(df.prices.same.ticker$first_date)
+          df_prices_same_ticker$first_date <- stringr::str_match(
+            df_prices_same_ticker$filename, "from_(.*?)_to")[, 2]
+          df_prices_same_ticker$first_date <- as.Date(
+            df_prices_same_ticker$first_date, format = "%Y-%m-%d")
+          min_date <- min(df_prices_same_ticker$first_date)
+          df_prices_same_ticker <- df_prices_same_ticker[df_prices_same_ticker$first_date == min_date, ]
+          earliest_date <- unique(df_prices_same_ticker$first_date)
 
           ## If new transaction is older than earliest date updated "to" date
-          if (transaction.date < earliest.date && !is.na(earliest.date)) {
-            today <- earliest.date - 1
+          if (transaction_date < earliest_date && !is.na(earliest_date)) {
+            today <- earliest_date - 1
           }
 
         }
 
         filename_data_raw_prices <- paste0("prices_ticker_", ticker, "_from_",
-                                           transaction.date, "_to_", today, ".csv")
+                                           transaction_date, "_to_", today, ".csv")
 
-        ## If transaction.date is older than earliest.date of existing transactions
+        ## If transaction_date is older than earliest_date of existing transactions
         ## or no prices with same ticker exist, do this
-        if (transaction.date < earliest.date || nrow(df.prices.same.ticker) == 0) {
+        if (transaction_date < earliest_date || nrow(df_prices_same_ticker) == 0) {
 
           ## Check whether such a file exists already, then no need to download again
           if (!file.exists(file.path(path.prices.raw, filename_data_raw_prices))) {
 
             df_ticker_prices <- get_prices_from_yahoo(ticker = ticker,
-                                                      from = transaction.date,
+                                                      from = transaction_date,
                                                       to = today)
 
             filename_data_raw_prices <- paste0("prices_ticker_", ticker,

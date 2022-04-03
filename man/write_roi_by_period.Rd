@@ -4,12 +4,12 @@
 \alias{write_roi_by_period}
 \title{Write cumulative daily investment returns to a csv file}
 \usage{
-write_roi_by_period(ticker, path)
+write_roi_by_period(ticker, user_path)
 }
 \arguments{
 \item{ticker}{A single character string containing the ticker.}
 
-\item{path}{A single character string. Path where data are stored.}
+\item{user_path}{A single character string. Path where data are stored.}
 }
 \description{
 Write cumulative daily investment returns to a csv file

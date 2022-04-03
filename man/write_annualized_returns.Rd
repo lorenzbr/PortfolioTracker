@@ -4,10 +4,12 @@
 \alias{write_annualized_returns}
 \title{Write annualized returns to a csv file}
 \usage{
-write_annualized_returns(path)
+write_annualized_returns(user_path, db_path)
 }
 \arguments{
-\item{path}{A single character string. Path where data are stored.}
+\item{user_path}{A single character string containing the directory of the user.}
+
+\item{db_path}{A single character string containing the directory of the database.}
 }
 \description{
 Write annualized returns to a csv file

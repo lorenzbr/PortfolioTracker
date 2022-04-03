@@ -21,7 +21,7 @@ write_investment_irr_all <- function(path) {
     files <- file.path(path.complete.panel, files_complete_panels)
     list_dfs <- lapply(files, data.table::fread)
 
-    df.irr <- data.frame(
+    df_irr <- data.frame(
       matrix(ncol = 3, nrow = 0,
              dimnames = list(NULL,
                              c("ticker", "time_period", "irr"))))
@@ -32,7 +32,7 @@ write_investment_irr_all <- function(path) {
 
       ticker <- stringr::str_match(
         files[i], "complete_panel_(.*?)_from")[, 2]
-      df.panel <- list_dfs[[i]]
+      df_panel <- list_dfs[[i]]
 
       ## Select time period to compute IRR
       nb_periods <- c(1, 3, 6, 12, 36, 60, 120, 1, 1)
@@ -40,72 +40,72 @@ write_investment_irr_all <- function(path) {
 
       for (t in 1:length(nb_periods)) {
 
-        df.selected <- get_df_with_selected_time_period(
-          df = df.panel, nb_period = nb_periods[t],
+        df_selected <- get_df_with_selected_time_period(
+          df = df_panel, nb_period = nb_periods[t],
           period_type = period_types[t])
 
-        if (nrow(df.selected) > 0) {
+        if (nrow(df_selected) > 0) {
 
           time_period <- paste(nb_periods[t], period_types[t])
 
           ## Sometimes dates do not exist (e.g., Feb 29, Feb 30,
           ## Feb 31, April 31)
-          first.date.target <- Sys.Date() - months(nb_periods[t])
+          first_date_target <- Sys.Date() - months(nb_periods[t])
           j <- 1
-          while (is.na(first.date.target) && j < 5) {
-            first.date.target <- (Sys.Date() - j) - months(nb_periods[i])
+          while (is.na(first_date_target) && j < 5) {
+            first_date_target <- (Sys.Date() - j) - months(nb_periods[i])
             j = j + 1
           }
-          first.date.actual <- min(df.selected$date)
+          first_date_actual <- min(df_selected$date)
 
           ## If difference is very large, data for this period not available
-          if (difftime(first.date.actual, first.date.target) <= 30) {
+          if (difftime(first_date_actual, first_date_target) <= 30) {
 
             ## Remove all periods with no portfolio value,
             ## no purchase and no sale value at the same time
-            days.empty.portfolio <- df.selected$value == 0 &
-              df.selected$purchase_value == 0 &
-              df.selected$sale_value == 0
-            df.selected <- df.selected[!days.empty.portfolio, ]
+            days_empty_portfolio <- df_selected$value == 0 &
+              df_selected$purchase_value == 0 &
+              df_selected$sale_value == 0
+            df_selected <- df_selected[!days_empty_portfolio, ]
 
             ## In the first period, the investment would be hypothetically purchased
             ## If something was indeed purchased, this would appear in the
             ## "value" column. So no need to consider it twice
-            is.first.day <- df.selected$date == min(df.selected$date)
-            df.selected$purchase_value[is.first.day] <- df.selected$value[is.first.day]
+            is_first_day <- df_selected$date == min(df_selected$date)
+            df_selected$purchase_value[is_first_day] <- df_selected$value[is_first_day]
 
             ## In the last period, the investment would be hypothetically sold
             ## If something was indeed sold on the last day, this would NOT
             ## appear in the "value" column. So need to consider this as well.
-            is.last.day <- df.selected$date == max(df.selected$date)
-            df.selected$sale_value[is.last.day] <- df.selected$sale_value[is.last.day] +
-              df.selected$value[is.last.day]
+            is_last_day <- df_selected$date == max(df_selected$date)
+            df_selected$sale_value[is_last_day] <- df_selected$sale_value[is_last_day] +
+              df_selected$value[is_last_day]
 
-            df.selected$cash_flow <- df.selected$sale_value +
-              df.selected$dividend_value -
-              df.selected$purchase_value
+            df_selected$cash_flow <- df_selected$sale_value +
+              df_selected$dividend_value -
+              df_selected$purchase_value
 
             ## Aggregate cash flow on month level
             ## If it gets too slow, compute IRR on year level
             ## For now month level should be fine
-            df.selected.by.month <- data.table::setDT(
-              df.selected)[, list(cash_flow = sum(cash_flow)),
+            df_selected_by_month <- data.table::setDT(
+              df_selected)[, list(cash_flow = sum(cash_flow)),
                            by = list(yr = lubridate::year(date),
                                      mon = months(date))]
 
             ## Computation of IRR on monthly basis
-            irr <- jrvFinance::irr(df.selected.by.month$cash_flow,
+            irr <- jrvFinance::irr(df_selected_by_month$cash_flow,
                                    cf.freq = 12, comp.freq = Inf)
 
-            df.temp <- data.frame(ticker = ticker, time_period, irr)
+            df_temp <- data.frame(ticker = ticker, time_period, irr)
 
           } else {
 
-            df.temp <- data.frame(ticker = ticker, time_period, irr = NA)
+            df_temp <- data.frame(ticker = ticker, time_period, irr = NA)
 
           }
 
-          df.irr <- rbind(df.irr, df.temp)
+          df_irr <- rbind(df_irr, df_temp)
 
         }
 
@@ -114,23 +114,23 @@ write_investment_irr_all <- function(path) {
     }
 
     ## Long to wide
-    data.table::setDT(df.irr)
-    df.irr <- data.table::dcast(df.irr, ticker ~ time_period,
+    data.table::setDT(df_irr)
+    df_irr <- data.table::dcast(df_irr, ticker ~ time_period,
                                 value.var = "irr")
 
-    data.table::setDF(df.irr)
+    data.table::setDF(df_irr)
 
-    names(df.irr)[names(df.irr) == "1 max"] <- "max"
-    names(df.irr)[names(df.irr) == "1 ytd"] <- "ytd"
-    names(df.irr)[names(df.irr) == "1 months"] <- "1m"
-    names(df.irr)[names(df.irr) == "3 months"] <- "3m"
-    names(df.irr)[names(df.irr) == "6 months"] <- "6m"
-    names(df.irr)[names(df.irr) == "12 months"] <- "1y"
-    names(df.irr)[names(df.irr) == "36 months"] <- "3y"
-    names(df.irr)[names(df.irr) == "60 months"] <- "5y"
-    names(df.irr)[names(df.irr) == "120 months"] <- "10y"
+    names(df_irr)[names(df_irr) == "1 max"] <- "max"
+    names(df_irr)[names(df_irr) == "1 ytd"] <- "ytd"
+    names(df_irr)[names(df_irr) == "1 months"] <- "1m"
+    names(df_irr)[names(df_irr) == "3 months"] <- "3m"
+    names(df_irr)[names(df_irr) == "6 months"] <- "6m"
+    names(df_irr)[names(df_irr) == "12 months"] <- "1y"
+    names(df_irr)[names(df_irr) == "36 months"] <- "3y"
+    names(df_irr)[names(df_irr) == "60 months"] <- "5y"
+    names(df_irr)[names(df_irr) == "120 months"] <- "10y"
 
-    data.table::fwrite(df.irr, file.path(path.returns, file.returns.irr))
+    data.table::fwrite(df_irr, file.path(path.returns, file.returns.irr))
 
   }
 
@@ -208,8 +208,9 @@ write_returns <- function(path) {
 #' Get all returns (daily, monthly, annual) for ticker
 #'
 #' @usage get_returns_all(df, ticker)
-#' @param df A data frame containing date and prices.
+#' @param df A data frame containing \emph{date} and prices with name \emph{adjusted}.
 #' @param ticker A single character string containing the ticker.
+#'
 #' @return A data frame containing daily, monthly and annual returns.
 #'
 #' @export
@@ -218,125 +219,119 @@ get_returns_all <- function(df, ticker) {
   df$date <- as.Date(df$date, format = "%Y-%m-%d")
 
   df <- df[, c("date", "adjusted")]
-  xts.prices <- xts::as.xts(df)
+  xts_prices <- xts::as.xts(df)
 
-  xts.monthlyreturns <- quantmod::monthlyReturn(xts.prices)
-  xts.annualreturns <- quantmod::annualReturn(xts.prices)
+  # xts_monthly_returns <- quantmod::monthlyReturn(xts_prices)
+  # xts_annual_returns <- quantmod::annualReturn(xts_prices)
 
-  xts.allreturns <- quantmod::allReturns(xts.prices)
+  xts_all_returns <- quantmod::allReturns(xts_prices)
 
-  df.allreturns <- as.data.frame(xts.allreturns)
+  df_all_returns <- as.data.frame(xts_all_returns)
 
-  names(df.allreturns) <- paste0(ticker, ".", names(df.allreturns))
+  names(df_all_returns) <- paste0(ticker, ".", names(df_all_returns))
 
-  df.allreturns$date <- rownames(df.allreturns)
+  df_all_returns$date <- rownames(df_all_returns)
 
-  rownames(df.allreturns) <- 1:nrow(df.allreturns)
+  rownames(df_all_returns) <- 1:nrow(df_all_returns)
 
-  df.allreturns$date <- as.Date(df.allreturns$date, format = "%Y-%m-%d")
+  df_all_returns$date <- as.Date(df_all_returns$date, format = "%Y-%m-%d")
 
-  return(df.allreturns)
+  return(df_all_returns)
 
 }
 
 #' Write annualized returns to a csv file
 #'
-#' @usage write_annualized_returns(path)
-#' @param path A single character string. Path where data are stored.
+#' @usage write_annualized_returns(user_path, db_path)
+#' @param user_path A single character string containing the directory of the user.
+#' @param db_path A single character string containing the directory of the database.
 #'
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
-write_annualized_returns <- function(path) {
+write_annualized_returns <- function(user_path, db_path) {
 
-  get_user_names(path)
+  get_user_names(user_path)
+  get_db_names(db_path)
 
-  returns.period <- "daily"
-  returns.period.file <- "daily_returns"
+  file_name <- list.files(path.returns, pattern = "daily_returns")
 
-  file.name <- list.files(path.returns, pattern = returns.period.file)
+  df_returns <- data.table::fread(file.path(path.returns, file_name))
 
-  df.returns <- data.table::fread(file.path(path.returns, file.name))
+  names(df_returns) <- gsub("\\.daily", "", names(df_returns))
 
-  names(df.returns) <- gsub(paste0("\\.", returns.period), "",
-                            names(df.returns))
+  df_returns$date <- as.Date(df_returns$date, format = "%Y-%m-%d")
 
-  df.returns$date <- as.Date(df.returns$date, format = "%Y-%m-%d")
+  xts_returns_max <- xts::as.xts(df_returns)
 
-  xts.returns.max <- xts::as.xts(df.returns)
-
-  df.annualized.years <- data.frame(
-    matrix(nrow = length(names(xts.returns.max)), ncol = 0,
-           dimnames = list(names(xts.returns.max), NULL)))
+  df_annualized_years <- data.frame(
+    matrix(nrow = length(names(xts_returns_max)), ncol = 0,
+           dimnames = list(names(xts_returns_max), NULL)))
 
   ## Annualized returns for 1, 3, 5 and 10 years
-  annualize.return.periods <- c(1, 3, 5, 10)
+  annualize_return_periods <- c(1, 3, 5, 10)
 
-  for (annualize.return.period in annualize.return.periods) {
+  for (annualize_return_period in annualize_return_periods) {
 
     ## Select period
-    xts.returns.Xy <- xts.returns.max[paste0(
-      Sys.Date() - lubridate::years(annualize.return.period), "/")]
+    xts.returns.Xy <- xts_returns_max[paste0(
+      Sys.Date() - lubridate::years(annualize_return_period), "/")]
 
     ## Compute annualized return if prices exist for X years
 
-    df.temp <- get_annualized_returns(xts.returns.Xy)
+    df_temp <- get_annualized_returns(xts.returns.Xy)
 
-    names(df.temp) <- paste0(annualize.return.period, "y")
+    names(df_temp) <- paste0(annualize_return_period, "y")
 
-    df.annualized.years <- cbind(df.annualized.years, df.temp)
+    df_annualized_years <- cbind(df_annualized_years, df_temp)
 
   }
 
-  df.annualized.max <- get_annualized_returns(xts.returns.max)
-  names(df.annualized.max) <- "max"
-  df.annualized <- cbind(df.annualized.years, df.annualized.max)
+  df_annualized_max <- get_annualized_returns(xts_returns_max)
+  names(df_annualized_max) <- "max"
+  df_annualized <- cbind(df_annualized_years, df_annualized_max)
 
-  col.names <- names(df.annualized)
-  df.annualized$ticker <- rownames(df.annualized)
-  df.annualized <- df.annualized[, c("ticker", col.names)]
+  col_names <- names(df_annualized)
+  df_annualized$ticker <- rownames(df_annualized)
+  df_annualized <- df_annualized[, c("ticker", col_names)]
 
+  file_path_transactions <- file.path(path.transactions, file.transactions)
 
-  transaction.history.exists <- file.exists(file.path(path.transactions,
-                                                      file.transactions))
-  isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
+  if (file.exists(file_path_transactions)) {
 
-  if (transaction.history.exists && isin.ticker.exists) {
+    df_transactions <- data.table::fread(file_path_transactions)
 
-    df.transaction.history <- data.table::fread(
-      file.path(path.transactions, file.transactions))
+    df_isin_ticker <- data.table::fread(file.path(path.database, file.tickers.db))
 
-    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+    df_transactions <- merge(df_transactions,
+                             df_isin_ticker,
+                             by = "isin")
 
-    df.transaction.history <- merge(df.transaction.history,
-                                    df.isin.ticker,
-                                    by = "isin")
-
-    df.ticker.date <- df.transaction.history[df.transaction.history$transaction_type == "Purchase",
-                                                        c("ticker", "transaction_date")]
-    names(df.ticker.date)[names(df.ticker.date) == "transaction_date"] <- "date"
-    df.ticker.date$date <- as.Date(df.ticker.date$date,
+    df_ticker_date <- df_transactions[df_transactions$transaction_type == "Purchase",
+                                      c("ticker", "transaction_date")]
+    names(df_ticker_date)[names(df_ticker_date) == "transaction_date"] <- "date"
+    df_ticker_date$date <- as.Date(df_ticker_date$date,
                                    format = "%d-%m-%Y")
-    df.ticker.date <- df.ticker.date %>%
+    df_ticker_date <- df_ticker_date %>%
       dplyr::group_by(.data$ticker) %>%
       dplyr::filter(date == min(.data$date))
-    df.ticker.date <- df.ticker.date %>%
+    df_ticker_date <- df_ticker_date %>%
       dplyr::group_by(.data$ticker) %>%
       dplyr::sample_n(size = 1)
-    df.ticker.date$age_yrs <- floor(
-      lubridate::time_length(difftime(Sys.Date(), df.ticker.date$date), "years"))
+    df_ticker_date$age_yrs <- floor(
+      lubridate::time_length(difftime(Sys.Date(), df_ticker_date$date), "years"))
 
     ## Make return NA or "-" if column year greater than age_yrs
-    df.annualized <- merge(df.annualized, df.ticker.date, by = "ticker")
-    for (i in 1:nrow(df.annualized)) {
-      incomplete.positions <- which(df.annualized$age_yrs[i] < annualize.return.periods) + 1
-      df.annualized[i, incomplete.positions] <- NA
+    df_annualized <- merge(df_annualized, df_ticker_date, by = "ticker")
+    for (i in 1:nrow(df_annualized)) {
+      incomplete_positions <- which(df_annualized$age_yrs[i] < annualize_return_periods) + 1
+      df_annualized[i, incomplete_positions] <- NA
     }
 
-    df.annualized <- df.annualized[, names(df.annualized) != "age_yrs"
-                                   & names(df.annualized) != "date"]
+    df_annualized <- df_annualized[, names(df_annualized) != "age_yrs"
+                                   & names(df_annualized) != "date"]
 
-    data.table::fwrite(df.annualized, file.path(path.returns,
+    data.table::fwrite(df_annualized, file.path(path.returns,
                                                 file.returns.annualized))
 
   }
@@ -353,133 +348,123 @@ write_portfolio_return <- function(path) {
 
   get_user_names(path)
 
-  # df.transaction.history <- data.table::fread(
-  #   file.path(path.transactions, file.transactions))
-  # df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
-  # df.transaction.history <- merge(df.transaction.history,
-  #                                 df.isin.ticker,
-  #                                 by = "isin")
+  file_name <- list.files(path.returns, pattern = "daily_returns")
 
-  returns.period <- "daily"
-  returns.period.file <- "daily_returns"
+  df_returns <- data.table::fread(file.path(path.returns, file_name))
 
-  file.name <- list.files(path.returns, pattern = returns.period.file)
+  names(df_returns) <- gsub("\\.daily", "", names(df_returns))
 
-  df.returns <- data.table::fread(file.path(path.returns, file.name))
+  df_returns$date <- as.Date(df_returns$date, format = "%Y-%m-%d")
 
-  names(df.returns) <- gsub(paste0("\\.", returns.period), "",
-                            names(df.returns))
+  df_returns[is.na(df_returns)] <- 0
 
-  df.returns$date <- as.Date(df.returns$date, format = "%Y-%m-%d")
-
-  df.returns[is.na(df.returns)] <- 0
-
-  xts.returns.max <- xts::as.xts(df.returns)
+  xts_returns_max <- xts::as.xts(df_returns)
 
 
-  files.pricequantity.panels <- list.files(path.pricequantity.panel)
+  files_pricequantity_panels <- list.files(path.pricequantity.panel)
 
-  no.pricequantity.panels <- length(files.pricequantity.panels) == 0
+  if (length(files_pricequantity_panels) > 0) {
 
-  if (!no.pricequantity.panels) {
-
-    files <- file.path(path.pricequantity.panel, files.pricequantity.panels)
-    list.dfs <- lapply(files, data.table::fread)
+    files <- file.path(path.pricequantity.panel, files_pricequantity_panels)
+    list_dfs <- lapply(files, data.table::fread)
 
   }
 
-  df.weight.final <- data.frame(matrix(nrow = 0, ncol = 1,
+  df_weight_final <- data.frame(matrix(nrow = 0, ncol = 1,
                                        dimnames = list(NULL, "date")))
 
-  for (i in 1:length(list.dfs)) {
+  for (i in 1:length(list_dfs)) {
 
     ticker <- stringr::str_match(files[i],
                                  "pricequantity_panel_(.*?)_from")[, 2]
-    df.pricequantity.panel <- list.dfs[[i]]
+    df_pricequantity_panel <- list_dfs[[i]]
 
-    df.weight.panel <- df.pricequantity.panel[, c("date", "value")]
-    names(df.weight.panel)[2] <- ticker
+    df_weight_panel <- df_pricequantity_panel[, c("date", "value")]
+    names(df_weight_panel)[2] <- ticker
 
-    df.weight.final <- merge(df.weight.final,
-                             df.weight.panel,
+    df_weight_final <- merge(df_weight_final,
+                             df_weight_panel,
                              by = "date",
                              all.x = TRUE, all.y = TRUE)
 
   }
 
-  df.weight.final[is.na(df.weight.final)] <- 0
-  df.weight.final$sum <- rowSums(df.weight.final[-1])
-  df.weight.final <- df.weight.final[df.weight.final$sum > 0, ]
-  df.weight.final[, 2:(length(df.weight.final) - 1)] <- df.weight.final[, 2:(length(df.weight.final) - 1)] / df.weight.final$sum
-  df.weight.final <- df.weight.final[, names(df.weight.final) != "sum"]
-  row.names(df.weight.final) <- df.weight.final$date
-  # df.weight.final <- df.weight.final[, names(df.weight.final) != "date"]
-  xts.weight <- xts::as.xts(df.weight.final)
-  xts.weight <- xts.weight[, names(xts.weight) != "date"]
-  storage.mode(xts.weight) <- "numeric"
+  df_weight_final[is.na(df_weight_final)] <- 0
+  df_weight_final$sum <- rowSums(df_weight_final[-1])
+  df_weight_final <- df_weight_final[df_weight_final$sum > 0, ]
+  df_weight_final[, 2:(length(df_weight_final) - 1)] <- df_weight_final[, 2:(length(df_weight_final) - 1)] / df_weight_final$sum
+  df_weight_final <- df_weight_final[, names(df_weight_final) != "sum"]
+  row.names(df_weight_final) <- df_weight_final$date
+  # df_weight_final <- df_weight_final[, names(df_weight_final) != "date"]
+  xts_weight <- xts::as.xts(df_weight_final)
+  xts_weight <- xts_weight[, names(xts_weight) != "date"]
+  storage.mode(xts_weight) <- "numeric"
 
   ## Get daily portfolio returns
-  ## Super slow: find other solution for this: Use slim version of this function
-  xts.portfolio <- PerformanceAnalytics::Return.portfolio(xts.returns.max,
-                                                          xts.weight)
+  ## Super slow: find other solution for this: Create faster/slim version of this function
+  xts_portfolio <- PerformanceAnalytics::Return.portfolio(xts_returns_max,
+                                                          xts_weight)
 
-  df.portfolio.daily <- data.frame(xts.portfolio)
-  df.portfolio.daily$date <- row.names(df.portfolio.daily)
-  df.portfolio.daily <- df.portfolio.daily[, c("date", "portfolio.returns")]
-  names(df.portfolio.daily)[2] <- "portfolio_returns"
-  row.names(df.portfolio.daily) <- 1:nrow(df.portfolio.daily)
+  df_portfolio_daily <- data.frame(xts_portfolio)
+  df_portfolio_daily$date <- row.names(df_portfolio_daily)
+  df_portfolio_daily <- df_portfolio_daily[, c("date", "portfolio.returns")]
+  names(df_portfolio_daily)[2] <- "portfolio_returns"
+  row.names(df_portfolio_daily) <- 1:nrow(df_portfolio_daily)
 
-  data.table::fwrite(df.portfolio.daily, file.path(path.returns,
+  data.table::fwrite(df_portfolio_daily, file.path(path.returns,
                                                    file.return.portfolio.daily))
 
 }
 
 #' Write cumulative daily investment returns for all tickers to a csv file
 #'
-#' @usage write_roi_by_period_all(path)
-#' @param path A single character string. Path where data are stored.
+#' @usage write_roi_by_period_all(user_path, db_path)
+#' @param user_path A single character string containing the directory of the user.
+#' @param db_path A single character string containing the directory of the database.
 #'
 #' @export
-write_roi_by_period_all <- function(path) {
+write_roi_by_period_all <- function(user_path, db_path) {
 
-  get_user_names(path)
+  get_user_names(user_path)
+  get_db_names(db_path)
 
-  df.transaction.history <- data.table::fread(file.path(path.transactions,
-                                                        file.transactions))
+  df_transactions <- data.table::fread(
+    file.path(path.transactions, file.transactions))
 
-  tickers <- get_tickers_from_transactions(df.transaction.history, path)
+  tickers <- get_tickers_from_db(df_transactions, db_path)[[2]]
 
-  ## Write cumulative daily investment return for all tickers
-  output <- mapply(write_roi_by_period, tickers, MoreArgs = list(path))
+  output <- mapply(write_roi_by_period, tickers,
+                   MoreArgs = list(user_path))
 
 }
 
 #' Write cumulative daily investment returns to a csv file
 #'
-#' @usage write_roi_by_period(ticker, path)
+#' @usage write_roi_by_period(ticker, user_path)
 #' @param ticker A single character string containing the ticker.
-#' @param path A single character string. Path where data are stored.
+#' @param user_path A single character string. Path where data are stored.
 #'
 #' @export
-write_roi_by_period <- function(ticker, path) {
+write_roi_by_period <- function(ticker, user_path) {
 
-  get_user_names(path)
+  get_user_names(user_path)
 
-  if (length(list.files(path.complete.panel, pattern = ticker)) > 0) {
+  file_complete_panel <- list.files(path.complete.panel, pattern = ticker)
 
-    df.complete.panel <- data.table::fread(file.path(path.complete.panel,
-                                              list.files(path.complete.panel,
-                                                         pattern = ticker)))
+  if (length(file_complete_panel) > 0) {
 
-    df.roi <- get_roi_by_period(df.complete.panel, nb_period = NULL,
+    df_complete_panel <- data.table::fread(
+      file.path(path.complete.panel, file_complete_panel))
+
+    df_roi <- get_roi_by_period(df_complete_panel, nb_period = NULL,
                                 period_type = "max")
 
-    file.roi.panel <- paste0("return_on_investment_daily_", ticker,
-                             "_from_", min(df.roi$date),
-                             "_to_", max(df.roi$date),
+    file_roi_panel <- paste0("return_on_investment_daily_", ticker,
+                             "_from_", min(df_roi$date),
+                             "_to_", max(df_roi$date),
                              ".csv")
 
-    data.table::fwrite(df.roi, file.path(path.returns.roi, file.roi.panel))
+    data.table::fwrite(df_roi, file.path(path.returns.roi, file_roi_panel))
 
   }
 
@@ -487,9 +472,9 @@ write_roi_by_period <- function(ticker, path) {
 
 #' Get cumulative return on investment for specific period
 #'
-#' @usage get_roi_by_period(df.complete.panel, nb_period = NULL,
+#' @usage get_roi_by_period(df_complete_panel, nb_period = NULL,
 #'                          period_type = "max")
-#' @param df.complete.panel A data.frame containing the complete panel.
+#' @param df_complete_panel A data.frame containing the complete panel.
 #' @param nb_period An integer indicating the number of months.
 #' Default is \emph{NULL}.
 #' @param period_type A single character string. Default \emph{max}. Possible
@@ -499,45 +484,45 @@ write_roi_by_period <- function(ticker, path) {
 #' for a given period.
 #'
 #' @export
-get_roi_by_period <- function(df.complete.panel, nb_period = NULL,
+get_roi_by_period <- function(df_complete_panel, nb_period = NULL,
                               period_type = "max") {
 
-  df.complete.panel.period <- get_df_with_selected_time_period(
-    df = df.complete.panel, nb_period = nb_period, period_type = period_type)
+  df_complete_panel_period <- get_df_with_selected_time_period(
+    df = df_complete_panel, nb_period = nb_period, period_type = period_type)
 
-  if (nrow(df.complete.panel.period) > 0) {
+  if (nrow(df_complete_panel_period) > 0) {
 
 
     if (period_type == "months"
         || period_type == "weeks"
         || period_type == "days") {
 
-      index.first.period <- df.complete.panel.period$date == min(df.complete.panel.period$date)
+      index_first_period <- df_complete_panel_period$date == min(df_complete_panel_period$date)
 
-      df.complete.panel.period <- df.complete.panel.period[order(df.complete.panel.period$date), ]
+      df_complete_panel_period <- df_complete_panel_period[order(df_complete_panel_period$date), ]
 
       ## Re-compute purchase cum value and first entry is simply equal to value
-      df.complete.panel.period$purchase_value[index.first.period] <- df.complete.panel.period$value[index.first.period]
-      df.complete.panel.period$purchase_cum_value <- cumsum(df.complete.panel.period$purchase_value)
+      df_complete_panel_period$purchase_value[index_first_period] <- df_complete_panel_period$value[index_first_period]
+      df_complete_panel_period$purchase_cum_value <- cumsum(df_complete_panel_period$purchase_value)
 
       ## Re-compute dividend and sale cum value
-      df.complete.panel.period$sale_cum_value <- cumsum(df.complete.panel.period$sale_value)
-      df.complete.panel.period$dividend_cum_value <- cumsum(df.complete.panel.period$dividend_value)
+      df_complete_panel_period$sale_cum_value <- cumsum(df_complete_panel_period$sale_value)
+      df_complete_panel_period$dividend_cum_value <- cumsum(df_complete_panel_period$dividend_value)
 
     }
 
-    df.complete.panel.period[is.na(df.complete.panel.period)] <- 0
-    df.complete.panel.period <- df.complete.panel.period[df.complete.panel.period$cum_quantity != 0
-                                                         | df.complete.panel.period$sale_value != 0
-                                                         | df.complete.panel.period$dividend_value != 0, ]
+    df_complete_panel_period[is.na(df_complete_panel_period)] <- 0
+    df_complete_panel_period <- df_complete_panel_period[df_complete_panel_period$cum_quantity != 0
+                                                         | df_complete_panel_period$sale_value != 0
+                                                         | df_complete_panel_period$dividend_value != 0, ]
 
-    df.complete.panel.period$daily_cum_roi <- (df.complete.panel.period$value +
-                                                 df.complete.panel.period$sale_cum_value +
-                                                 df.complete.panel.period$dividend_cum_value) / df.complete.panel.period$purchase_cum_value
+    df_complete_panel_period$daily_cum_roi <- (df_complete_panel_period$value +
+                                                 df_complete_panel_period$sale_cum_value +
+                                                 df_complete_panel_period$dividend_cum_value) / df_complete_panel_period$purchase_cum_value
 
-    df.roi.period <- df.complete.panel.period[, c("date", "daily_cum_roi")]
+    df_roi_period <- df_complete_panel_period[, c("date", "daily_cum_roi")]
 
-    return(df.roi.period)
+    return(df_roi_period)
 
   }
 

@@ -1,31 +1,25 @@
 #' Write history of dividends in a csv file
 #'
-#' @usage write_dividend_history(df.transaction.history, path)
-#' @param df.transaction.history data.frame containing history of transactions.
+#' @usage write_dividend_history(df_transactions, path)
+#' @param df_transactions A data frame containing the history of transactions.
 #' @param path A single character string. Path where data are stored.
 #'
 #' @export
-write_dividend_history <- function(df.transaction.history, path) {
+write_dividend_history <- function(df_transactions, path) {
 
   get_user_names(path)
 
-  ## Get list of dividends
-  ## Using fixed = TRUE if no regex is needed is faster
-  # df.dividend.history <- df.transaction.history[grepl("Dividend", df.transaction.history$transaction_type), ]
-  df.dividend.history <- df.transaction.history[grepl("Dividend", df.transaction.history$transaction_type,
-                                                      fixed = TRUE), ]
+  df_dividends <- df_transactions[grepl("Dividend",
+                                           df_transactions$transaction_type,
+                                           fixed = TRUE), ]
 
-  if (nrow(df.dividend.history) > 0) {
+  if (nrow(df_dividends) > 0) {
 
-    ## Make sure values are positive
-    df.dividend.history$transaction_value <- abs(df.dividend.history$transaction_value)
+    ## Make sure values are positive - Why is there a need anyways? Explain!
+    df_dividends$transaction_value <- abs(df_dividends$transaction_value)
 
-    ## Write dividend history
-    data.table::fwrite(df.dividend.history, file.path(path.dividends, file.dividend.history))
-
-  } else {
-
-    # message("No dividend transactions available.")
+    data.table::fwrite(df_dividends,
+                       file.path(path.dividends, file.dividend.history))
 
   }
 
@@ -44,30 +38,31 @@ write_dividend_by_yr <- function(path) {
 
     get_user_names(path)
 
-    if (file.exists(file.path(path.dividends, file.dividend.history))) {
+    file_path_dividends <- file.path(path.dividends, file.dividend.history)
 
-      df.dividend.history <- data.table::fread(file.path(path.dividends,
-                                                         file.dividend.history))
+    if (file.exists(file_path_dividends)) {
+
+      df_dividends <- data.table::fread(file_path_dividends)
 
       ## Storno needs to be a negative amount (i.e., payment)
-      is_storno <- df.dividend.history$transaction_type == "Storno - Dividend"
-      df.dividend.history$transaction_value[is_storno] <- -df.dividend.history$transaction_value[is_storno]
+      is_storno <- df_dividends$transaction_type == "Storno - Dividend"
+      df_dividends$transaction_value[is_storno] <- -df_dividends$transaction_value[is_storno]
 
-      df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date,
-                                                      format = "%d-%m-%Y")
+      df_dividends$transaction_date <- as.Date(df_dividends$transaction_date,
+                                               format = "%d-%m-%Y")
 
-      df.dividend.history$year <- lubridate::year(df.dividend.history$transaction_date)
+      df_dividends$year <- lubridate::year(df_dividends$transaction_date)
 
-      df.dividend.history.sum.yr <- stats::aggregate(transaction_value ~ year,
-                                                     data = df.dividend.history, sum)
-      df.dividend.history.sum.yr <- df.dividend.history.sum.yr %>%
+      df_dividends_sum_yr <- stats::aggregate(transaction_value ~ year,
+                                              data = df_dividends, sum)
+      df_dividends_sum_yr <- df_dividends_sum_yr %>%
         dplyr::mutate(year = year) %>%
         tidyr::complete(year = seq(min(year), as.numeric(lubridate::year(Sys.Date())),
                                    by = 1))
-      df.dividend.history.sum.yr <- as.data.frame(df.dividend.history.sum.yr)
-      df.dividend.history.sum.yr$transaction_value[is.na(df.dividend.history.sum.yr$transaction_value)] <- 0
+      df_dividends_sum_yr <- as.data.frame(df_dividends_sum_yr)
+      df_dividends_sum_yr$transaction_value[is.na(df_dividends_sum_yr$transaction_value)] <- 0
 
-      data.table::fwrite(df.dividend.history.sum.yr,
+      data.table::fwrite(df_dividends_sum_yr,
                          file.path(path.dividends, file.dividend.year))
 
     }
@@ -96,33 +91,35 @@ write_dividend_by_month <- function(path) {
 
   tryCatch({
 
-    if (file.exists(file.path(path.dividends, file.dividend.history))) {
+    file_path_dividends <- file.path(path.dividends, file.dividend.history)
 
-      df.dividend.history <- data.table::fread(file.path(path.dividends, file.dividend.history))
+    if (file.exists(file_path_dividends)) {
+
+      df_dividends <- data.table::fread(file_path_dividends)
 
       ## Storno needs to be a negative amount (i.e., payment)
-      is_storno <- df.dividend.history$transaction_type == "Storno - Dividend"
-      df.dividend.history$transaction_value[is_storno] <- -df.dividend.history$transaction_value[is_storno]
+      is_storno <- df_dividends$transaction_type == "Storno - Dividend"
+      df_dividends$transaction_value[is_storno] <- -df_dividends$transaction_value[is_storno]
 
-      df.dividend.history$transaction_date <- as.Date(df.dividend.history$transaction_date,
-                                                      format = "%d-%m-%Y")
+      df_dividends$transaction_date <- as.Date(df_dividends$transaction_date,
+                                               format = "%d-%m-%Y")
 
-      df.dividend.history$yearmon <- lubridate::floor_date(df.dividend.history$transaction_date,
-                                                           unit = "month")
+      df_dividends$yearmon <- lubridate::floor_date(df_dividends$transaction_date,
+                                                    unit = "month")
 
       ## Get dividends by month
-      df.dividend.history.sum.month <- stats::aggregate(transaction_value ~ yearmon,
-                                                        data = df.dividend.history, sum)
-      df.dividend.history.sum.month <- df.dividend.history.sum.month %>%
+      df_dividends_sum_month <- stats::aggregate(transaction_value ~ yearmon,
+                                                 data = df_dividends, sum)
+      df_dividends_sum_month <- df_dividends_sum_month %>%
         dplyr::mutate(yearmon = as.Date(.data$yearmon)) %>%
         tidyr::complete(yearmon = seq.Date(min(.data$yearmon),
                                            lubridate::floor_date(Sys.Date(),
                                                                  unit = "month"),
                                            by = "month"))
-      df.dividend.history.sum.month <- as.data.frame(df.dividend.history.sum.month)
-      df.dividend.history.sum.month$transaction_value[is.na(df.dividend.history.sum.month$transaction_value)] <- 0
+      df_dividends_sum_month <- as.data.frame(df_dividends_sum_month)
+      df_dividends_sum_month$transaction_value[is.na(df_dividends_sum_month$transaction_value)] <- 0
 
-      data.table::fwrite(df.dividend.history.sum.month,
+      data.table::fwrite(df_dividends_sum_month,
                          file.path(path.dividends, file.dividend.month))
 
     }

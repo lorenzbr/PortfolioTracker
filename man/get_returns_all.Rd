@@ -7,7 +7,7 @@
 get_returns_all(df, ticker)
 }
 \arguments{
-\item{df}{A data frame containing date and prices.}
+\item{df}{A data frame containing \emph{date} and prices with name \emph{adjusted}.}
 
 \item{ticker}{A single character string containing the ticker.}
 }
