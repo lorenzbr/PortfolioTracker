@@ -331,8 +331,8 @@ write_annualized_returns <- function(user_path, db_path) {
     df_annualized <- df_annualized[, names(df_annualized) != "age_yrs"
                                    & names(df_annualized) != "date"]
 
-    data.table::fwrite(df_annualized, file.path(path.returns,
-                                                file.returns.annualized))
+    data.table::fwrite(
+      df_annualized, file.path(path.returns, file.returns.annualized))
 
   }
 

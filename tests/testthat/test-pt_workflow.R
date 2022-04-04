@@ -1,10 +1,11 @@
-## Test the entire workflow for the Portfolio Tracker
+## Test the entire workflow of the Portfolio Tracker
 ## To do: Test not only that functions do not produce any errors, but also
 ##        test that output actually makes sense (files exist, content is correct)
 
-
 ## Test of work flow is based on PortfolioTracker::transactions
 ## To do: add more/other transactions to test other variants and features
+## (e.g., ...?)
+
 df_transactions <- transactions
 user_name <- "test_user1"
 portfolio_name <- "portfolio_1"
@@ -37,11 +38,38 @@ test_that("functions are successful", {
   expect_error(write_previous_investments(user_path, db_path), NA)
   expect_error(write_returns(user_path), NA)
   expect_error(write_annualized_returns(user_path, db_path), NA)
-  ## At the moment write portfolio return not really needed
+  ## At the moment write_portfolio_return not really needed
   # expect_error(write_portfolio_return(user_path), NA)
   expect_error(write_roi_by_period_all(user_path, db_path), NA)
   expect_error(write_investment_irr_all(user_path), NA)
   expect_error(write_dividend_history(df_transactions, user_path), NA)
   expect_error(write_dividend_by_month(user_path), NA)
   expect_error(write_dividend_by_yr(user_path), NA)
+})
+
+test_that("all files exist", {
+
+  expect_true(file.exists(file.path(path.transactions, file.transactions)))
+  expect_true(file.exists(file.path(path.database, file.tickers.db)))
+  expect_true(file.exists(file.path(path.database, file.ticker.exchange.db)))
+  expect_true(file.exists(file.path(path.database, file.ticker.price.available.db)))
+  # ... write_price_quantity_panels2
+  # ... write_all_value_panels
+  # ... write_complete_panels
+  # ... write_investment_value_panels
+  expect_true(file.exists(file.path(path.returns, file.returns.twr.daily)))
+  expect_true(file.exists(file.path(path.data, file.current)))
+  expect_true(file.exists(file.path(path.data, file.stats)))
+  expect_true(file.exists(file.path(path.data, file.previous)))
+  expect_true(file.exists(file.path(path.returns, file.returns.daily)))
+  expect_true(file.exists(file.path(path.returns, file.returns.monthly)))
+  expect_true(file.exists(file.path(path.returns, file.returns.annual)))
+  expect_true(file.exists(file.path(path.returns, file.returns.annualized)))
+  # ... write_portfolio_return
+  # ... write_roi_by_period_all
+  expect_true(file.exists(file.path(path.returns, file.returns.irr)))
+  expect_true(file.exists(file.path(path.dividends, file.dividend.history)))
+  expect_true(file.exists(file.path(path.dividends, file.dividend.month)))
+  expect_true(file.exists(file.path(path.dividends, file.dividend.year)))
+
 })
