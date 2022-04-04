@@ -11,21 +11,32 @@ user_name <- "test_user1"
 portfolio_name <- "portfolio_1"
 db_path <- test_path("testdata")
 user_path <- test_path(file.path("testdata/data/user_data", user_name))
-tickers <- get_tickers_from_db(df_transactions, db_path)[[2]]
-get_db_names(path = db_path)
-get_user_names(user_path, portfolio_name)
-data.table::fwrite(
-  df_transactions, file.path(path.transactions, file.transactions))
 
-test_that("functions are successful", {
+## Delete all data for pt workflow
+## To do: however, this means that I do not really
+## test the function append_latest_prices_db --> use other user_name or
+## portfolio_name
+unlink(test_path("testdata/data"), recursive = TRUE)
+# unlink(user_path, recursive = TRUE)
+
+test_that("functions (part 1) are successful", {
 
   expect_error(create_main_dir(path = db_path), NA)
   expect_error(create_user_dir(user_path, portfolio_name), NA)
   expect_error(get_db_names(path = db_path), NA)
   expect_error(get_user_names(user_path, portfolio_name), NA)
-  expect_error(append_latest_prices_db(db_path, tickers), NA)
+
+})
+
+data.table::fwrite(
+  df_transactions, file.path(path.transactions, file.transactions))
+tickers <- get_tickers_from_db(df_transactions, db_path)[[2]]
+
+test_that("functions (part 2) are successful", {
+
   expect_error(update_db_prices_based_on_transactions(
     df_transactions, db_path, external_search = TRUE), NA)
+  expect_error(append_latest_prices_db(db_path, tickers), NA)
   expect_error(write_price_quantity_panels2(
     df_transactions, user_path, db_path), NA)
   expect_error(write_all_value_panels(df_transactions, user_path, db_path), NA)
@@ -45,6 +56,7 @@ test_that("functions are successful", {
   expect_error(write_dividend_history(df_transactions, user_path), NA)
   expect_error(write_dividend_by_month(user_path), NA)
   expect_error(write_dividend_by_yr(user_path), NA)
+
 })
 
 test_that("all files exist", {
@@ -73,3 +85,6 @@ test_that("all files exist", {
   expect_true(file.exists(file.path(path.dividends, file.dividend.year)))
 
 })
+
+# unlink(test_path("testdata/data"), recursive = TRUE)
+# unlink(user_path, recursive = TRUE)
