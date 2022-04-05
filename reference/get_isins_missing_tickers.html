@@ -57,17 +57,19 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_isins_missing_tickers</span><span class="op">(</span><span class="va">path</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_isins_missing_tickers</span><span class="op">(</span><span class="va">user_path</span>, <span class="va">db_path</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>path</dt>
-<dd><p>A single character string. Directory of your data.</p></dd>
+    <dl><dt>user_path</dt>
+<dd><p>A single character string containing the directory of the user.</p></dd>
+<dt>db_path</dt>
+<dd><p>A single character string containing the directory of the database.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data frame with ISINS for which a ticker was not found.</p>
+    <p>A data frame with ISIN-ticker pairs for which a ticker was not found.</p>
     </div>
 
   </div>
