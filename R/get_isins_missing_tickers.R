@@ -1,28 +1,28 @@
 #' Get ISINs with missing tickers
 #'
-#' @usage get_isins_missing_tickers(path)
-#' @param path A single character string. Directory of your data.
+#' @usage get_isins_missing_tickers(user_path, db_path)
+#' @param user_path A single character string containing the directory of the user.
+#' @param db_path A single character string containing the directory of the database.
 #'
-#' @return A data frame with ISINS for which a ticker was not found.
+#' @return A data frame with ISIN-ticker pairs for which a ticker was not found.
 #'
 #' @export
-get_isins_missing_tickers <- function(path){
+get_isins_missing_tickers <- function(user_path, db_path){
 
-  get_user_names(path)
+  get_user_names(user_path)
+  get_db_names(db_path)
 
-  transaction_history_exists <- file.exists(file.path(path.transactions,
-                                                      file.transactions))
-  isin_ticker_exists <- file.exists(file.path(path.tickers, file.tickers))
+  file_path_transactions <- file.path(path.transactions, file.transactions)
 
-  if (transaction_history_exists && isin_ticker_exists) {
+  if (file.exists(file_path_transactions)) {
 
     ## Get table that converts ISIN to ticker (which is needed by Yahoo Finance)
-    df_isin_ticker <- data.table::fread(file.path(path.tickers, file.tickers))
+    df_isin_ticker <- data.table::fread(file.path(path.database, file.tickers.db))
     df_isin_ticker <- df_isin_ticker[df_isin_ticker$ticker != "", ]
-    df_transaction_history <- data.table::fread(file.path(path.transactions,
-                                                          file.transactions))
 
-    df_missings <- dplyr::anti_join(df_transaction_history,
+    df_transactions <- data.table::fread(file_path_transactions)
+
+    df_missings <- dplyr::anti_join(df_transactions,
                                     df_isin_ticker,
                                     by = "isin")
 

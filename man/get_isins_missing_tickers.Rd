@@ -4,13 +4,15 @@
 \alias{get_isins_missing_tickers}
 \title{Get ISINs with missing tickers}
 \usage{
-get_isins_missing_tickers(path)
+get_isins_missing_tickers(user_path, db_path)
 }
 \arguments{
-\item{path}{A single character string. Directory of your data.}
+\item{user_path}{A single character string containing the directory of the user.}
+
+\item{db_path}{A single character string containing the directory of the database.}
 }
 \value{
-A data frame with ISINS for which a ticker was not found.
+A data frame with ISIN-ticker pairs for which a ticker was not found.
 }
 \description{
 Get ISINs with missing tickers
