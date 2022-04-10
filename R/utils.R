@@ -38,11 +38,11 @@ get_tickers_from_db <- function(df_transactions, db_path) {
 
   get_db_names(db_path)
 
-  isin_ticker_exists <- file.exists(file.path(path.database, file.tickers.db))
+  file_path_tickers <- file.path(path.database, file.tickers.db)
 
-  if (isin_ticker_exists) {
+  if (file.exists(file_path_tickers)) {
 
-    df_isin_ticker <- data.table::fread(file.path(path.database, file.tickers.db))
+    df_isin_ticker <- data.table::fread(file_path_tickers)
     df_isin_ticker <- df_isin_ticker[df_isin_ticker$ticker != "", ]
 
     df_transactions <- merge(df_transactions,
@@ -57,22 +57,22 @@ get_tickers_from_db <- function(df_transactions, db_path) {
 
 }
 
-get_tickers_from_transactions <- function(df.transaction.history, path) {
+get_tickers_from_transactions <- function(df_transactions, path) {
 
   get_user_names(path)
 
-  isin.ticker.exists <- file.exists(file.path(path.tickers, file.tickers))
+  file_path_tickers <- file.path(path.tickers, file.tickers)
 
-  if (isin.ticker.exists) {
+  if (file.exists(file_path_tickers)) {
 
-    df.isin.ticker <- data.table::fread(file.path(path.tickers, file.tickers))
-    df.isin.ticker <- df.isin.ticker[df.isin.ticker$ticker != "", ]
+    df_isin_ticker <- data.table::fread(file_path_tickers)
+    df_isin_ticker <- df_isin_ticker[df_isin_ticker$ticker != "", ]
 
-    df.transaction.history <- merge(df.transaction.history,
-                                    df.isin.ticker,
+    df_transactions <- merge(df_transactions,
+                             df_isin_ticker,
                                     by = "isin")
 
-    tickers <- unique(df.transaction.history$ticker)
+    tickers <- unique(df_transactions$ticker)
 
     return(tickers)
 
