@@ -60,7 +60,7 @@ get_ticker_prices with further arguments. E.g., select the stock exchange."><!--
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_prices_from_yahoo</span><span class="op">(</span><span class="va">ticker</span>, <span class="va">from</span>, <span class="va">to</span>, preferred_exchange <span class="op">=</span> <span class="st">"Xetra"</span>,
-                             stock.exchanges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">".DE"</span>, <span class="st">".F"</span>, <span class="st">".SG"</span>, <span class="st">".MU"</span>, <span class="st">".DU"</span><span class="op">)</span>,
+                             stock_exchanges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">".DE"</span>, <span class="st">".F"</span>, <span class="st">".SG"</span>, <span class="st">".MU"</span>, <span class="st">".DU"</span><span class="op">)</span>,
                              method <span class="op">=</span> <span class="st">"simple"</span>, user_specific_exchange <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
     </div>
 
@@ -75,7 +75,7 @@ get_ticker_prices with further arguments. E.g., select the stock exchange."><!--
 <dt>preferred_exchange</dt>
 <dd><p>A single character string. Stock exchange
 (default is <em>Xetra</em>)</p></dd>
-<dt>stock.exchanges</dt>
+<dt>stock_exchanges</dt>
 <dd><p>A vector of single character strings. Possible stock
 exchanges to get prices from.</p></dd>
 <dt>method</dt>

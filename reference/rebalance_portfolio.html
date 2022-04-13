@@ -57,8 +57,8 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">rebalance_portfolio</span><span class="op">(</span><span class="va">df</span>, <span class="va">df.target.shares</span>, <span class="va">money.to.invest</span>, step.size <span class="op">=</span> <span class="fl">500</span>,
-                           exclude.from.rebalancing <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">rebalance_portfolio</span><span class="op">(</span><span class="va">df</span>, <span class="va">df_target_shares</span>, <span class="va">money_to_invest</span>, step_size <span class="op">=</span> <span class="fl">500</span>,
+                           exclude_from_rebalancing <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -66,14 +66,14 @@
     <dl><dt>df</dt>
 <dd><p>A data frame containing at least a column for <code>isin</code>
 (character) and <code>value</code> (numeric)</p></dd>
-<dt>df.target.shares</dt>
+<dt>df_target_shares</dt>
 <dd><p>A data frame containing a column for <code>isin</code>
 (character) and <code>target_share</code> (numeric)</p></dd>
-<dt>money.to.invest</dt>
+<dt>money_to_invest</dt>
 <dd><p>A single numeric. Amount to invest for rebalancing.</p></dd>
-<dt>step.size</dt>
+<dt>step_size</dt>
 <dd><p>A single numeric. Step size (default is 500).</p></dd>
-<dt>exclude.from.rebalancing</dt>
+<dt>exclude_from_rebalancing</dt>
 <dd><p>A single character or vector of strings.
 Should contain ISINs (default is NA).</p></dd>
 </dl></div>
