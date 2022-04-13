@@ -184,8 +184,10 @@ get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type =
 
   }
 
-  if (period_type == "months" || period_type == "weeks" || period_type == "days"
-      || period_type == "ytd") {
+  if (period_type == "months" ||
+      period_type == "weeks" ||
+      period_type == "days" ||
+      period_type == "ytd") {
 
     df_selected_time_period <- df[df$date >= first_date, ]
 

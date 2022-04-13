@@ -4,10 +4,10 @@
 \alias{write_price_panels}
 \title{Write price panels for all tickers to csv files}
 \usage{
-write_price_panels(df.transactions, path)
+write_price_panels(df_transactions, path)
 }
 \arguments{
-\item{df.transactions}{A data frame containing transaction history.}
+\item{df_transactions}{A data frame containing transaction history.}
 
 \item{path}{A single character string containing the directory of the user.}
 }

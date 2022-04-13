@@ -398,45 +398,45 @@ append_latest_prices <- function(path) {
 
   if (length(filename.prices.raw.with.ticker) > 0) {
 
-    df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
+    df_files_price_data <- data.frame(filename = filename.prices.raw.with.ticker)
 
-    df.files.price.data$first_date <- stringr::str_match(df.files.price.data$filename,
+    df_files_price_data$first_date <- stringr::str_match(df_files_price_data$filename,
                                                         "from_(.*?)_to")[, 2]
 
-    df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename,
+    df_files_price_data$last_date <- stringr::str_match(df_files_price_data$filename,
                                                         "to_(.*?).csv")[, 2]
 
-    df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename,
+    df_files_price_data$ticker <- stringr::str_match(df_files_price_data$filename,
                                                      "ticker_(.*?)_from")[, 2]
 
     ## Keep latest date for each ticker
     ## To do: there should be only one file for each ticker anyways! So, no need
     ## to do this!?
-    df.files.price.data2 <- stats::aggregate(last_date ~ ticker,
-                                            data = df.files.price.data, max)
-    df.files.price.data <- merge(df.files.price.data, df.files.price.data2,
+    df_files_price_data2 <- stats::aggregate(last_date ~ ticker,
+                                            data = df_files_price_data, max)
+    df_files_price_data <- merge(df_files_price_data, df_files_price_data2,
                                  by = c("ticker", "last_date"))
 
     today <- Sys.Date()
 
     ## Keep only tickers which are not up to date
-    df.files.price.data <- df.files.price.data[df.files.price.data$last_date < today, ]
+    df_files_price_data <- df_files_price_data[df_files_price_data$last_date < today, ]
 
     ## If at least one ticker is not up to date
-    if (nrow(df.files.price.data) > 0) {
+    if (nrow(df_files_price_data) > 0) {
 
       ## Loop over all tickers: get prices from Yahoo Finance API
-      for (i in 1:nrow(df.files.price.data)) {
+      for (i in 1:nrow(df_files_price_data)) {
 
         skip_to_next <- FALSE
 
         tryCatch({
 
           ## Date "from" is the last date + one day (since last date exists already)
-          from <- as.Date(df.files.price.data$last_date[i]) + 1
+          from <- as.Date(df_files_price_data$last_date[i]) + 1
 
-          ticker <- df.files.price.data$ticker[i]
-          current_filename <- df.files.price.data$filename[i]
+          ticker <- df_files_price_data$ticker[i]
+          current_filename <- df_files_price_data$filename[i]
 
           if (today > from) {
 
@@ -447,7 +447,7 @@ append_latest_prices <- function(path) {
             if (!is.null(df_updated_prices)) {
 
               filename_prices_raw <- paste0("prices_ticker_", ticker,
-                                            "_from_", df.files.price.data$first_date[i],
+                                            "_from_", df_files_price_data$first_date[i],
                                             "_to_", max(df_updated_prices$date),
                                             ".csv")
 
@@ -499,34 +499,34 @@ update_latest_prices <- function(path) {
 
   if (length(filename.prices.raw.with.ticker) > 0) {
 
-    df.files.price.data <- data.frame(filename = filename.prices.raw.with.ticker)
+    df_files_price_data <- data.frame(filename = filename.prices.raw.with.ticker)
 
-    df.files.price.data$last_date <- stringr::str_match(df.files.price.data$filename,
+    df_files_price_data$last_date <- stringr::str_match(df_files_price_data$filename,
                                                         "to_(.*?).csv")[, 2]
 
-    df.files.price.data$ticker <- stringr::str_match(df.files.price.data$filename,
+    df_files_price_data$ticker <- stringr::str_match(df_files_price_data$filename,
                                                      "ticker_(.*?)_from")[, 2]
 
-    df.files.price.data <- stats::aggregate(last_date ~ ticker,
-                                            data = df.files.price.data, max)
+    df_files_price_data <- stats::aggregate(last_date ~ ticker,
+                                            data = df_files_price_data, max)
 
     today <- Sys.Date()
 
     ## Keep only tickers which are not up to date
-    df.files.price.data <- df.files.price.data[df.files.price.data$last_date < today, ]
+    df_files_price_data <- df_files_price_data[df_files_price_data$last_date < today, ]
 
     ## If at least one ticker is not up to date
-    if (nrow(df.files.price.data) > 0) {
+    if (nrow(df_files_price_data) > 0) {
 
-      for (i in 1:nrow(df.files.price.data)) {
+      for (i in 1:nrow(df_files_price_data)) {
 
         skip_to_next <- FALSE
 
         tryCatch({
 
         ## Date from is last date + 1 day
-        from <- as.Date(df.files.price.data$last_date[i]) + 1
-        ticker <- df.files.price.data$ticker[i]
+        from <- as.Date(df_files_price_data$last_date[i]) + 1
+        ticker <- df_files_price_data$ticker[i]
 
           if (today > from) {
 
@@ -570,14 +570,14 @@ update_latest_prices <- function(path) {
 #' \code{\link{get_ticker_prices}} with further arguments. E.g., select the stock exchange.
 #'
 #' @usage get_prices_from_yahoo(ticker, from, to, preferred_exchange = "Xetra",
-#'                              stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
+#'                              stock_exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
 #'                              method = "simple", user_specific_exchange = TRUE)
 #' @param ticker A single character string. Ticker symbol.
 #' @param from A single character string. Start date.
 #' @param to A single character string. End date.
 #' @param preferred_exchange A single character string. Stock exchange
 #' (default is \emph{Xetra})
-#' @param stock.exchanges A vector of single character strings. Possible stock
+#' @param stock_exchanges A vector of single character strings. Possible stock
 #' exchanges to get prices from.
 #' @param method A single character string (default: \emph{simple}). The method
 #' how to get prices from Yahoo. Use the R package \emph{quantmod} or a \emph{simple}
@@ -590,72 +590,72 @@ update_latest_prices <- function(path) {
 #'
 #' @export
 get_prices_from_yahoo <- function(ticker, from, to, preferred_exchange = "Xetra",
-                                  stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
+                                  stock_exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
                                   method = "simple", user_specific_exchange = TRUE) {
 
 
   if (user_specific_exchange) {
-    path.tick <- path.tickers
-    file.tick.ex <- file.ticker.exchange
+    path_tick <- path.tickers
+    file_tick_ex <- file.ticker.exchange
   } else if (!user_specific_exchange) {
-    path.tick <- path.database
-    file.tick.ex <- file.ticker.exchange.db
+    path_tick <- path.database
+    file_tick_ex <- file.ticker.exchange.db
   }
 
   ## Check if specific exchange for ticker has been saved in file.
   ## Then, takes this one
-  ticker.exchange.file.exists <- file.exists(file.path(path.tick, file.tick.ex))
+  ticker_exchange_file_exists <- file.exists(file.path(path_tick, file_tick_ex))
 
   ## Initiate: ticker exchange pair does not exists (in the following code
   ## this will be checked)
-  ticker.exchange.pair.exists <- FALSE
+  ticker_exchange_pair_exists <- FALSE
 
-  if (ticker.exchange.file.exists) {
+  if (ticker_exchange_file_exists) {
 
-    df.ticker.exchanges <- data.table::fread(file.path(path.tick, file.tick.ex))
+    df_ticker_exchanges <- data.table::fread(file.path(path_tick, file_tick_ex))
 
     ## Needed because using "ticker" produces same data frame (?)
-    ticker.current <- ticker
-    df.ticker.exchange <- df.ticker.exchanges[df.ticker.exchanges$ticker == ticker.current, ]
-    ticker.exchange.pair.exists <- nrow(df.ticker.exchange) == 1
+    ticker_current <- ticker
+    df_ticker_exchange <- df_ticker_exchanges[df_ticker_exchanges$ticker == ticker_current, ]
+    ticker_exchange_pair_exists <- nrow(df_ticker_exchange) == 1
 
-    if (ticker.exchange.pair.exists) {
-      stock.exchange <- df.ticker.exchange$exchange
-      ticker.yahoo <- paste0(ticker, stock.exchange)
+    if (ticker_exchange_pair_exists) {
+      stock_exchange <- df_ticker_exchange$exchange
+      ticker_yahoo <- paste0(ticker, stock_exchange)
     }
 
   }
 
 
-  if (!exists("ticker.yahoo")) {
+  if (!exists("ticker_yahoo")) {
 
     ## Produce final ticker for Yahoo Finance
     if (preferred_exchange == "Xetra") {
-      stock.exchange <- ".DE"
+      stock_exchange <- ".DE"
     } else if (preferred_exchange == "Frankfurt") {
-      stock.exchange <- ".F"
+      stock_exchange <- ".F"
     } else if (preferred_exchange == "Stuttgart") {
-      stock.exchange <- ".SG"
+      stock_exchange <- ".SG"
     } else if (preferred_exchange == "Muenchen") {
-      stock.exchange <- ".MU"
+      stock_exchange <- ".MU"
     } else if (preferred_exchange == "Duesseldorf") {
-      stock.exchange <- ".DU"
+      stock_exchange <- ".DU"
     }
 
-    ticker.yahoo <- paste0(ticker, stock.exchange)
+    ticker_yahoo <- paste0(ticker, stock_exchange)
 
   }
 
   ## Get prices from Yahoo API
   try({
     if (method == "quantmod") {
-      ticker.prices <- quantmod::getSymbols(ticker.yahoo,
+      ticker_prices <- quantmod::getSymbols(ticker_yahoo,
                                             from = from,
                                             to = to,
                                             auto.assign = FALSE,
                                             warnings = FALSE)
     } else if (method == "simple") {
-      ticker.prices <- get_ticker_prices(ticker.yahoo,
+      ticker_prices <- get_ticker_prices(ticker_yahoo,
                                          from = from,
                                          to = to)
     }
@@ -665,46 +665,46 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred_exchange = "Xetra"
 
   ## If not yet found and ticker with exchanges does not exist, iterate over all
   ## other stock exchanges to get prices
-  if (!ticker.exchange.file.exists && !exists("ticker.prices")) {
+  if (!ticker_exchange_file_exists && !exists("ticker_prices")) {
 
-    iter.stock.exchanges <- 1
-    while (!exists("ticker.prices") && iter.stock.exchanges <= length(stock.exchanges)) {
-      stock.exchange <- stock.exchanges[iter.stock.exchanges]
-      ticker.yahoo <- paste0(ticker, stock.exchange)
-      iter.stock.exchanges <- iter.stock.exchanges + 1
+    iter_stock_exchanges <- 1
+    while (!exists("ticker_prices") && iter_stock_exchanges <= length(stock_exchanges)) {
+      stock_exchange <- stock_exchanges[iter_stock_exchanges]
+      ticker_yahoo <- paste0(ticker, stock_exchange)
+      iter_stock_exchanges <- iter_stock_exchanges + 1
       try({
         if (method == "quantmod") {
-          ticker.prices <- quantmod::getSymbols(ticker.yahoo,
+          ticker_prices <- quantmod::getSymbols(ticker_yahoo,
                                                 from = from,
                                                 to = to,
                                                 auto.assign = FALSE,
                                                 warnings = FALSE)
         } else if (method == "simple") {
-          ticker.prices <- get_ticker_prices(ticker.yahoo,
+          ticker_prices <- get_ticker_prices(ticker_yahoo,
                                              from = from,
                                              to = to)
         }
       })
     }
 
-  } else if (ticker.exchange.file.exists) {
+  } else if (ticker_exchange_file_exists) {
 
-    if (nrow(df.ticker.exchange) != 1) {
+    if (nrow(df_ticker_exchange) != 1) {
 
-      iter.stock.exchanges <- 1
-      while (!exists("ticker.prices")
-             && iter.stock.exchanges <= length(stock.exchanges)) {
-        stock.exchange <- stock.exchanges[iter.stock.exchanges]
-        ticker.yahoo <- paste0(ticker, stock.exchange)
-        iter.stock.exchanges <- iter.stock.exchanges + 1
+      iter_stock_exchanges <- 1
+      while (!exists("ticker_prices") &&
+             iter_stock_exchanges <= length(stock_exchanges)) {
+        stock_exchange <- stock_exchanges[iter_stock_exchanges]
+        ticker_yahoo <- paste0(ticker, stock_exchange)
+        iter_stock_exchanges <- iter_stock_exchanges + 1
         try({
           if (method == "quantmod") {
-            ticker.prices <- quantmod::getSymbols(Symbols = ticker.yahoo,
+            ticker_prices <- quantmod::getSymbols(Symbols = ticker_yahoo,
                                                   from = from, to = to,
                                                   auto.assign = FALSE,
                                                   warnings = FALSE)
           } else if (method == "simple") {
-            ticker.prices <- get_ticker_prices(ticker = ticker.yahoo,
+            ticker_prices <- get_ticker_prices(ticker = ticker_yahoo,
                                                from = from,
                                                to = to)
           }
@@ -716,55 +716,55 @@ get_prices_from_yahoo <- function(ticker, from, to, preferred_exchange = "Xetra"
   }
 
 
-  if (exists("ticker.prices")) {
+  if (exists("ticker_prices")) {
 
     ## Store stock exchange and ticker in csv file if it not yet exists
-    df.ticker.exchange <- data.frame(ticker = ticker, exchange = stock.exchange)
+    df_ticker_exchange <- data.frame(ticker = ticker, exchange = stock_exchange)
 
-    if (ticker.exchange.file.exists && !ticker.exchange.pair.exists) {
+    if (ticker_exchange_file_exists && !ticker_exchange_pair_exists) {
 
-      df.ticker.exchanges <- data.table::fread(file.path(path.tick, file.tick.ex))
-      df.ticker.exchanges <- rbind(df.ticker.exchanges, df.ticker.exchange)
-      df.ticker.exchanges <- unique(df.ticker.exchanges)
+      df_ticker_exchanges <- data.table::fread(file.path(path_tick, file_tick_ex))
+      df_ticker_exchanges <- rbind(df_ticker_exchanges, df_ticker_exchange)
+      df_ticker_exchanges <- unique(df_ticker_exchanges)
 
-      data.table::fwrite(df.ticker.exchanges, file.path(path.tick, file.tick.ex))
+      data.table::fwrite(df_ticker_exchanges, file.path(path_tick, file_tick_ex))
 
-    } else if (!ticker.exchange.file.exists) {
+    } else if (!ticker_exchange_file_exists) {
 
-      data.table::fwrite(df.ticker.exchange, file.path(path.tick, file.tick.ex))
+      data.table::fwrite(df_ticker_exchange, file.path(path_tick, file_tick_ex))
 
     }
 
 
     ## Convert time series with prices to data frame
-    df.ticker.prices <- data.frame(ticker.prices)
+    df_ticker_prices <- data.frame(ticker_prices)
 
     if (method == "quantmod") {
-      names(df.ticker.prices) <- gsub(pattern = paste0(ticker.yahoo, "\\."),
+      names(df_ticker_prices) <- gsub(pattern = paste0(ticker_yahoo, "\\."),
                                       replacement = "",
-                                      names(df.ticker.prices))
-      df.ticker.prices$date <- rownames(df.ticker.prices)
-      rownames(df.ticker.prices) <- 1:nrow(df.ticker.prices)
+                                      names(df_ticker_prices))
+      df_ticker_prices$date <- rownames(df_ticker_prices)
+      rownames(df_ticker_prices) <- 1:nrow(df_ticker_prices)
     } else if (method == "simple") {
 
-      names(df.ticker.prices)[startsWith(names(df.ticker.prices), "Adj")] <- "Adjusted"
+      names(df_ticker_prices)[startsWith(names(df_ticker_prices), "Adj")] <- "Adjusted"
       ## Columns of data frame need to have same order as quantmod method
-      df.ticker.prices <- df.ticker.prices[, c("Open", "High", "Low", "Close",
+      df_ticker_prices <- df_ticker_prices[, c("Open", "High", "Low", "Close",
                                                "Volume", "Adjusted", "Date")]
     }
 
-    names(df.ticker.prices) <- tolower(names(df.ticker.prices))
+    names(df_ticker_prices) <- tolower(names(df_ticker_prices))
 
-    df.ticker.prices$date <- as.Date(df.ticker.prices$date)
+    df_ticker_prices$date <- as.Date(df_ticker_prices$date)
 
-    df.ticker.prices <- df.ticker.prices[!is.na(df.ticker.prices$adjusted), ]
-    df.ticker.prices <- df.ticker.prices[!is.null(df.ticker.prices$adjusted), ]
-    df.ticker.prices <- df.ticker.prices[df.ticker.prices$adjusted != "NA", ]
-    df.ticker.prices <- df.ticker.prices[df.ticker.prices$adjusted != "null", ]
+    df_ticker_prices <- df_ticker_prices[!is.na(df_ticker_prices$adjusted), ]
+    df_ticker_prices <- df_ticker_prices[!is.null(df_ticker_prices$adjusted), ]
+    df_ticker_prices <- df_ticker_prices[df_ticker_prices$adjusted != "NA", ]
+    df_ticker_prices <- df_ticker_prices[df_ticker_prices$adjusted != "null", ]
 
-    return(df.ticker.prices)
+    return(df_ticker_prices)
 
-  } else if (!exists("ticker.prices")) {
+  } else if (!exists("ticker_prices")) {
 
     return(NULL)
 

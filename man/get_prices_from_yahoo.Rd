@@ -5,7 +5,7 @@
 \title{Get prices for a given ticker from the Yahoo Finance API}
 \usage{
 get_prices_from_yahoo(ticker, from, to, preferred_exchange = "Xetra",
-                             stock.exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
+                             stock_exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
                              method = "simple", user_specific_exchange = TRUE)
 }
 \arguments{
@@ -18,7 +18,7 @@ get_prices_from_yahoo(ticker, from, to, preferred_exchange = "Xetra",
 \item{preferred_exchange}{A single character string. Stock exchange
 (default is \emph{Xetra})}
 
-\item{stock.exchanges}{A vector of single character strings. Possible stock
+\item{stock_exchanges}{A vector of single character strings. Possible stock
 exchanges to get prices from.}
 
 \item{method}{A single character string (default: \emph{simple}). The method

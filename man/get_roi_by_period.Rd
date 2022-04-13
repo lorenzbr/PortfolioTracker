@@ -8,7 +8,7 @@ get_roi_by_period(df_complete_panel, nb_period = NULL,
                          period_type = "max")
 }
 \arguments{
-\item{df_complete_panel}{A data.frame containing the complete panel.}
+\item{df_complete_panel}{A data frame containing the complete panel.}
 
 \item{nb_period}{An integer indicating the number of months.
 Default is \emph{NULL}.}

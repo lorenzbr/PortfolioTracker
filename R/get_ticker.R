@@ -120,9 +120,8 @@ get_ticker_from_investing <- function(isin, preferred_exchange = "") {
     ## strsplit namespace? should be stringr
     ticker <- strsplit(html_output_text_selected, "\n")[[1]][1]
     ## If no regex is needed, grepl is faster with fixed = TRUE
-    if (preferred_exchange == "Xetra"
-         && grepl(preferred_exchange, html_output_text_selected,
-                  fixed = TRUE)) {
+    if (preferred_exchange == "Xetra" &&
+        grepl(preferred_exchange, html_output_text_selected, fixed = TRUE)) {
       ticker <- paste0(ticker, ".DE")
     }
   }

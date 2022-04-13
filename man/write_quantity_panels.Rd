@@ -4,10 +4,10 @@
 \alias{write_quantity_panels}
 \title{Write full history of quantities for all tickers as csv}
 \usage{
-write_quantity_panels(df.transaction.history, path)
+write_quantity_panels(df_transactions, path)
 }
 \arguments{
-\item{df.transaction.history}{A data frame containing the full history of transactions.}
+\item{df_transactions}{A data frame containing the full history of transactions.}
 
 \item{path}{A single character string. Directory of your data.}
 }

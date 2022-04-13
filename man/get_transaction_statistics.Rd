@@ -4,13 +4,13 @@
 \alias{get_transaction_statistics}
 \title{get transaction statistics}
 \usage{
-get_transaction_statistics(df.transactions)
+get_transaction_statistics(df_transactions)
 }
 \arguments{
-\item{df.transactions}{A data frame containing transactions.}
+\item{df_transactions}{A data frame containing transactions.}
 }
 \value{
-df.stats A data frame containing transaction statistics.
+A data frame containing transaction statistics.
 }
 \description{
 get transaction statistics

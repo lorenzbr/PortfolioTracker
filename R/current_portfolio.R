@@ -32,7 +32,6 @@ write_current_portfolio <- function(user_path, db_path) {
       ## Use name from most recent transaction
       df_ticker_names$date <- as.Date(
         df_ticker_names$transaction_date, format = "%d-%m-%Y")
-
       df_ticker_names <- df_ticker_names %>%
         dplyr::group_by(.data$isin) %>%
         dplyr::filter(date == max(.data$date))
