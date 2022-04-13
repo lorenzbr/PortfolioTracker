@@ -19,23 +19,23 @@ user_path <- test_path(file.path("testdata/data/user_data", user_name))
 unlink(test_path("testdata/data"), recursive = TRUE)
 # unlink(user_path, recursive = TRUE)
 
-test_that("functions (part 1) are successful", {
+test_that("Portfolio Tracker initiation is successful", {
 
-  expect_error(create_main_dir(path = db_path), NA)
+  expect_error(init_portfolio_tracker(db_path = db_path), NA)
   expect_error(create_user_dir(user_path, portfolio_name), NA)
-  expect_error(get_db_names(path = db_path), NA)
   expect_error(get_user_names(user_path, portfolio_name), NA)
 
 })
 
-data.table::fwrite(
-  df_transactions, file.path(path.transactions, file.transactions))
-tickers <- get_tickers_from_db(df_transactions, db_path)[[2]]
 
-test_that("functions (part 2) are successful", {
+test_that("Portfolio Tracker workflow is successful", {
 
+  expect_error(data.table::fwrite(
+    df_transactions, file.path(path.transactions, file.transactions)), NA)
   expect_error(update_db_prices_based_on_transactions(
     df_transactions, db_path, external_search = TRUE), NA)
+  ## Tickers need to be loaded
+  expect_error(tickers <- get_tickers_from_db(df_transactions, db_path)[[2]], NA)
   expect_error(append_latest_prices_db(db_path, tickers), NA)
   expect_error(write_price_quantity_panels2(
     df_transactions, user_path, db_path), NA)
@@ -65,6 +65,7 @@ test_that("all files exist", {
   expect_true(file.exists(file.path(path.database, file.tickers.db)))
   expect_true(file.exists(file.path(path.database, file.ticker.exchange.db)))
   expect_true(file.exists(file.path(path.database, file.ticker.price.available.db)))
+  ## To do: Check the following files/functions as well
   # ... write_price_quantity_panels2
   # ... write_all_value_panels
   # ... write_complete_panels
@@ -77,6 +78,7 @@ test_that("all files exist", {
   expect_true(file.exists(file.path(path.returns, file.returns.monthly)))
   expect_true(file.exists(file.path(path.returns, file.returns.annual)))
   expect_true(file.exists(file.path(path.returns, file.returns.annualized)))
+  ## To do: Check the following files/functions as well
   # ... write_portfolio_return
   # ... write_roi_by_period_all
   expect_true(file.exists(file.path(path.returns, file.returns.irr)))
@@ -86,5 +88,6 @@ test_that("all files exist", {
 
 })
 
+## Clean up: delete everything after testing
 # unlink(test_path("testdata/data"), recursive = TRUE)
 # unlink(user_path, recursive = TRUE)

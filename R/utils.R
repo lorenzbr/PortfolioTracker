@@ -4,21 +4,11 @@
 get_available_price_date_range <- function(path.database,
                                            file.ticker.price.available.db) {
 
-  full_filename <- file.path(path.database, file.ticker.price.available.db)
+  file_path_price_available <- file.path(path.database,
+                                         file.ticker.price.available.db)
 
-  if (file.exists(full_filename)) {
-
-    df_price_range <- data.table::fread(full_filename)
-    df_price_range <- as.data.frame(df_price_range)
-
-  } else {
-
-    col_names <- c("ticker", "first_date", "last_date")
-    df_price_range <- data.frame(matrix(
-      nrow = 0, ncol = 3, dimnames = list(NULL, col_names)))
-    data.table::fwrite(df_price_range, full_filename)
-
-  }
+  df_price_range <- data.table::fread(file_path_price_available)
+  df_price_range <- as.data.frame(df_price_range)
 
   return(df_price_range)
 
@@ -40,20 +30,17 @@ get_tickers_from_db <- function(df_transactions, db_path) {
 
   file_path_tickers <- file.path(path.database, file.tickers.db)
 
-  if (file.exists(file_path_tickers)) {
+  df_isin_ticker <- data.table::fread(file_path_tickers)
+  df_isin_ticker <- df_isin_ticker[df_isin_ticker$ticker != "", ]
 
-    df_isin_ticker <- data.table::fread(file_path_tickers)
-    df_isin_ticker <- df_isin_ticker[df_isin_ticker$ticker != "", ]
+  df_transactions <- merge(df_transactions,
+                           df_isin_ticker,
+                           by = "isin")
 
-    df_transactions <- merge(df_transactions,
-                             df_isin_ticker,
-                             by = "isin")
+  tickers <- unique(df_transactions$ticker)
 
-    tickers <- unique(df_transactions$ticker)
+  return(list(df_transactions, tickers))
 
-    return(list(df_transactions, tickers))
-
-  }
 
 }
 

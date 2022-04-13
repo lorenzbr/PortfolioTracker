@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_portfoliotracker_dir.R
 \name{create_user_dir}
 \alias{create_user_dir}
-\title{Create directory for user}
+\title{Create directory of the user}
 \usage{
 create_user_dir(path, portfolio_name = "portfolio_1")
 }
@@ -16,5 +16,5 @@ portfolio. Currently the default is \emph{portfolio_1}.}
 Returns a list with path names for user-specific data storage
 }
 \description{
-Create directory for user
+Create directory of the user
 }

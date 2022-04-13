@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_portfoliotracker_dir.R
 \name{create_main_dir}
 \alias{create_main_dir}
-\title{Create main directory for the Portfolio Tracker}
+\title{Create main directory of the Portfolio Tracker}
 \usage{
 create_main_dir(path)
 }
@@ -13,5 +13,5 @@ create_main_dir(path)
 Returns a list with path names for data storage
 }
 \description{
-Create main directory for the Portfolio Tracker
+Create the main directory of the Portfolio Tracker with all required folders
 }

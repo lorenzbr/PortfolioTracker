@@ -9,16 +9,22 @@ get_db_file_names <- function() {
   pos <- 1
   envir <- as.environment(pos)
 
-  var_name <- c("file.tickers.db",
-                "file.ticker.exchange.db",
-                "file.stock.splits.db",
-                "file.ticker.price.available.db"
+  var_name <- c(
+    "file.user.db",
+    "file.cookies",
+    "file.tickers.db",
+    "file.ticker.exchange.db",
+    "file.stock.splits.db",
+    "file.ticker.price.available.db"
   )
 
-  file_name <- c("isin_ticker_db.csv",
-                 "ticker_exchange_db.csv",
-                 "stock_splits_db.csv",
-                 "ticker_price_available_db.csv"
+  file_name <- c(
+    "user_database_encoded.csv",
+    "user_cookies.csv",
+    "isin_ticker_db.csv",
+    "ticker_exchange_db.csv",
+    "stock_splits_db.csv",
+    "ticker_price_available_db.csv"
   )
 
   for (i in 1:length(var_name))

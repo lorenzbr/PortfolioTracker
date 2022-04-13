@@ -1,4 +1,6 @@
-#' Create main directory for the Portfolio Tracker
+#' Create main directory of the Portfolio Tracker
+#'
+#' Create the main directory of the Portfolio Tracker with all required folders
 #'
 #' @usage create_main_dir(path)
 #' @param path A single character string. Path where data are stored.
@@ -21,12 +23,13 @@ create_main_dir <- function(path) {
 
 }
 
-#' Create directory for user
+#' Create directory of the user
 #'
 #' @usage create_user_dir(path, portfolio_name = "portfolio_1")
 #' @param path A single character string. Path where user data are stored.
 #' @param portfolio_name A single character string indicating the name of the
 #' portfolio. Currently the default is \emph{portfolio_1}.
+#'
 #' @return Returns a list with path names for user-specific data storage
 #'
 #' @export

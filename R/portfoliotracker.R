@@ -37,6 +37,8 @@ if (getRversion() >= "2.15.1") {
      "path.crypto",
      "path.value.panel",
      ## Database file names
+     "file.cookies",
+     "file.user.db",
      "file.tickers.db",
      "file.ticker.exchange.db",
      "file.stock.splits.db",
