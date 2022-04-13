@@ -37,6 +37,9 @@
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/create_main_dir.html</loc>
   </url>
   <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/create_main_files.html</loc>
+  </url>
+  <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/create_user_dir.html</loc>
   </url>
   <url>
@@ -116,6 +119,9 @@
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/init_isin_ticker.html</loc>
+  </url>
+  <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/init_portfolio_tracker.html</loc>
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/rebalance_portfolio.html</loc>
