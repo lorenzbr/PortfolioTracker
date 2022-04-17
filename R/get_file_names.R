@@ -15,7 +15,8 @@ get_db_file_names <- function() {
     "file.tickers.db",
     "file.ticker.exchange.db",
     "file.stock.splits.db",
-    "file.ticker.price.available.db"
+    "file.ticker.price.available.db",
+    "file.update.log"
   )
 
   file_name <- c(
@@ -24,7 +25,8 @@ get_db_file_names <- function() {
     "isin_ticker_db.csv",
     "ticker_exchange_db.csv",
     "stock_splits_db.csv",
-    "ticker_price_available_db.csv"
+    "ticker_price_available_db.csv",
+    "user_update_log.csv"
   )
 
   for (i in 1:length(var_name))

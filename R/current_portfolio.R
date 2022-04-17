@@ -12,9 +12,11 @@ write_current_portfolio <- function(user_path, db_path) {
   get_user_names(user_path)
   get_db_names(db_path)
 
-  if (length(list.files(path.pricequantity.panel)) > 0) {
+  files_pricequantity_panel <- list.files(path.pricequantity.panel)
 
-    files <- file.path(path.pricequantity.panel, list.files(path.pricequantity.panel))
+  if (length(files_pricequantity_panel) > 0) {
+
+    files <- file.path(path.pricequantity.panel, files_pricequantity_panel)
     list_dfs <- lapply(files, data.table::fread)
 
     file_path_transactions <- file.path(path.transactions, file.transactions)

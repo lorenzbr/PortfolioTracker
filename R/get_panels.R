@@ -333,9 +333,10 @@ write_price_quantity_panels2 <- function(df_transactions, user_path, db_path) {
   df_transactions_with_tickers <- list_output[[1]]
   tickers <- list_output[[2]]
 
-  if (length(list.files(path.pricequantity.panel)) > 0)
-    file.remove(file.path(path.pricequantity.panel,
-                          list.files(path.pricequantity.panel)))
+  files_pricequantity_panel <- list.files(path.pricequantity.panel)
+
+  if (length(files_pricequantity_panel) > 0)
+    file.remove(file.path(path.pricequantity.panel, files_pricequantity_panel))
 
   output <- mapply(write_price_quantity_panel2, tickers,
                    MoreArgs = list(df_transactions_with_tickers,
@@ -636,9 +637,10 @@ write_complete_panels <- function(user_path, db_path) {
 
   tickers <- get_tickers_from_db(df_transactions, db_path)[[2]]
 
-  if (length(list.files(path.complete.panel)) > 0)
-    file.remove(file.path(path.complete.panel,
-                          list.files(path.complete.panel)))
+  files_complete_panel <- list.files(path.complete.panel)
+
+  if (length(files_complete_panel) > 0)
+    file.remove(file.path(path.complete.panel, files_complete_panel))
 
   output <- mapply(write_complete_panel, tickers,
                    MoreArgs = list(user_path))

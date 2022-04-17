@@ -29,6 +29,15 @@ create_main_files <- function(path) {
     data.table::fwrite(df_user_base, file_path_user_db)
   }
 
+  file_path_update_log <- file.path(path.user.credentials, file.update.log)
+  if (!file.exists(file_path_update_log)) {
+    df_update_log <- data.frame(
+      matrix(nrow = 0, ncol = 2,
+             dimnames = list(NULL, c("user_name", "pt_update_date")))
+    )
+    data.table::fwrite(df_update_log, file_path_update_log)
+  }
+
   file_path_tickers <- file.path(path.database, file.tickers.db)
   if (!file.exists(file_path_tickers)) {
     df_isin_ticker <- data.frame(
