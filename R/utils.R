@@ -1,6 +1,6 @@
 # Helpers -----------------------------------------------------------------
 
-
+## ...
 get_available_price_date_range <- function(path.database,
                                            file.ticker.price.available.db) {
 
@@ -184,4 +184,69 @@ get_df_with_selected_time_period <- function(df, nb_period = NULL, period_type =
 
 }
 
+#' Format column names of a data frame
+#'
+#' @usage clean_column_names(df)
+#' @param df A data frame with unformatted column names.
+#'
+#' @return A data frame with formatted column names.
+#'
+#' @export
+clean_column_names <- function(df) {
 
+  df <- as.data.frame(df)
+
+  names(df)[names(df) == "isin"] <- "ISIN"
+  names(df)[names(df) == "wkn"] <- "WKN"
+  names(df)[names(df) == "name"] <- "Name"
+  names(df)[names(df) == "quantity"] <- "Quantity"
+  names(df)[names(df) == "transaction_price"] <- "Price [EUR]"
+  names(df)[names(df) == "transaction_value"] <- "Value [EUR]"
+  names(df)[names(df) == "value"] <- "Value [EUR]"
+  names(df)[names(df) == "transaction_date"] <- "Date"
+  names(df)[names(df) == "transaction_type"] <- "Type"
+  names(df)[names(df) == "transaction_fee"] <- "Fee [EUR]"
+  names(df)[names(df) == "transaction_time"] <- "Time"
+  names(df)[names(df) == "document_page"] <- "Document page"
+  names(df)[names(df) == "document_name"] <- "Document name"
+
+  names(df)[names(df) == "ticker"] <- "Ticker"
+  names(df)[names(df) == "investment"] <- "Investment"
+  names(df)[names(df) == "income"] <- "Income"
+  names(df)[names(df) == "return_absolute"] <- "Return [EUR]"
+  names(df)[names(df) == "return_percent"] <- "Return [%]"
+  names(df)[names(df) == "quantity"] <- "Quantity"
+
+  names(df)[names(df) == "weight"] <- "Weight [%]"
+
+  names(df)[names(df) == "actual_share"] <- "Actual [%]"
+  names(df)[names(df) == "target_share"] <- "Target [%]"
+  names(df)[names(df) == "value_to_invest"] <- "Value to invest [EUR]"
+  names(df)[names(df) == "new_value"] <- "New value [EUR]"
+  names(df)[names(df) == "new_share"] <- "New [%]"
+  names(df)[names(df) == "target_value"] <- "Target value [EUR]"
+  names(df)[names(df) == "share_deviation"] <- "Deviation [%]"
+  names(df)[names(df) == "value_deviation"] <- "Value deviation"
+
+  return(df)
+
+}
+
+#' Clean names of investments
+#'
+#' @usage clean_investment_names(investment_names)
+#' @param investment_names A single character string.
+#'
+#' @return A string with cleaned names.
+#'
+#' @export
+clean_investment_names <- function(investment_names) {
+
+  investment_names <- gsub("UCITS ETF|UC.ETF|U.ETF||Inhaber-Anteile|Reg\\.Shs|Registered Shares|Reg\\. Shares|oN$|o\\.N\\.$", "",
+                           investment_names)
+  investment_names <- gsub("\\s+", " ", investment_names)
+  investment_names <- gsub("^\\s+|\\s+$", "", investment_names)
+
+  return(investment_names)
+
+}
