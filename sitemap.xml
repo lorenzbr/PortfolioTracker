@@ -34,6 +34,12 @@
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/append_latest_prices_db.html</loc>
   </url>
   <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/clean_column_names.html</loc>
+  </url>
+  <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/clean_investment_names.html</loc>
+  </url>
+  <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/create_main_dir.html</loc>
   </url>
   <url>
@@ -50,6 +56,9 @@
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_complete_portfolio_panel.html</loc>
+  </url>
+  <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_current_portfolio.html</loc>
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_db_file_names.html</loc>
@@ -71,6 +80,9 @@
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_portfolio_irr.html</loc>
+  </url>
+  <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_portfolio_stats.html</loc>
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_portfolio_ttwror.html</loc>
@@ -122,6 +134,9 @@
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/init_portfolio_tracker.html</loc>
+  </url>
+  <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/read_panels.html</loc>
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/rebalance_portfolio.html</loc>
