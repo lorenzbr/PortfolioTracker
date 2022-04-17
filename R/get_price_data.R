@@ -342,7 +342,11 @@ append_latest_prices_db <- function(db_path, tickers) {
                                                       to = today,
                                                       user_specific_exchange = FALSE)
 
-            if (!is.null(df_updated_prices)) {
+            ## For some unknown reasons (time zones??), the date "from - 1" is
+            ## returned -> remove this day
+            df_updated_prices <- df_updated_prices[df_updated_prices$date != from - 1, ]
+
+            if (!is.null(df_updated_prices) && nrow(df_updated_prices) > 0) {
 
               ## Update price availability date range
               to <- as.Date(max(df_updated_prices$date), format = "%Y-%m-%d")

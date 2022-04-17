@@ -1,6 +1,14 @@
 # Helpers -----------------------------------------------------------------
 
-## ...
+#' Get dates of available prices for all tickers in database
+#'
+#' @usage get_available_price_date_range(path.database, file.ticker.price.available.db)
+#' @param path.database A path where prices are stored.
+#' @param file.ticker.price.available.db A single character string containing the directory of the database.
+#'
+#' @return A data frame containing the tickers with dates of available prices.
+#'
+#' @export
 get_available_price_date_range <- function(path.database,
                                            file.ticker.price.available.db) {
 

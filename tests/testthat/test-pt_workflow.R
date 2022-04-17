@@ -88,6 +88,17 @@ test_that("all files exist", {
 
 })
 
+test_that("prices in database for each date and ticker are unique", {
+
+  files <- file.path(path.prices.db, list.files(path.prices.db))
+  list_dfs <- lapply(files, data.table::fread)
+  for(i in 1:length(list_dfs)) {
+    df <- list_dfs[[i]]
+    expect_true(length(unique(df$date)) == length(df$date))
+  }
+
+})
+
 ## Clean up: delete everything after testing
 # unlink(test_path("testdata/data"), recursive = TRUE)
 # unlink(user_path, recursive = TRUE)
