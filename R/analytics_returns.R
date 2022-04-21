@@ -279,7 +279,7 @@ write_annualized_returns <- function(user_path, db_path) {
 
     ## Compute annualized return if prices exist for X years
 
-    df_temp <- get_annualized_returns(xts_returns_Xy)
+    df_temp <- compute_annualized_returns(xts_returns_Xy)
 
     names(df_temp) <- paste0(annualize_return_period, "y")
 
@@ -287,7 +287,7 @@ write_annualized_returns <- function(user_path, db_path) {
 
   }
 
-  df_annualized_max <- get_annualized_returns(xts_returns_max)
+  df_annualized_max <- compute_annualized_returns(xts_returns_max)
   names(df_annualized_max) <- "max"
   df_annualized <- cbind(df_annualized_years, df_annualized_max)
 

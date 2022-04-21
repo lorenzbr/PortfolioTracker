@@ -1,3 +1,13 @@
+#' Get database path for main directory
+#'
+#' @usage get_db_main_path(db_path = ".")
+#' @param db_path A single character string. Path where database is stored.
+#'
+#' @export
+get_db_main_path <- function(db_path = ".") {
+  return(db_path)
+}
+
 #' Get path names for main directory
 #'
 #' @usage get_db_path_names(path)

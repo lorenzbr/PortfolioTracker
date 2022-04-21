@@ -75,9 +75,9 @@ get_tickers_from_transactions <- function(df_transactions, path) {
 
 }
 
-#' Get annualized returns based on daily returns for matrix or xts
+#' Compute annualized returns based on daily returns for matrix or xts
 #'
-#' @usage get_annualized_returns(R, scale = 252)
+#' @usage compute_annualized_returns(R, scale = 252)
 #'
 #' @param R An xts or matrix with returns
 #' @param scale A numeric for the number of periods in a year (daily = 252 is
@@ -86,9 +86,9 @@ get_tickers_from_transactions <- function(df_transactions, path) {
 #' @return A data frame with annualized returns for all investments
 #'
 #' @export
-get_annualized_returns <- function(R, scale = 252) {
+compute_annualized_returns <- function(R, scale = 252) {
 
-  result <- apply(R, 2, get_annualized_return, scale = scale)
+  result <- apply(R, 2, compute_annualized_return, scale = scale)
   dim(result) <- c(1, NCOL(R))
   colnames(result) <- colnames(R)
   rownames(result) = "annualized_return"
@@ -98,9 +98,9 @@ get_annualized_returns <- function(R, scale = 252) {
 
 }
 
-#' Get annualized return based on daily returns for vector
+#' Compute annualized return based on daily returns for vector
 #'
-#' @usage get_annualized_return(R, scale = 252)
+#' @usage compute_annualized_return(R, scale = 252)
 #'
 #' @param R An xts or vector with returns
 #' @param scale A numeric for the number of periods in a year (daily = 252 is
@@ -109,7 +109,7 @@ get_annualized_returns <- function(R, scale = 252) {
 #' @return A vector with annualized returns
 #'
 #' @export
-get_annualized_return <- function(R, scale = 252) {
+compute_annualized_return <- function(R, scale = 252) {
 
   R <- as.vector(R)
   R <- stats::na.omit(R)
