@@ -5,7 +5,7 @@
 #'
 #' @return A data frame containing IRRs for all tickers
 #'
-#' @noRd
+#' @export
 get_investment_irr <- function(path) {
 
   PortfolioTracker::get_user_names(path)
