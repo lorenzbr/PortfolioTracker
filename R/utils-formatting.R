@@ -89,6 +89,7 @@ format_previous_investments <- function(df_investments) {
 #' @param path A single character string. Directory of the data.
 #' @param df_returns A data frame with table structure of returns,
 #' i.e., ticker and time periods.
+#'
 #' @return A data frame containing formatted table with returns.
 #'
 #' @export
@@ -101,17 +102,21 @@ format_return_tables <- function(path, df_returns) {
   if (file.exists(file_path_transactions)) {
 
     df_transactions <- data.table::fread(file_path_transactions)
+
     df_isin_tickers <- data.table::fread(file.path(path.database,
                                                    file.tickers.db))
 
     df_returns <- as.data.frame(df_returns)
+    df_isin_tickers <- as.data.frame(df_isin_tickers)
+    df_transactions <- as.data.frame(df_transactions)
 
     df_isin_name_ticker <- unique(df_transactions[, c("isin", "name")])
     df_isin_name_ticker <- merge(df_isin_name_ticker,
                                  df_isin_tickers,
                                  by = "isin")
 
-    df_isin_name_ticker$name <- PortfolioTracker::clean_investment_names(df_isin_name_ticker$name)
+    df_isin_name_ticker$name <- PortfolioTracker::clean_investment_names(
+      df_isin_name_ticker$name)
 
     df_returns <- merge(df_isin_name_ticker, df_returns, by = "ticker")
 
@@ -154,6 +159,7 @@ format_return_tables <- function(path, df_returns) {
 #'
 #' @usage format_rebalanced_portfolio(df_investments)
 #' @param df_investments A data frame containing a rebalanced portfolio.
+#'
 #' @return A data frame containing the rebalanced portfolio with
 #' formatted numbers.
 #'
