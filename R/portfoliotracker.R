@@ -40,6 +40,8 @@ if (getRversion() >= "2.15.1") {
      "file.cookies",
      "file.user.db",
      "file.update.log",
+     "file.transactions.log",
+     "file.tickers.db.log",
      ## Database file names
      "file.tickers.db",
      "file.ticker.exchange.db",
