@@ -46,6 +46,9 @@
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/compute_annualized_returns.html</loc>
   </url>
   <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/correct_quantity_panels_for_stock_splits.html</loc>
+  </url>
+  <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/create_main_dir.html</loc>
   </url>
   <url>
@@ -143,6 +146,9 @@
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_roi_by_period.html</loc>
+  </url>
+  <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_stock_splits_from_yahoo.html</loc>
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_ticker_from_investing.html</loc>
