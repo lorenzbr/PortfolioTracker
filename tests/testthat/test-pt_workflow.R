@@ -35,11 +35,13 @@ test_that("Portfolio Tracker workflow is successful", {
   expect_error(update_db_prices_based_on_transactions(
     df_transactions, db_path, external_search = TRUE), NA)
   ## Tickers need to be loaded
-  expect_error(tickers <- get_tickers_from_db(df_transactions, db_path)[[2]], NA)
+  expect_error(tickers <- get_tickers_from_db(df_transactions,
+                                              db_path)[[2]], NA)
   expect_error(append_latest_prices_db(db_path, tickers), NA)
   expect_error(write_price_quantity_panels2(
     df_transactions, user_path, db_path), NA)
-  expect_error(write_all_value_panels(df_transactions, user_path, db_path), NA)
+  expect_error(write_all_value_panels(df_transactions, user_path,
+                                      db_path), NA)
   expect_error(write_complete_panels(user_path, db_path), NA)
   ## I think investment value panels are not required!
   # expect_error(write_investment_value_panels(user_path), NA)
@@ -65,6 +67,7 @@ test_that("all files exist", {
   expect_true(file.exists(file.path(path.database, file.tickers.db)))
   expect_true(file.exists(file.path(path.database, file.ticker.exchange.db)))
   expect_true(file.exists(file.path(path.database, file.ticker.price.available.db)))
+  expect_true(file.exists(file.path(path.database, file.stock.splits.db)))
   ## To do: Check the following files/functions as well
   # ... write_price_quantity_panels2
   # ... write_all_value_panels

@@ -18,7 +18,8 @@ get_db_file_names <- function() {
     "file.ticker.price.available.db",
     "file.update.log",
     "file.transactions.log",
-    "file.tickers.db.log"
+    "file.tickers.db.log",
+    "file.stock.splits.log"
   )
 
   file_name <- c(
@@ -30,7 +31,8 @@ get_db_file_names <- function() {
     "ticker_price_available_db.csv",
     "user_update_log.csv",
     "transaction_history_log.csv",
-    "isin_ticker_db_log.csv"
+    "isin_ticker_db_log.csv",
+    "stock_splits_db_log.csv"
   )
 
   for (i in 1:length(var_name))
@@ -66,7 +68,9 @@ get_user_file_names <- function() {
                 "file.returns.annualized",
                 "file.return.portfolio.daily",
                 "file.returns.twr.daily",
-                "file.returns.irr"
+                "file.returns.irr",
+                "file.stock.splits.previous",
+                "file.stock.splits.current"
   )
 
   file_name <- c("transaction_fullhistory.csv",
@@ -85,7 +89,9 @@ get_user_file_names <- function() {
                  "annualized_returns.csv",
                  "daily_portfolio_return.csv",
                  "twr_portfolio_factors_daily.csv",
-                 "investment_irr.csv"
+                 "investment_irr.csv",
+                 "stock_splits_previous.csv",
+                 "stock_splits_current.csv"
   )
 
   for (i in 1:length(var_name))

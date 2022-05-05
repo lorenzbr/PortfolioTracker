@@ -2,6 +2,26 @@
 ## Test get_price_quantity_panel2
 
 df_transactions <- transactions
+user_name <- "test_user1"
+portfolio_name <- "portfolio_1"
+db_path <- test_path("testdata")
+user_path <- test_path(file.path("testdata/data/user_data", user_name))
+
+## Delete all data for pt workflow
+## To do: however, this means that I do not really
+## test the function append_latest_prices_db --> use other user_name or
+## portfolio_name
+# unlink(test_path("testdata/data"), recursive = TRUE)
+# unlink(user_path, recursive = TRUE)
+
+test_that("Portfolio Tracker initiation is successful", {
+
+  expect_error(init_portfolio_tracker(db_path = db_path), NA)
+  expect_error(create_user_dir(user_path, portfolio_name), NA)
+  expect_error(get_user_names(user_path, portfolio_name), NA)
+
+})
+
 
 df_isin_ticker <- data.table::fread(
   system.file("extdata", "isin_ticker_name_list_xetra_june2017.csv",
@@ -18,14 +38,15 @@ tickers <- unique(df_transactions_with_tickers$ticker)
 
 list_quantity_panels <- mapply(
   get_quantity_panel, tickers,
-  MoreArgs = list(df_transactions_with_tickers),
+  MoreArgs = list(df_transactions_with_tickers, user_path),
   SIMPLIFY = FALSE)
 # df_quantity_panels <- do.call(rbind, unname(list_quantity_panels))
 
 list_pricequantity_panels <- mapply(
   get_price_quantity_panel2, tickers,
   MoreArgs = list(df_transactions_with_tickers,
-                  path.prices.db = test_path("testdata")),
+                  path.prices.db = test_path("testdata"),
+                  user_path),
   SIMPLIFY = FALSE)
 
 test_that("object is a data frame", {

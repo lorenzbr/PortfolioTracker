@@ -5,7 +5,7 @@
 \title{Get panel for the product of prices and quantity for input ticker}
 \usage{
 get_price_quantity_panel2(ticker, df_transactions_with_tickers,
-                                 path.prices.db)
+                                 path.prices.db, user_path)
 }
 \arguments{
 \item{ticker}{A single character string containing a ticker symbol.}
@@ -15,6 +15,8 @@ and ticker.}
 
 \item{path.prices.db}{A single character string containing the directory of
 the price database.}
+
+\item{user_path}{A single character string containing the directory of the user.}
 }
 \value{
 A data frame with price quantity panel.

@@ -18,6 +18,7 @@ if (getRversion() >= "2.15.1") {
      "path.user.credentials",
      "path.user.data",
      "path.database",
+     "path.logs",
      "path.prices.db",
      "path.tickers.db",
      ## User-specific paths
@@ -42,6 +43,7 @@ if (getRversion() >= "2.15.1") {
      "file.update.log",
      "file.transactions.log",
      "file.tickers.db.log",
+     "file.stock.splits.log",
      ## Database file names
      "file.tickers.db",
      "file.ticker.exchange.db",
@@ -65,6 +67,8 @@ if (getRversion() >= "2.15.1") {
      "file.return.portfolio.daily",
      "file.returns.twr.daily",
      "file.returns.irr",
+     "file.stock.splits.previous",
+     "file.stock.splits.current",
      ## Other variables
      "transaction_date"
      )

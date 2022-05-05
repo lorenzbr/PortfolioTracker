@@ -4,16 +4,18 @@
 \alias{get_quantity_panel}
 \title{Get quantity panel for ticker}
 \usage{
-get_quantity_panel(ticker, df_transactions_with_tickers)
+get_quantity_panel(ticker, df_transactions_with_tickers, user_path)
 }
 \arguments{
 \item{ticker}{A single character string containing the ticker symbol.}
 
 \item{df_transactions_with_tickers}{A data frame containing transactions
 and ticker.}
+
+\item{user_path}{A single character string containing the directory of the user.}
 }
 \value{
-A data frame with a quantity panel.
+A data frame which contains a quantity panel.
 }
 \description{
 Get quantity panel for ticker

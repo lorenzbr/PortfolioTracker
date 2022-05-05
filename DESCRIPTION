@@ -15,7 +15,7 @@ Imports:
     lubridate,
     magrittr,
     PerformanceAnalytics,
-    quantmod,
+    quantmod (>= 0.4.20),
     rlang,
     rvest,
     stats,

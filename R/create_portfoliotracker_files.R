@@ -88,5 +88,23 @@ create_main_files <- function(path) {
   }
 
   ## To do: create files for stock splits
+  file_path_stock_splits_db <- file.path(path.database,
+                                         file.stock.splits.db)
+  if (!file.exists(file_path_stock_splits_db)) {
+    df_stock_splits <- data.frame(
+      matrix(nrow = 0, ncol = 3,
+             dimnames = list(NULL, c("ticker", "date", "stock_split")))
+    )
+    data.table::fwrite(df_stock_splits, file_path_stock_splits_db)
+  }
+
+  file_path_stock_splits_log <- file.path(path.logs, file.stock.splits.log)
+  if (!file.exists(file_path_stock_splits_log)) {
+    df_stock_splits_log <- data.frame(
+      matrix(nrow = 0, ncol = 2,
+             dimnames = list(NULL, c("ticker", "last_updated")))
+    )
+    data.table::fwrite(df_stock_splits_log, file_path_stock_splits_log)
+  }
 
 }

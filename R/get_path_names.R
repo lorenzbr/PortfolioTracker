@@ -24,6 +24,7 @@ get_db_path_names <- function(path) {
                 "path.user.credentials",
                 "path.user.data",
                 "path.database",
+                "path.logs",
                 "path.prices.db"
   )
 
@@ -31,6 +32,7 @@ get_db_path_names <- function(path) {
                  "user_credentials",
                  "user_data",
                  "database",
+                 "logs",
                  "database/prices"
   )
 

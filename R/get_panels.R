@@ -11,8 +11,8 @@ write_quantity_panels <- function(df_transactions, path) {
 
   df_transactions <- as.data.frame(df_transactions)
 
-  df_transactions$transaction_date <- as.Date(df_transactions$transaction_date,
-                                              format = "%d-%m-%Y")
+  df_transactions$transaction_date <- as.Date(
+    df_transactions$transaction_date, format = "%d-%m-%Y")
 
   ticker_file <- file.path(path.tickers, file.tickers)
 
@@ -154,16 +154,17 @@ write_quantity_panel <- function(ticker, df_transactions_with_tickers,
 
 #' Get quantity panel for ticker
 #'
-#' @usage get_quantity_panel(ticker, df_transactions_with_tickers)
+#' @usage get_quantity_panel(ticker, df_transactions_with_tickers, user_path)
 #' @param ticker A single character string containing the ticker symbol.
 #' @param df_transactions_with_tickers A data frame containing transactions
 #' and ticker.
+#' @param user_path A single character string containing the directory of the user.
 #'
-#' @return A data frame with a quantity panel.
+#' @return A data frame which contains a quantity panel.
 #'
 #' @export
 #' @import data.table
-get_quantity_panel <- function(ticker, df_transactions_with_tickers) {
+get_quantity_panel <- function(ticker, df_transactions_with_tickers, user_path) {
 
   df_transactions <- as.data.frame(df_transactions_with_tickers)
 
@@ -177,8 +178,8 @@ get_quantity_panel <- function(ticker, df_transactions_with_tickers) {
 
   if (nrow(df_transactions) > 0) {
 
-    df_transactions$transaction_date <- as.Date(df_transactions$transaction_date,
-                                                format = "%d-%m-%Y")
+    df_transactions$transaction_date <- as.Date(
+      df_transactions$transaction_date, format = "%d-%m-%Y")
 
     ## If transaction type is a sale, quantity needs to be negative
     ## to be subtracted at a given date
@@ -204,8 +205,8 @@ get_quantity_panel <- function(ticker, df_transactions_with_tickers) {
 
       if (all(!is.na(df_transactions$transaction_date))) {
 
-        earliest_transaction_date <- as.Date(min(df_transactions$transaction_date),
-                                             format = "%d-%m-%Y")
+        earliest_transaction_date <- as.Date(
+          min(df_transactions$transaction_date), format = "%d-%m-%Y")
 
         ## Create panel with date and quantity for ticker from first transaction
         ## date until today (remove Saturday and Sunday)
@@ -215,7 +216,8 @@ get_quantity_panel <- function(ticker, df_transactions_with_tickers) {
 
         ## Remove weekends (1 is Sunday, 7 is Saturday)
         ## What about holidays?
-        dates <- dates[lubridate::wday(dates) != 1 & lubridate::wday(dates) != 7]
+        dates <- dates[lubridate::wday(dates) != 1 &
+                       lubridate::wday(dates) != 7]
 
         df_panel <- data.frame(date = dates)
         data.table::setDT(df_panel)
@@ -240,13 +242,18 @@ get_quantity_panel <- function(ticker, df_transactions_with_tickers) {
         ## and thus remove subsequent entries
         if (df_panel$cum_quantity[df_panel$date == max(df_panel$date)] == 0) {
 
-          last_date_nonzero_quantity <- max(df_panel$date[df_panel$cum_quantity != 0])
+          last_date_nonzero_quantity <- max(
+            df_panel$date[df_panel$cum_quantity != 0])
 
-          index_investment_was_sold <- which(df_panel$date == last_date_nonzero_quantity) + 1
+          index_investment_was_sold <- which(
+            df_panel$date == last_date_nonzero_quantity) + 1
 
           df_panel <- df_panel[1:index_investment_was_sold, ]
 
         }
+
+        df_panel <- correct_quantity_panels_for_stock_splits(
+          df_panel, ticker, df_transactions_with_tickers, user_path)
 
         return(df_panel)
 
@@ -338,6 +345,15 @@ write_price_quantity_panels2 <- function(df_transactions, user_path, db_path) {
   if (length(files_pricequantity_panel) > 0)
     file.remove(file.path(path.pricequantity.panel, files_pricequantity_panel))
 
+  ## Stock splits are appended to data. Thus, it should be deleted every time
+  ## quantity or price-quantity panels are recreated#
+  file_path_splits_previous <- file.path(path.data, file.stock.splits.previous)
+  file_path_splits_current <- file.path(path.data, file.stock.splits.current)
+  if (file.exists(file_path_splits_previous))
+    file.remove(file_path_splits_previous)
+  if (file.exists(file_path_splits_current))
+    file.remove(file_path_splits_current)
+
   output <- mapply(write_price_quantity_panel2, tickers,
                    MoreArgs = list(df_transactions_with_tickers,
                                    user_path, db_path))
@@ -362,7 +378,7 @@ write_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
   get_db_names(db_path)
 
   df_panel <- get_price_quantity_panel2(
-    ticker, df_transactions_with_tickers, path.prices.db)
+    ticker, df_transactions_with_tickers, path.prices.db, user_path)
 
   if (!is.null(df_panel)) {
 
@@ -381,18 +397,19 @@ write_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
 #' Get panel for the product of prices and quantity for input ticker
 #'
 #' @usage get_price_quantity_panel2(ticker, df_transactions_with_tickers,
-#'                                  path.prices.db)
+#'                                  path.prices.db, user_path)
 #' @param ticker A single character string containing a ticker symbol.
 #' @param df_transactions_with_tickers A data frame containing transactions
 #' and ticker.
 #' @param path.prices.db A single character string containing the directory of
 #' the price database.
+#' @param user_path A single character string containing the directory of the user.
 #'
 #' @return A data frame with price quantity panel.
 #'
 #' @export
 get_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
-                                      path.prices.db) {
+                                      path.prices.db, user_path) {
 
   file_prices <- file.path(path.prices.db, paste0("prices_", ticker, ".csv"))
 
@@ -400,7 +417,8 @@ get_price_quantity_panel2 <- function(ticker, df_transactions_with_tickers,
 
     df_prices <- data.table::fread(file_prices)
 
-    df_quantity_panel <- get_quantity_panel(ticker, df_transactions_with_tickers)
+    df_quantity_panel <- get_quantity_panel(
+      ticker, df_transactions_with_tickers, user_path)
 
     if (!is.null(df_quantity_panel)) {
 
