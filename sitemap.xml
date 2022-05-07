@@ -70,6 +70,9 @@
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/format_return_tables.html</loc>
   </url>
   <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/format_stock_splits.html</loc>
+  </url>
+  <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_annual_returns.html</loc>
   </url>
   <url>
@@ -83,6 +86,9 @@
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_current_portfolio.html</loc>
+  </url>
+  <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_current_stock_splits.html</loc>
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_db_file_names.html</loc>
@@ -131,6 +137,9 @@
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_previous_investments.html</loc>
+  </url>
+  <url>
+    <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_previous_stock_splits.html</loc>
   </url>
   <url>
     <loc>https://www.lorenz-brachtendorf.com/PortfolioTracker/reference/get_price_quantity_panel2.html</loc>
