@@ -594,8 +594,10 @@ update_latest_prices <- function(path) {
 #'
 #' @export
 get_prices_from_yahoo <- function(ticker, from, to, preferred_exchange = "Xetra",
-                                  stock_exchanges = c(".DE", ".F", ".SG", ".MU", ".DU"),
-                                  method = "simple", user_specific_exchange = TRUE) {
+                                  stock_exchanges = c(".DE", ".F", ".SG",
+                                                      ".MU", ".DU"),
+                                  method = "simple",
+                                  user_specific_exchange = TRUE) {
 
 
   if (user_specific_exchange) {

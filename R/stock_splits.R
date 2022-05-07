@@ -65,9 +65,9 @@ correct_quantity_panels_for_stock_splits <- function(
     if (last_updated == Sys.Date()) {
       df_splits <- df_stock_splits[df_stock_splits$ticker == ticker, ]
     }
-    ## If no, run quantmod::getSplits or get_stock_splits_from_yahoo
-    ## to get updated stock splits
-  } else {
+  }
+
+  if (length(last_updated) == 0 || last_updated < Sys.Date()) {
     ## For Yahoo finance need to get ticker with stock exchange
     file_path_ticker_exchange <- file.path(path.database, file.ticker.exchange.db)
     df_ticker_exchanges <- data.table::fread(file_path_ticker_exchange)
@@ -99,6 +99,7 @@ correct_quantity_panels_for_stock_splits <- function(
       }
     }
   }
+
   if (exists("df_splits")) {
     ## Keep only splits after first purchase because the purchase price was
     ## executed after those earlier splits. They are therefore not of interest

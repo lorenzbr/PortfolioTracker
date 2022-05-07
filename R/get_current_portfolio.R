@@ -2,6 +2,7 @@
 #'
 #' @usage get_current_portfolio(path)
 #' @param path A single character string. Directory of your data.
+#'
 #' @return A data frame containing the current investments.
 #'
 #' @export

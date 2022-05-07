@@ -31,7 +31,6 @@ format_current_portfolio <- function(df_investments) {
 
     }
 
-    ## Changes names of df_investments
     names(df_investments) <- names_investments
 
     return(df_investments)
@@ -74,7 +73,6 @@ format_previous_investments <- function(df_investments) {
 
     }
 
-    ## Changes names of df_investments
     df_investments <- PortfolioTracker::clean_column_names(df_investments)
 
     return(df_investments)
@@ -82,6 +80,44 @@ format_previous_investments <- function(df_investments) {
   }
 
 }
+
+#' Format current or previous stock splits
+#'
+#' @usage format_stock_splits(df_stock_splits)
+#' @param df_stock_splits A data frame containing current or previous
+#' stock splits
+#'
+#' @return A data frame containing the current or previous stock splits
+#' with formatted names and numbers.
+#'
+#' @export
+format_stock_splits <- function(df_stock_splits) {
+
+  # names_stock_splits <- c("Name", "ISIN", "Ticker", "Stock split")
+  names_stock_splits <- c("Ticker", "Date", "Stock split")
+
+  if (!is.null(df_stock_splits)) {
+
+    if (nrow(df_stock_splits) > 0) {
+
+      # ...
+
+    } else {
+
+      df_stock_splits <- data.frame(
+        matrix(nrow = 0, ncol = length(names_stock_splits),
+               dimnames = list(NULL, names_stock_splits)))
+
+    }
+
+    names(df_stock_splits) <- names_stock_splits
+
+    return(df_stock_splits)
+
+  }
+
+}
+
 
 #' Format table with returns
 #'

@@ -29,7 +29,7 @@ create_main_files <- function(path) {
     data.table::fwrite(df_user_base, file_path_user_db)
   }
 
-  file_path_update_log <- file.path(path.user.credentials, file.update.log)
+  file_path_update_log <- file.path(path.logs, file.update.log)
   if (!file.exists(file_path_update_log)) {
     df_update_log <- data.frame(
       matrix(nrow = 0, ncol = 2,
@@ -38,8 +38,7 @@ create_main_files <- function(path) {
     data.table::fwrite(df_update_log, file_path_update_log)
   }
 
-  file_path_transactions_log <- file.path(path.user.credentials,
-                                          file.transactions.log)
+  file_path_transactions_log <- file.path(path.logs, file.transactions.log)
   if (!file.exists(file_path_transactions_log)) {
     df_transactions_log <- data.frame(
       matrix(nrow = 0, ncol = 2,
@@ -49,7 +48,7 @@ create_main_files <- function(path) {
     data.table::fwrite(df_transactions_log, file_path_transactions_log)
   }
 
-  file_path_tickers_log <- file.path(path.user.credentials, file.tickers.db.log)
+  file_path_tickers_log <- file.path(path.logs, file.tickers.db.log)
   if (!file.exists(file_path_tickers_log)) {
     df_tickers_log <- data.frame(
       matrix(nrow = 0, ncol = 2,
