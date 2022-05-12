@@ -585,12 +585,19 @@ write_value_panel <- function(transaction_type, ticker,
   if (nrow(df_transactions) > 0) {
 
     df_transactions <- df_transactions[, c("transaction_date", "transaction_value")]
+
+    ## Aggregate by date (because there may be several transactions per day!)
+    if (nrow(df_transactions) > 1)
+      df_transactions <- stats::aggregate(transaction_value ~ transaction_date,
+                                   data = df_transactions,
+                                   FUN = sum)
+
     df_transactions_keep <- df_transactions
     df_transactions <- df_transactions[order(df_transactions$transaction_date), ]
     df_transactions$cum_value <- cumsum(df_transactions$transaction_value)
     df_transactions <- df_transactions[, c("transaction_date", "cum_value")]
-    names(df_transactions)[names(df_transactions) == "cum_value"] <- paste0(transaction_type_lc,
-                                                                            "_cum_value")
+    names(df_transactions)[names(df_transactions) == "cum_value"] <- paste0(
+      transaction_type_lc, "_cum_value")
 
     if (all(!is.na(df_transactions$transaction_date))) {
 
@@ -620,8 +627,8 @@ write_value_panel <- function(transaction_type, ticker,
                         all.x = TRUE)
       df_panel$transaction_value[is.na(df_panel$transaction_value)] <- 0
       names(df_panel)[names(df_panel) == "transaction_date"] <- "date"
-      names(df_panel)[names(df_panel) == "transaction_value"] <- paste0(transaction_type_lc,
-                                                                        "_value")
+      names(df_panel)[names(df_panel) == "transaction_value"] <- paste0(
+        transaction_type_lc, "_value")
 
       file_value_panel <- paste0(transaction_type_lc, "value_panel_",
                                  ticker,
