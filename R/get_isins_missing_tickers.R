@@ -22,15 +22,25 @@ get_isins_missing_tickers <- function(user_path, db_path){
 
     df_transactions <- data.table::fread(file_path_transactions)
 
-    df_missings <- dplyr::anti_join(df_transactions,
-                                    df_isin_ticker,
-                                    by = "isin")
+    if (nrow(df_transactions) && nrow(df_isin_ticker)) {
 
-    df_missings <- df_missings[, c("isin", "wkn", "name")]
+      df_missings <- dplyr::anti_join(df_transactions,
+                                      df_isin_ticker,
+                                      by = "isin")
 
-    df_missings <- unique(df_missings)
+      df_missings <- df_missings[, c("isin", "wkn", "name")]
 
-    df_missings$wkn[is.na(df_missings$wkn)] <- "-"
+      df_missings <- unique(df_missings)
+
+      df_missings$wkn[is.na(df_missings$wkn)] <- "-"
+
+    } else {
+
+      df_missings <- as.data.frame(
+        matrix(nrow = 0, ncol = 3,
+               dimnames = list(NULL, c("isin", "wkn", "name"))))
+
+    }
 
     return(df_missings)
 

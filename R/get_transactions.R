@@ -19,22 +19,26 @@ get_transaction_history <- function(path) {
 
       df_transactions <- as.data.frame(df_transactions)
 
-      df_transactions$name <- PortfolioTracker::clean_investment_names(df_transactions$name)
+      if (nrow(df_transactions) > 0) {
 
-      df_transactions$transaction_date <- as.Date(
-        df_transactions$transaction_date, "%d-%m-%Y")
+        df_transactions$name <- PortfolioTracker::clean_investment_names(df_transactions$name)
 
-      ## Order by date (most recent date at the top)
-      df_transactions <- df_transactions[rev(order(df_transactions$transaction_date)), ]
+        df_transactions$transaction_date <- as.Date(
+          df_transactions$transaction_date, "%d-%m-%Y")
 
-      rownames(df_transactions) <- 1:nrow(df_transactions)
+        ## Order by date (most recent date at the top)
+        df_transactions <- df_transactions[rev(order(df_transactions$transaction_date)), ]
 
-      df_transactions$transaction_price <- as.numeric(
-        formatC(df_transactions$transaction_price, digits = 2, format = "f"))
-      df_transactions$transaction_value <- as.numeric(
-        formatC(df_transactions$transaction_value, digits = 2, format = "f"))
-      df_transactions$transaction_fee <- as.numeric(
-        formatC(df_transactions$transaction_fee, digits = 2, format = "f"))
+        rownames(df_transactions) <- 1:nrow(df_transactions)
+
+        df_transactions$transaction_price <- as.numeric(
+          formatC(df_transactions$transaction_price, digits = 2, format = "f"))
+        df_transactions$transaction_value <- as.numeric(
+          formatC(df_transactions$transaction_value, digits = 2, format = "f"))
+        df_transactions$transaction_fee <- as.numeric(
+          formatC(df_transactions$transaction_fee, digits = 2, format = "f"))
+
+      }
 
       df_transactions <- df_transactions[, names(df_transactions) != "wkn"]
       df_transactions <- df_transactions[, names(df_transactions) != "document_page"]
@@ -42,10 +46,20 @@ get_transaction_history <- function(path) {
 
       df_transactions <- PortfolioTracker::clean_column_names(df_transactions)
 
-      return(df_transactions)
-
     })
 
+  } else {
+
+    df_transactions <- as.data.frame(
+      matrix(nrow = 0, ncol = 9,
+             dimnames = list(NULL,
+                             c("ISIN", "Name", "Quantity",
+                               "Price [EUR]", "Value [EUR]", "Fee [EUR]",
+                               "Date", "Time", "Type")
+             )))
+
   }
+
+  return(df_transactions)
 
 }
