@@ -70,6 +70,11 @@ write_current_portfolio <- function(user_path, db_path) {
 
     }
 
+  } else {
+
+    ## If no price quantity panels exist, delete file with current investments
+    unlink(file.path(path.data, file.current))
+
   }
 
 }

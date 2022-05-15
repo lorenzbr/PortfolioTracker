@@ -115,6 +115,11 @@ write_portfolio_stats <- function(path) {
 
     data.table::fwrite(df_stats, file.path(path.data, file.stats))
 
+  } else {
+
+    ## Delete file with stats if no complete panel exists
+    unlink(file.path(path.data, file.stats))
+
   }
 
 }

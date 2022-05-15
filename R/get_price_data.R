@@ -44,8 +44,8 @@ update_db_prices_based_on_transactions <- function(df_transactions, db_path,
   if (nrow(df_transactions) > 0) {
 
     ## Be aware of the specific date format
-    df_transactions$transaction_date <- as.Date(df_transactions$transaction_date,
-                                                format = "%d-%m-%Y")
+    df_transactions$transaction_date <- as.Date(
+      df_transactions$transaction_date, format = "%d-%m-%Y")
 
     ## Keep oldest transactions for each ticker because younger transactions
     ## produce price data which are a subset of older transactions
@@ -53,10 +53,13 @@ update_db_prices_based_on_transactions <- function(df_transactions, db_path,
     ## small data (select minimum date and if more than one choose 1 randomly)
     df_transactions <- as.data.frame(df_transactions)
     col_names_transactions <- names(df_transactions)
-    df <- stats::aggregate(transaction_date ~ ticker, data = df_transactions, FUN = min)
-    df_transactions <- merge(df_transactions, df, by = c("ticker", "transaction_date"))
+    df <- stats::aggregate(
+      transaction_date ~ ticker, data = df_transactions, FUN = min)
+    df_transactions <- merge(df_transactions, df,
+                             by = c("ticker", "transaction_date"))
     df_transactions <- do.call(rbind,
-                               lapply(split(df_transactions, df_transactions$ticker),
+                               lapply(split(df_transactions,
+                                            df_transactions$ticker),
                                       function(x) x[sample(nrow(x), 1), ]))
     df_transactions <- df_transactions[, col_names_transactions]
     row.names(df_transactions) <- 1:nrow(df_transactions)
@@ -108,16 +111,22 @@ update_db_prices_based_on_transactions <- function(df_transactions, db_path,
             from <- as.Date(min(df_ticker_prices$date), format = "%Y-%m-%d")
             to <- as.Date(max(df_ticker_prices$date), format = "%Y-%m-%d")
             is_current_ticker <- df_price_range$ticker == ticker
+
             if (length(df_price_range$first_date[is_current_ticker]) > 0) {
+
               if (from < earliest_date)
                 df_price_range$first_date[is_current_ticker] <- from
               if (to > df_prices_same_ticker$last_date)
                 df_price_range$last_date[is_current_ticker] <- to
+
             } else {
+
               df_new <- data.frame(ticker = ticker, first_date = from,
                                    last_date = to)
               df_price_range <- rbind(df_price_range, df_new)
+
             }
+
             data.table::fwrite(df_price_range,
                                file.path(path.database,
                                          file.ticker.price.available.db))
@@ -125,6 +134,7 @@ update_db_prices_based_on_transactions <- function(df_transactions, db_path,
             #### Update csv with prices
             filename_prices <- paste0("prices_", ticker, ".csv")
             file_path_prices <- file.path(path.prices.db, filename_prices)
+
             ## Append prices in correct order and store again as csv
             if (file.exists(file_path_prices)) {
               df_ticker_prices_all <- data.table::fread(file_path_prices)
@@ -136,6 +146,7 @@ update_db_prices_based_on_transactions <- function(df_transactions, db_path,
               ## because of rbind?
               df_ticker_prices <- df_ticker_prices[order(df_ticker_prices$date), ]
             }
+
             data.table::fwrite(df_ticker_prices, file_path_prices)
 
           }
@@ -157,10 +168,12 @@ update_db_prices_based_on_transactions <- function(df_transactions, db_path,
 
 #' Update and store prices as csv based on new transactions
 #'
-#' @usage update_prices_based_on_transactions(df_transactions, path, external_search = TRUE)
-#' @param df_transactions A data frame. Results from \code{\link[BankStatementParser]{get_transactions}}.
-#' At least three variables/columns are required: \emph{transaction_type}, \emph{isin}
-#' and \emph{transaction_date}
+#' @usage update_prices_based_on_transactions(df_transactions, path,
+#'                                            external_search = TRUE)
+#' @param df_transactions A data frame. Results from
+#' \code{\link[BankStatementParser]{get_transactions}}.
+#' At least three variables/columns are required: \emph{transaction_type},
+#' \emph{isin} and \emph{transaction_date}
 #' @param path A single character string. Path where data are stored.
 #' @param external_search Logical; if TRUE, the function searches external
 #' sources to find the ticker.
@@ -173,7 +186,7 @@ update_prices_based_on_transactions <- function(df_transactions, path,
 
   get_user_names(path)
 
-  ## To get prices, only purchase transactions are relevant (?)
+  ## To get prices, only purchase transactions are relevant
   df_transactions <- df_transactions[df_transactions$transaction_type == "Purchase", ]
 
   isins <- unique(df_transactions$isin)

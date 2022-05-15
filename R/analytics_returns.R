@@ -433,6 +433,9 @@ write_roi_by_period_all <- function(user_path, db_path) {
 
   tickers <- get_tickers_from_db(df_transactions, db_path)[[2]]
 
+  ## Delete all files in retrns/roi ("*" makes sure to keep the folder)
+  unlink(file.path(path.returns.roi, "*"), recursive = TRUE, force = TRUE)
+
   output <- mapply(write_roi_by_period, tickers,
                    MoreArgs = list(user_path))
 
@@ -519,6 +522,8 @@ get_roi_by_period <- function(df_complete_panel, nb_period = NULL,
     df_complete_panel_period$daily_cum_roi <- (df_complete_panel_period$value +
                                                  df_complete_panel_period$sale_cum_value +
                                                  df_complete_panel_period$dividend_cum_value) / df_complete_panel_period$purchase_cum_value
+
+    df_complete_panel_period$daily_cum_roi <- (df_complete_panel_period$daily_cum_roi - 1) * 100
 
     df_roi_period <- df_complete_panel_period[, c("date", "daily_cum_roi")]
 

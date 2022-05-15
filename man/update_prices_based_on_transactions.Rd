@@ -4,12 +4,14 @@
 \alias{update_prices_based_on_transactions}
 \title{Update and store prices as csv based on new transactions}
 \usage{
-update_prices_based_on_transactions(df_transactions, path, external_search = TRUE)
+update_prices_based_on_transactions(df_transactions, path,
+                                           external_search = TRUE)
 }
 \arguments{
-\item{df_transactions}{A data frame. Results from \code{\link[BankStatementParser]{get_transactions}}.
-At least three variables/columns are required: \emph{transaction_type}, \emph{isin}
-and \emph{transaction_date}}
+\item{df_transactions}{A data frame. Results from
+\code{\link[BankStatementParser]{get_transactions}}.
+At least three variables/columns are required: \emph{transaction_type},
+\emph{isin} and \emph{transaction_date}}
 
 \item{path}{A single character string. Path where data are stored.}
 
