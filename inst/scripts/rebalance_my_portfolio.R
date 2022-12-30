@@ -1,9 +1,10 @@
 ## Rebalancing for my portfolio
 
 money_to_invest <- 30000
-step_size <- 500
+step_size <- 50
 
-file <- "G:/Dropbox/Dokumente/Anderes/Finanzen/Vermoegensaufstellung/Rebalancing_ETFs.xlsx"
+
+file <- file.path(dirname(dirname(getwd())), "Rebalancing_ETFs.xlsx")
 df <- readxl::read_xlsx(file)
 
 df <- df[df$status != "old", ]
@@ -38,3 +39,5 @@ for (i in 1:nb_iterations) {
   df$new_share <- df$new_value / sum(df$new_value)
 
 }
+
+View(df)
