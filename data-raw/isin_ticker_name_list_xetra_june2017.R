@@ -2,7 +2,7 @@
 
 ## Download the data and store it as csv locally
 
-## Read tickers from Extra as data table
+## Read tickers from Xetra as data table
 config <- config::get("tickers_from_xetra")
 path <- config$path
 files <- file.path(path, list.files(path))
@@ -14,7 +14,9 @@ names(dt) <- c("isin", "ticker", "name")
 
 dt <- unique(dt)
 
-output_filepath <- "inst/extdata/isin_ticker_name_list_xetra_june2017.csv"
+output_path <- "inst/extdata"
+output_file <- "isin_ticker_name_list_xetra_june2017.csv"
+output_filepath <- file.path(output_path, output_file)
 data.table::fwrite(dt, output_filepath)
 # data.table::fwrite(dt[, c("isin", "ticker")], output_filepath)
 
