@@ -1,19 +1,21 @@
 ## Raw data for tickers from https://github.com/Deutsche-Boerse/dbg-pds
 
+## Download the data and store it as csv locally
 
-##
-path <- "G:/Dropbox/Dokumente/Anderes/Finanzen/Data/dbg-pds-master/docs/samples/xetra"
+## Read tickers from Extra as data table
+config <- config::get("tickers_from_xetra")
+path <- config$path
 files <- file.path(path, list.files(path))
-list.dfs <- lapply(files, data.table::fread)
-df <- do.call(rbind, unname(list.dfs))
+list_dts <- lapply(files, data.table::fread)
+dt <- do.call(rbind, unname(list_dts))
 
-df <- df[, 1:3 ]
+dt <- dt[, c("ISIN", "Mnemonic", "SecurityDesc")]
+names(dt) <- c("isin", "ticker", "name")
 
-names(df) <- c("isin", "ticker", "name")
+dt <- unique(dt)
 
-df <- unique(df)
+output_filepath <- "inst/extdata/isin_ticker_name_list_xetra_june2017.csv"
+data.table::fwrite(dt, output_filepath)
+# data.table::fwrite(dt[, c("isin", "ticker")], output_filepath)
 
-data.table::fwrite(df, "inst/extdata/isin_ticker_name_list_xetra_june2017.csv")
-# data.table::fwrite(df[, c("isin", "ticker")], "inst/extdata/isin_ticker_list_xetra_june2017.csv")
-
-# df.test <- data.table::fread("inst/extdata/isin_ticker_name_list_xetra_june2017.csv")
+# dt_test <- data.table::fread(output_filepath)
